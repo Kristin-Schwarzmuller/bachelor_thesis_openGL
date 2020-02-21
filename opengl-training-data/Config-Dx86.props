@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <IntDir>$(Configuration)</IntDir>
+    <OutDir>$(SolutionDir)bin/</OutDir>
+    <IncludePath>$(SolutionDir)src/;$(SolutionDir)dependencies/include/;$(SolutionDir)dependencies/include/AntTweakBar/;$(SolutionDir)dependencies/include/FreeImage/;$(SolutionDir)dependencies/include/fbx/;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)/dependencies/x86/anttweakbar/;$(SolutionDir)/dependencies/x86/glfw-vc2015/;$(SolutionDir)/dependencies/x86/freeimage/;$(SolutionDir)/dependencies/x86/fbx/debug/;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>AntTweakBar.lib;glfw3.lib;FreeImage.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Link>
+      <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)dependencies\x86\anttweakbar\AntTweakBar.dll" "$(SolutionDir)bin\" /y /c
+xcopy "$(SolutionDir)dependencies\x86\freeimage\FreeImage.dll" "$(SolutionDir)bin\" /y /c
+xcopy "$(SolutionDir)dependencies\x86\fbx\debug\libfbxsdk.dll" "$(SolutionDir)bin\" /y /c</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
