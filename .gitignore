@@ -29,6 +29,7 @@ mono_crash.*
 x64/
 x86/
 !/dependencies/x86/
+!/dependencies/x86/fbx/debug/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
