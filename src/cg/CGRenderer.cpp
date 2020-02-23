@@ -90,7 +90,7 @@ namespace cgbv
 
 
         // Shader
-        shader = std::make_unique<cgbv::shader::GLSLShaderprogram>("../shader/cg/VertexShader.glsl", "../shader/cg/FragmentShader.glsl");
+        shader = std::make_unique<cgbv::shader::GLSLShaderprogram>("../shader/VertexShader.glsl", "../shader/FragmentShader.glsl");
         locs.vertex = shader->getAttribLocation("vertex");
         locs.normal = shader->getAttribLocation("normal");
         locs.modelViewProjection = shader->getUniformLocation("matrices.mvp");

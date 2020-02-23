@@ -84,4 +84,12 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\shader\FragmentShader.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\shader\VertexShader.glsl">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
 </Project>
