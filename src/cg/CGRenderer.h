@@ -44,7 +44,7 @@ namespace cgbv
 
         ShaderLocations locs;
 
-        BufferCombo cone;
+        BufferCombo basesurface;
 
         glm::mat4 projection, model;
 

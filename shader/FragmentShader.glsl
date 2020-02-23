@@ -112,6 +112,6 @@ layout (index = 0) subroutine (FragmentProgram) void toon()
     toon.w = 1.f;
 
 
-    out_color = toon * vec4((Input.normal * .5f) + .5f, 1);
+    out_color = vec4(n.normal, 1.f); //toon * vec4((Input.normal * .5f) + .5f, 1);
 }
 // =============================================================================================================

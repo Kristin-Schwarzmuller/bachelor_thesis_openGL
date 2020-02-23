@@ -21,8 +21,8 @@ namespace cgbv
 
     void CGRenderer::destroy()
     {
-        glDeleteVertexArrays(1, &cone.vao);
-        glDeleteBuffers(1, &cone.vbo);
+        glDeleteVertexArrays(1, &basesurface.vao);
+        glDeleteBuffers(1, &basesurface.vbo);
     }
 
 
@@ -105,43 +105,30 @@ namespace cgbv
 
         // Geometrie
         std::vector<glm::vec3> basevertices;
-        std::vector<glm::vec3> basenormals;
 
-        float step = 2.f * float(M_PI) / 32.f;
-        for(float f = 0; f <= 2.f * float(M_PI) + step; f += step)
-        {
-            float x = std::sin(f);
-            float z = std::cos(f);
-            basevertices.push_back(glm::vec3(x, 0.f, z));
-            basenormals.push_back(glm::vec3(x, std::sin(float(M_PI) / 12.6), z));
-        }
+        glm::vec3 a(-5.f, -1.f, -5.f);
+        glm::vec3 b(5.f, -1.f, -5.f);
+        glm::vec3 c(5.f, -1.f, 5.f);
+        glm::vec3 d(-5.f, -1.f, 5.f);
+
+        glm::vec3 n(0.f, 1.f, 0.f);
+
+        basevertices.push_back(d); basevertices.push_back(c); basevertices.push_back(a);
+        basevertices.push_back(a); basevertices.push_back(c); basevertices.push_back(b);
 
         std::vector<float> data;
-        glm::vec3 top(0.f, 2.f, 0.f);
-        for(unsigned int i = 0; i < basevertices.size(); ++i)
+        for (auto v : basevertices)
         {
-            int next = (i + 1 == basevertices.size()) ? 0 : i + 1;
-
-            glm::vec3 topnormal = glm::normalize(basenormals[i] + basenormals[next]);
-
-            data.insert(std::end(data), glm::value_ptr(basevertices[i]), glm::value_ptr(basevertices[i]) + sizeof(glm::vec3) / sizeof(float));
-            data.insert(std::end(data), glm::value_ptr(basenormals[i]), glm::value_ptr(basenormals[i]) + sizeof(glm::vec3) / sizeof(float));
-            cone.vertsToDraw++;
-
-            data.insert(std::end(data), glm::value_ptr(top), glm::value_ptr(top) + sizeof(glm::vec3) / sizeof(float));
-            data.insert(std::end(data), glm::value_ptr(topnormal), glm::value_ptr(topnormal) + sizeof(glm::vec3) / sizeof(float));
-            cone.vertsToDraw++;
-
-            data.insert(std::end(data), glm::value_ptr(basevertices[next]), glm::value_ptr(basevertices[next]) + sizeof(glm::vec3) / sizeof(float));
-            data.insert(std::end(data), glm::value_ptr(basenormals[next]), glm::value_ptr(basenormals[next]) + sizeof(glm::vec3) / sizeof(float));
-            cone.vertsToDraw++;
+            data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+            data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
+            basesurface.vertsToDraw++;
         }
 
-        glGenVertexArrays(1, &cone.vao);
-        glBindVertexArray(cone.vao);
+        glGenVertexArrays(1, &basesurface.vao);
+        glBindVertexArray(basesurface.vao);
 
-        glGenBuffers(1, &cone.vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, cone.vbo);
+        glGenBuffers(1, &basesurface.vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, basesurface.vbo);
         glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(locs.vertex);
@@ -189,8 +176,8 @@ namespace cgbv
         glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.subVertex);
         glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.subFragment);
 
-        glBindVertexArray(cone.vao);
-        glDrawArrays(GL_TRIANGLES, 0, cone.vertsToDraw);
+        glBindVertexArray(basesurface.vao);
+        glDrawArrays(GL_TRIANGLES, 0, basesurface.vertsToDraw);
 
 
         TwDraw();
