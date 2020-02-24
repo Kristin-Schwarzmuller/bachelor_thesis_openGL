@@ -23,6 +23,9 @@ namespace cgbv
     {
         glDeleteVertexArrays(1, &basesurface.vao);
         glDeleteBuffers(1, &basesurface.vbo);
+
+        glDeleteVertexArrays(1, &object.vao);
+        glDeleteBuffers(1, &object.vbo);
     }
 
 
@@ -33,7 +36,7 @@ namespace cgbv
 
         glViewport(0, 0, width, height);
 
-        projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, 200.f);
+        observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, 200.f);
 
         TwWindowSize(width, height > 0 ? height : 1);
     }
@@ -49,16 +52,16 @@ namespace cgbv
             switch (key)
             {
                 case GLFW_KEY_W:
-                    camera.moveForward(.1f);
+                    observer_camera.moveForward(.1f);
                     break;
                 case GLFW_KEY_S:
-                    camera.moveForward(-.1f);
+                    observer_camera.moveForward(-.1f);
                     break;
                 case GLFW_KEY_A:
-                    camera.moveRight(.1f);
+                    observer_camera.moveRight(.1f);
                     break;
                 case GLFW_KEY_D:
-                    camera.moveRight(-.1f);
+                    observer_camera.moveRight(-.1f);
                     break;
                 default:
                     break;
@@ -84,9 +87,9 @@ namespace cgbv
 
 
 
-        projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, 200.f);
-		camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
-		camera.moveTo(0.f, -.5f, 5.f);
+        observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, 200.f);
+		observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
+		observer_camera.moveTo(0.f, 2.5f, 5.f);
 
 
         // Shader
@@ -97,27 +100,27 @@ namespace cgbv
         locs.normalmatrix = shader->getUniformLocation("matrices.normal");
         locs.modelview = shader->getUniformLocation("matrices.mv");
         locs.lightPos = shader->getUniformLocation("light.lightPos");
-        locs.subFragment = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "toon");
+        locs.subFragment = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "lambert");
         locs.subVertex = shader->getSubroutineIndex(GL_VERTEX_SHADER, "verts_and_normals");
 
 
 
 
         // Geometrie
-        std::vector<glm::vec3> basevertices;
+        std::vector<glm::vec3> vertices;
 
-        glm::vec3 a(-5.f, -1.f, -5.f);
-        glm::vec3 b(5.f, -1.f, -5.f);
-        glm::vec3 c(5.f, -1.f, 5.f);
-        glm::vec3 d(-5.f, -1.f, 5.f);
+        glm::vec3 a(-5.f, 0.f, -5.f);
+        glm::vec3 b(5.f, 0.f, -5.f);
+        glm::vec3 c(5.f, 0.f, 5.f);
+        glm::vec3 d(-5.f, 0.f, 5.f);
 
         glm::vec3 n(0.f, 1.f, 0.f);
 
-        basevertices.push_back(d); basevertices.push_back(c); basevertices.push_back(a);
-        basevertices.push_back(a); basevertices.push_back(c); basevertices.push_back(b);
+        vertices.push_back(d); vertices.push_back(c); vertices.push_back(a);
+        vertices.push_back(a); vertices.push_back(c); vertices.push_back(b);
 
         std::vector<float> data;
-        for (auto v : basevertices)
+        for (auto v : vertices)
         {
             data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
             data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
@@ -136,6 +139,36 @@ namespace cgbv
         glEnableVertexAttribArray(locs.normal);
         glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*) size_t(3 * sizeof(float)));
 
+
+        data.clear();
+        vertices.clear();
+
+        a = glm::vec3(-1.f, 0.f, 0.f);
+        b = glm::vec3(1.f, 0.f, 0.f);
+        c = glm::vec3(0.f, 2.f, 0.f);
+
+        n = glm::vec3(0.f, 0.f, 1.f);
+
+        vertices.push_back(a); vertices.push_back(b); vertices.push_back(c);
+
+        for (auto v : vertices)
+        {
+            data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+            data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
+            object.vertsToDraw++;
+        }
+
+        glGenVertexArrays(1, &object.vao);
+        glBindVertexArray(object.vao);
+
+        glGenBuffers(1, &object.vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
+        glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(locs.vertex);
+        glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+        glEnableVertexAttribArray(locs.normal);
+        glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
 
 
         // GUI
@@ -157,15 +190,13 @@ namespace cgbv
 
         //camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
         //camera.moveTo(0.f, -.5f, 5.f);
-        glm::mat4 view = camera.getViewMatrix();
-
+        glm::mat4 view = observer_camera.getViewMatrix();
 
         model = glm::mat4_cast(parameter.globalRotation);
 
-
         shader->use();
         normal = glm::transpose(glm::inverse(view * model));
-        glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(projection * view * model));
+        glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(observer_projection * view * model));
         glUniformMatrix4fv(locs.modelview, 1, GL_FALSE, glm::value_ptr(view * model));
         glUniformMatrix3fv(locs.normalmatrix, 1, GL_FALSE, glm::value_ptr(normal));
 
@@ -179,6 +210,8 @@ namespace cgbv
         glBindVertexArray(basesurface.vao);
         glDrawArrays(GL_TRIANGLES, 0, basesurface.vertsToDraw);
 
+        glBindVertexArray(object.vao);
+        glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
         TwDraw();
     }

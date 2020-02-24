@@ -32,7 +32,7 @@ namespace cgbv
 	struct UIParameter
 	{
 		glm::quat globalRotation;
-        glm::vec4 lightPos = glm::vec4(0.f, 0.f, 5.f, 1.f);
+        glm::vec4 lightPos = glm::vec4(0.f, 0.f, 50.f, 1.f);
 
         float f;
 	};
@@ -44,15 +44,15 @@ namespace cgbv
 
         ShaderLocations locs;
 
-        BufferCombo basesurface;
+        BufferCombo basesurface, object;
 
-        glm::mat4 projection, model;
+        glm::mat4 observer_projection, lightsource_projection, model;
 
         glm::mat3 normal;
 
 		UIParameter parameter;
 
-        cgbv::Camera camera;
+        cgbv::Camera observer_camera, lightsource_camera;
 
 	public:
         CGRenderer(GLFWwindow *window);

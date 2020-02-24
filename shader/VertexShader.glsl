@@ -49,7 +49,7 @@ uniform Light light;
 
 subroutine uniform VertexProgram vertexprogram;
 
-layout(location = 0) flat out VertexOutput Output;
+layout(location = 0) out VertexOutput Output;
 // =============================================================================================================
 
 
