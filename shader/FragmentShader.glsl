@@ -98,7 +98,7 @@ layout (index = 0) subroutine (FragmentProgram) void lambert()
     vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
     shadow_coordinates.z -= .005f; // Needs to be adjusted
 
-    float shadowsample = texture(tex.shadowmap, shadow_coordinates) + 0.25f;
+    float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates) + 0.25f, 0.f, 1.f);
 
 
     out_color = shadowsample * intensity * vec4(.7f);
