@@ -15,14 +15,32 @@ namespace cgbv
 	{
 		// Texture																																												  Texture
 		//	===================================================================================================================================================================================		#####
-		class Texture2D
+		class Texture
+		{
+		protected:
+			unsigned int textureID;
+
+		public:
+			Texture();
+			~Texture();
+
+			unsigned int getTextureID()
+			{
+				return textureID;
+			}
+		};
+
+
+
+
+		// Texture2D																																											Texture2D
+		//	===================================================================================================================================================================================		#####
+		class Texture2D : public Texture
 		{
 		protected:
 			int width;
 
 			int height;
-
-			unsigned int textureID;
 
 			const unsigned char *data;
 
@@ -53,6 +71,11 @@ namespace cgbv
 			friend class Texture2DStorage;
 		};
 
+
+
+
+		// Texture2DRect																																									Texture2DRect
+		//	===================================================================================================================================================================================		#####
 		class Texture2DRect : public Texture2D
 		{
 		public:
@@ -66,12 +89,14 @@ namespace cgbv
 
 
 
+
 		// TextureStorage																																								   TextureStorage
 		//	===================================================================================================================================================================================		#####
 		class Texture2DStorage
 		{
 		public:
 			static void Store(std::string path, GLubyte *data, int width, int height, int imgDepth);
+			static void StoreGreyscale(std::string path, GLubyte *data, int width, int height, int imgDepth);
 		};
 		//	===================================================================================================================================================================================		#####
 	}

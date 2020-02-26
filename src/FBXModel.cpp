@@ -160,6 +160,14 @@ namespace cgbv
 				case FbxNodeAttribute::eSubDiv:
 					std::cout << "eSubDiv" << std::endl;
 					break;
+
+				case FbxNodeAttribute::eCachedEffect:
+					std::cout << "eCachedEffect" << std::endl;
+					break;
+
+				case FbxNodeAttribute::eLine:
+					std::cout << "eLine" << std::endl;
+					break;
 				}
 				//if(nodeAttribs->GetAttributeType() == FbxNodeAttribute::eMesh)
 				//{

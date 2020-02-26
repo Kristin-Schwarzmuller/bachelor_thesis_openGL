@@ -11,15 +11,29 @@ namespace cgbv
 {
 	namespace textures
 	{
-		Texture2D::Texture2D(void)
+        Texture::Texture(void)
+        {
+            glGenTextures(1, &textureID);
+        }
+
+        Texture::~Texture(void)
+        {
+            glDeleteTextures(1, &textureID);
+        }
+
+
+
+		Texture2D::Texture2D(void) : Texture()
 		{
-			glGenTextures(1, &textureID);
+            data = nullptr;
+            height = -1;
+            width = -1;
 		}
 
 
 		Texture2D::~Texture2D(void)
 		{
-			glDeleteTextures(1, &textureID);
+
 		}
 
 		void Texture2D::Generate(std::string filepath, bool autoMipmap)
@@ -131,6 +145,16 @@ namespace cgbv
 
 			FreeImage_Unload(image);
 		}
+
+        void Texture2DStorage::StoreGreyscale(std::string path, GLubyte* data, int width, int height, int imgDepth)
+        {
+            auto datatype = FreeImage_GetFIFFromFilename(path.c_str());
+            FIBITMAP *image = FreeImage_ConvertFromRawBits(data, width, height, width, 8, 0x0000FF, 0xFF0000, 0x00FF00, false);
+            if (!FreeImage_Save(datatype, image, path.c_str()))
+                std::cout << "Writing Image " << path << " failed" << std::endl;
+
+            FreeImage_Unload(image);
+        }
 
 
 

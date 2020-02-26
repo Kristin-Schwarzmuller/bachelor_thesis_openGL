@@ -9,6 +9,7 @@ struct Matrices
 	mat4 mvp;
 	mat4 mv;
 	mat3 normal;
+    mat4 bmvp;
 };
 
 
@@ -21,9 +22,12 @@ struct Light
 struct VertexOutput
 {
     vec3 normal;
+    vec3 surfaceNormal;
 
 	vec3 lightDir;
 	vec3 viewDir;
+
+    vec4 shadow_coordinates;
 };
 // =============================================================================================================
 
@@ -73,11 +77,19 @@ subroutine (VertexProgram) void verts_and_normals()
     gl_Position = matrices.mvp * vertex;
 
     Output.normal = matrices.normal * normal;
+    Output.surfaceNormal = normal;
 
     vec4 h = matrices.mv * vertex;
     vec3 mvPos = h.xyz / h.w;
 
     Output.lightDir = light.lightPos - mvPos;
     Output.viewDir = -mvPos;
+
+    Output.shadow_coordinates = matrices.bmvp * vertex;
+}
+
+subroutine (VertexProgram) void simple_placement()
+{
+    gl_Position = matrices.mvp * vertex;
 }
 // =============================================================================================================

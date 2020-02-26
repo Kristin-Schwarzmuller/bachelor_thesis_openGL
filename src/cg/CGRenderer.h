@@ -9,19 +9,22 @@
 #include <Texture.h>
 #include <FrameCounter.h>
 #include <Camera.h>
+#include <bitset>
 
 
 namespace cgbv
 {
-    struct ShaderLocations
+	struct ShaderLocations
     {
         unsigned int vertex, normal;
 
-        unsigned int modelViewProjection, normalmatrix, modelview;
+        unsigned int modelViewProjection, normalmatrix, modelview, biasedModelViewProjection;
 
-        unsigned int subVertex, subFragment;
+        unsigned int placementVS, lightingVS, lambertFS, depthmapFS;
 
 		unsigned int lightPos;
+
+        unsigned int shadowmap;
     };
 
     struct BufferCombo
@@ -37,6 +40,12 @@ namespace cgbv
         float f;
 	};
 
+    struct Framebuffers
+    {
+        unsigned int shadowmap_buffer;
+        unsigned int default_buffer = 0;
+    };
+
 
 	class CGRenderer : public Renderer
 	{
@@ -46,13 +55,24 @@ namespace cgbv
 
         BufferCombo basesurface, object;
 
-        glm::mat4 observer_projection, lightsource_projection, model;
+        glm::mat4 observer_projection, lightsource_projection, model, bias;
 
         glm::mat3 normal;
 
 		UIParameter parameter;
 
+        Framebuffers framebuffers;
+
+        std::unique_ptr<cgbv::textures::Texture> shadowmap;
+        unsigned int shadowmap_sampler;
+        int shadowmap_width = 2048, shadowmap_height = 2048;
+
         cgbv::Camera observer_camera, lightsource_camera;
+
+        std::bitset<1> screenshot;
+
+        void shadowmap_pass();
+        void final_pass();
 
 	public:
         CGRenderer(GLFWwindow *window);
@@ -64,5 +84,6 @@ namespace cgbv
 		virtual bool setup();
 		virtual void render();
 		virtual void update();
+        void capture();
 	};
 }
