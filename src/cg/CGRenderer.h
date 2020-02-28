@@ -65,7 +65,7 @@ namespace cgbv
 
         std::unique_ptr<cgbv::textures::Texture> shadowmap;
         unsigned int shadowmap_sampler;
-        int shadowmap_width = 2048, shadowmap_height = 2048;
+        int shadowmap_width = 4096, shadowmap_height = 4096;
 
         cgbv::Camera observer_camera, lightsource_camera;
 

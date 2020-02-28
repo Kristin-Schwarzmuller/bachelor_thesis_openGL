@@ -104,7 +104,8 @@ namespace cgbv
 
 		// Matrices 
 		{
-			observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, 200.f);
+			//observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, 200.f);
+			observer_projection = glm::perspective(glm::pi<float>() / 5.f, float(window_width) / float(window_height), .1f, 20.f);
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			observer_camera.moveTo(0.f, 2.5f, 5.f);
 
@@ -236,7 +237,7 @@ namespace cgbv
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.shadowmap_buffer);
 			
 			glBindTexture(GL_TEXTURE_2D, shadowmap->getTextureID());
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, shadowmap_width, shadowmap_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, shadowmap_width, shadowmap_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
 			glGenSamplers(1, &shadowmap_sampler);
 			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -259,6 +260,8 @@ namespace cgbv
 
 	void CGRenderer::render()
 	{
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1.4f, 1.f);
 		shadowmap_pass();
 		final_pass();
 	}
@@ -274,10 +277,10 @@ namespace cgbv
 
 		model = glm::mat4_cast(parameter.globalRotation);
 
-		glm::mat4 view = lightsource_camera.getViewMatrix();
+		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 
 		shader->use();
-		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * view * model));
+		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * shadow_view * model));
 
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.placementVS);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.depthmapFS);
@@ -311,8 +314,8 @@ namespace cgbv
 		glUniformMatrix4fv(locs.modelview, 1, GL_FALSE, glm::value_ptr(view * model));
 		glUniformMatrix3fv(locs.normalmatrix, 1, GL_FALSE, glm::value_ptr(normal));
 
-		view = lightsource_camera.getViewMatrix();
-		glUniformMatrix4fv(locs.biasedModelViewProjection, 1, GL_FALSE, glm::value_ptr(bias * lightsource_projection * view * model));
+		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
+		glUniformMatrix4fv(locs.biasedModelViewProjection, 1, GL_FALSE, glm::value_ptr(bias * lightsource_projection * shadow_view * model));
 
 		glUniform3fv(locs.lightPos, 1, glm::value_ptr(parameter.lightPos));
 
