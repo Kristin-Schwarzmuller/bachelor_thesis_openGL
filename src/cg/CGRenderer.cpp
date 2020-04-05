@@ -2,6 +2,14 @@
 
 #include <iostream>
 #include <AntTweakBar.h>
+// new
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <list>
+#include <iterator>
+#include <vector>
+
 
 
 
@@ -211,8 +219,62 @@ namespace cgbv
 			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
 		}
 
+		// Assimp Importer
+		{
+			std::string bunny = "";
+			std::string budda = "";
+			std::string dragon = "";
+			std::string cuboid = "";
+			std::string cone = "";
+			std::string cylinder = "";
+
+			struct Position {
+				float x, y, z;
+			};
+
+			std::vector<Position> positions;
+			std::vector<unsigned int> indices;
 
 
+			void processMesh(aiMesh mesh, const aiScene scene) {
+				for (unsigned int i = 0; i < mNumVertices; i++) {
+					Position vertex;
+					vertex.x = mesh->mVertices[i].x;
+					vertex.y = mesh->mVertices[i].y;
+					vertex.z = mesh->mVertices[i].z;
+					positions.push_back(vertex);
+				}
+				for (unsigned int i = 0; i < mNumFaces; i++) {
+					aiFace face = mesh->mFaces[i];
+					assert(face.mNumIndices == 3);
+					for (unsigned int j = 0; i < mNumVertices; j++) {
+						indices.push_back(face.mIndices[j]);
+					}
+				}
+			}
+
+			void processNode(aiNode* node, const aiScene* scene) {
+
+				for (unsigned int i = 0; i < node.mNumMeshes; i++) {
+					aiMesh mesh = scene->mMeshes[node->mMeshes[i];
+					processMesh(mesh, scene)
+				}
+
+				for (unsigned int i = 0; i < node.mNumChildren; i++) {
+					processNode(node->mChildren[i], scene);
+				}
+			}
+
+			Assimp::Importer importer;
+			const aiScene* scene = importer.ReadFile(bunny, aiProcess_Triangulate | aiProcess_OptimizeMeshes |
+				aiProcess_OptimizeGraph | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality);
+			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE, !scene->mRootNode) {
+				std::cout << "Error while loading assimp: " << importer.GetErrorString() << std::endl;
+				return 1;
+			}
+			processNode(scene->mRootNode, scene);
+
+		}
 
 		// GUI
 		{
