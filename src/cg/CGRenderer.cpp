@@ -152,7 +152,7 @@ namespace cgbv
 
 
 		// Geometrie
-		/*
+		
 		{
 			std::vector<glm::vec3> vertices;
 
@@ -185,11 +185,11 @@ namespace cgbv
 			glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
 			glEnableVertexAttribArray(locs.normal);
 			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
-
-
+		}
+			/*
 			data.clear();
 			vertices.clear();
-
+		
 			a = glm::vec3(-1.f, 0.f, 0.f);
 			b = glm::vec3(1.f, 0.f, 0.f);
 			c = glm::vec3(0.f, 2.f, 0.f);
@@ -236,49 +236,69 @@ namespace cgbv
 			fbxs.push_back(cylinder);
 
 			auto fbx = cgbv::fbxmodel::FBXModel::FBXModel(bunny);
-			//FBXmodel fbx(bunny);
-			GLuint triVAO, triVBO;
+			////FBXmodel fbx(bunny);
+			////GLuint triVAO, triVBO;
 
-			glGenVertexArrays(1, &triVAO);
-			glGenBuffers(1, &triVBO);
+			////glGenVertexArrays(1, &triVAO);
+			////glGenBuffers(1, &triVBO);
 
-			glBindVertexArray(triVAO);
+			////glBindVertexArray(triVAO);
 
-			for(auto mesh : fbx.Meshes())
+			for (auto mesh : fbx.Meshes())
 			{
-				glBindBuffer(GL_ARRAY_BUFFER, triVBO);
-				glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount() + 2 * mesh.UVDataCount() + 3 * mesh.TangentCount() + 3 * mesh.BitangentCount()) * sizeof(float), nullptr, GL_STATIC_DRAW);
+				/*
+					glBindBuffer(GL_ARRAY_BUFFER, triVBO);
+					glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount() + 2 * mesh.UVDataCount() + 3 * mesh.TangentCount() + 3 * mesh.BitangentCount()) * sizeof(float), nullptr, GL_STATIC_DRAW);
+					/*
+					const float* data = mesh.VertexData();
+					glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(float), data);
+					data = mesh.NormalData();
+					glBufferSubData(GL_ARRAY_BUFFER, (mesh.VertexCount() * 3) * sizeof(float), 3 * mesh.NormalCount() * sizeof(float), data);
+					data = mesh.UVData();
+					glBufferSubData(GL_ARRAY_BUFFER, (mesh.VertexCount() * 3 + mesh.NormalCount() * 3) * sizeof(float), 2 * mesh.UVDataCount() * sizeof(float), data);
+					data = mesh.TangentData();
+					glBufferSubData(GL_ARRAY_BUFFER, (mesh.VertexCount() * 3 + mesh.NormalCount() * 3 + mesh.UVDataCount() * 2) * sizeof(float), 3 * mesh.TangentCount() * sizeof(float), data);
+					data = mesh.BitangentData();
+					glBufferSubData(GL_ARRAY_BUFFER, (mesh.VertexCount() * 3 + mesh.NormalCount() * 3 + mesh.UVDataCount() * 2 + mesh.TangentCount() * 3) * sizeof(float), 3 * mesh.BitangentCount() * sizeof(float), data);
 
-				const float *dataV = mesh.VertexData();
-				glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(float), dataV);
-				const float* dataN = mesh.NormalData();
-				glBufferSubData(GL_ARRAY_BUFFER, (mesh.VertexCount() * 3) * sizeof(float), 3 * mesh.NormalCount() * sizeof(float), dataN);
-				const float* dataUV = mesh.UVData();
-				glBufferSubData(GL_ARRAY_BUFFER, (mesh.VertexCount() * 3 + mesh.NormalCount() * 3) * sizeof(float), 2 * mesh.UVDataCount() * sizeof(float), dataUV);
-				const float* dataT = mesh.TangentData();
-				glBufferSubData(GL_ARRAY_BUFFER, (mesh.VertexCount() * 3 + mesh.NormalCount() * 3 + mesh.UVDataCount() * 2) * sizeof(float), 3 * mesh.TangentCount() * sizeof(float), dataT);
-				const float* dataB = mesh.BitangentData();
-				glBufferSubData(GL_ARRAY_BUFFER, (mesh.VertexCount() * 3 + mesh.NormalCount() * 3 + mesh.UVDataCount() * 2 + mesh.TangentCount() * 3) * sizeof(float), 3 * mesh.BitangentCount() * sizeof(float), dataB);
+					glEnableVertexAttribArray(locs.vertex);// 0);
+					glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-				glEnableVertexAttribArray(locs.vertex);// 0); sollte egtl keiene Unterschied machen, oder? 
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+					glEnableVertexAttribArray(locs.normal); // 1);
+					glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (const void*)((3 * mesh.VertexCount()) * sizeof(float)));
 
-				glEnableVertexAttribArray(locs.normal); // 1);
-				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (const void*)((3 * mesh.VertexCount()) * sizeof(float)));
+					/*glEnableVertexAttribArray(2);
+					glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (const void*)((3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(float)));
 
-				glEnableVertexAttribArray(2);
-				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (const void*)((3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(float)));
+					glEnableVertexAttribArray(3);
+					glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (const void*)((3 * mesh.VertexCount() + 3 * mesh.NormalCount() + 2 * mesh.UVDataCount()) * sizeof(float)));
 
-				glEnableVertexAttribArray(3);
-				glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (const void*)((3 * mesh.VertexCount() + 3 * mesh.NormalCount() + 2 * mesh.UVDataCount()) * sizeof(float)));
+					glEnableVertexAttribArray(4);
+					glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (const void*)((3 * mesh.VertexCount() + 3 * mesh.NormalCount() + 2 * mesh.UVDataCount() + 3 * mesh.TangentCount()) * sizeof(float)));
+				*/
 
-				glEnableVertexAttribArray(4);
-				glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (const void*)((3 * mesh.VertexCount() + 3 * mesh.NormalCount() + 2 * mesh.UVDataCount() + 3 * mesh.TangentCount()) * sizeof(float)));
+				glGenVertexArrays(1, &object.vao);
+				glBindVertexArray(object.vao);
+
+				glGenBuffers(1, &object.vbo);
+				glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
+				////glBufferData(GL_ARRAY_BUFFER, mesh.VertexCount()*3 * sizeof(float), data,  GL_STATIC_DRAW);
+
+				const float* data = mesh.VertexData();
+				glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(float), data);
+				data = mesh.NormalData();
+				glBufferSubData(GL_ARRAY_BUFFER, (mesh.VertexCount() * 3) * sizeof(float), 3 * mesh.NormalCount() * sizeof(float), data);
+
+				glEnableVertexAttribArray(locs.vertex);
+				glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+				glEnableVertexAttribArray(locs.normal);
+				glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, mesh.VertexCount() * 3 * sizeof(float), nullptr);
+
+				object.vertsToDraw = mesh.VertexCount();
 			}
-
-			//glBindVertexArray(0);
-			//glBindBuffer(GL_ARRAY_BUFFER, 0);
-		}
+	}
+		
 
 		// GUI
 		{
