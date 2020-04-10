@@ -38,7 +38,7 @@ namespace cgbv
 		//	===================================================================================================================================================================================		#####
 		FBXModel::FBXModel(std::string modelPath)
 		{
-			FbxManager *sdkManager = FbxManager::Create();
+			FbxManager *sdkManager = FbxManager::Create(); 
 
 			FbxIOSettings *ioSettings = FbxIOSettings::Create(sdkManager, IOSROOT);
 			sdkManager->SetIOSettings(ioSettings);
