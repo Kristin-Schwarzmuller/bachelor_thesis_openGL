@@ -181,69 +181,32 @@ namespace cgbv
 			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
 
 
-
-
-			//FBXModel fbx("../models/NewCube.fbx");
-
-			//gl::GenVertexArrays(1, &triVAO);
-			//gl::GenBuffers(1, &triVBO);
-
-			//gl::BindVertexArray(triVAO);
-
-			//for(Mesh mesh : fbx.Meshes())
-			//{
-			//	gl::BindBuffer(gl::ARRAY_BUFFER, triVBO);
-			//	gl::BufferData(gl::ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount() + 2 * mesh.UVDataCount()) * sizeof(float), nullptr, gl::STATIC_DRAW);
-
-			//	float *data = mesh.VertexData();
-			//	gl::BufferSubData(gl::ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(float), data);
-			//	data = mesh.NormalData();
-			//	gl::BufferSubData(gl::ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(float), 3 * mesh.NormalCount() * sizeof(float), data);
-			//	data = mesh.UVData();
-			//	gl::BufferSubData(gl::ARRAY_BUFFER, (mesh.VertexCount() * 3 + mesh.NormalCount() * 3) * sizeof(float), 2 * mesh.UVDataCount() * sizeof(float), data);
-
-			//	gl::EnableVertexAttribArray(0);
-			//	gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE_, 0, 0);
-
-			//	gl::EnableVertexAttribArray(1);
-			//	gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE_, 0, (const void *) (3 * mesh.VertexCount() * sizeof(float)));
-
-			//	gl::EnableVertexAttribArray(2);
-			//	gl::VertexAttribPointer(2, 2, gl::FLOAT, gl::FALSE_, 0, (const void *) ((3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(float)));
-
-
-
 			data.clear();
 			vertices.clear();
 
-			cgbv::fbxmodel::FBXModel fbx("../models/stanford-bunny_maya_export.fbx");
-
-			a = glm::vec3(-1.f, 0.f, 0.f);
-			b = glm::vec3(1.f, 0.f, 0.f);
-			c = glm::vec3(0.f, 2.f, 0.f);
-
-			n = glm::vec3(0.f, 0.f, 1.f);
-
-			vertices.push_back(a); vertices.push_back(b); vertices.push_back(c);
-
-			for (auto v : vertices)
-			{
-				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
-				data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
-				object.vertsToDraw++;
-			}
+			//cgbv::fbxmodel::FBXModel fbx("../models/stanford-bunny_maya_export.fbx");
+			cgbv::fbxmodel::FBXModel fbx("../models/Testcube.fbx");
 
 			glGenVertexArrays(1, &object.vao);
 			glBindVertexArray(object.vao);
 
-			glGenBuffers(1, &object.vbo);
-			glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
-			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+			for (cgbv::fbxmodel::Mesh mesh : fbx.Meshes())
+			{
+				glGenBuffers(1, &object.vbo);
+				glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
+				glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
 
-			glEnableVertexAttribArray(locs.vertex);
-			glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
-			glEnableVertexAttribArray(locs.normal);
-			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
+				glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
+				glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
+
+				glEnableVertexAttribArray(locs.vertex);
+				glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+				glEnableVertexAttribArray(locs.normal);
+				glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 0, (const void*)(3 * mesh.VertexCount() * sizeof(GLfloat)));
+
+				object.vertsToDraw = mesh.VertexCount();
+			}
 		}
 
 
@@ -325,6 +288,8 @@ namespace cgbv
 
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
+
+		std::cout << "Test" << std::endl;
 	}
 
 

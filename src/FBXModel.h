@@ -57,9 +57,9 @@ namespace cgbv
 			Mesh();
 			~Mesh();
 
-			const float* VertexData()
+			std::vector<float> VertexData()
 			{
-				return vertexData.data();
+				return vertexData;
 			}
 
 			int VertexCount() const
@@ -67,9 +67,9 @@ namespace cgbv
 				return vertexData.size() / 3;
 			}
 
-			const float* UVData()
+			std::vector<float> UVData()
 			{
-				return uvData.data();
+				return uvData;
 			}
 
 			int UVDataCount() const
@@ -77,9 +77,9 @@ namespace cgbv
 				return uvData.size() / 2;
 			}
 
-			const float* NormalData()
+			std::vector<float> NormalData()
 			{
-				return normalData.data();
+				return normalData;
 			}
 
 			int NormalCount() const
@@ -87,9 +87,9 @@ namespace cgbv
 				return normalData.size() / 3;
 			}
 
-			const float* TangentData()
+			std::vector<float> TangentData()
 			{
-				return tangentData.data();
+				return tangentData;
 			}
 
 			int TangentCount() const
@@ -97,9 +97,9 @@ namespace cgbv
 				return tangentData.size() / 3;
 			}
 
-			const float* BitangentData()
+			std::vector<float> BitangentData()
 			{
-				return bitangentData.data();
+				return bitangentData;
 			}
 
 			int BitangentCount() const
