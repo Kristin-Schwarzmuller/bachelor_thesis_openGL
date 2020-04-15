@@ -3,13 +3,6 @@
 
 #include <iostream>
 #include <AntTweakBar.h>
-// new
-#include <FBXModel.h>
-//using mgraphics::fbxmodel::FBXModel;
-//using mgraphics::fbxmodel::Mesh;
-
-
-
 
 namespace cgbv
 {
@@ -190,8 +183,29 @@ namespace cgbv
 			data.clear();
 			vertices.clear();
 
+			std::vector<std::string> fbxs;
+
+			std::string bunny = "../fbxmodels/stanford-bunny_maya_export.fbx";
+			fbxs.push_back(bunny);
+			std::string bunny2 = "../fbxmodels/01new/stanford-bunny.fbx";
+			fbxs.push_back(bunny2);
+			std::string budda = "../fbxmodels/happy-buddha_maya_export.fbx";
+			fbxs.push_back(budda);
+			std::string dragon = "";
+			fbxs.push_back(dragon);
+			std::string box = "../fbxmodels/Box.fbx";
+			fbxs.push_back(box);
+			std::string cone = "";
+			fbxs.push_back(cone);
+			std::string cylinder = "";
+			fbxs.push_back(cylinder);
+
 			//cgbv::fbxmodel::FBXModel fbx("../models/stanford-bunny_maya_export.fbx");
-			cgbv::fbxmodel::FBXModel fbx("../models/Testcube.fbx");
+			cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/TRex.fbx");
+			//cgbv::fbxmodel::FBXModel fbx("../fbsmodels/01new/stanford-bunny_maya_export0.fbx");
+			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/dragon.fbx");
+			//cgbv::fbxmodel::FBXModel fbx("../models/Testcube.fbx");
+			//cgbv::fbxmodel::FBXModel fbx(bunny2);
 
 			glGenVertexArrays(1, &object.vao);
 			glBindVertexArray(object.vao);
@@ -202,13 +216,33 @@ namespace cgbv
 				glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
 				glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
 
-				glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
+				const float* data = mesh.VertexData().data();
+				//std::vector<GLfloat> vertices;
+				////for (const float* x : data)
+				//for (int i = 0; i < mesh.VertexCount(); i++) {
+				//	vertices.push_back(data[i] * 0.1);
+				//}
+				//data = vertices;
+				/*std::vector<float> dataSmall;
+				for (auto v : vertices)
+				{
+					dataSmall.insert(std::end(dataSmall), v, glm::value_ptr(v) + sizeof(GLfloat) / sizeof(GLfloat));
+				}*/
+
+
+				// Buffer Vetex Data
+				glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), data);
+				// Buffer Normal Data
 				glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
 
+				/* Enable attribute index 0 as being used */
 				glEnableVertexAttribArray(locs.vertex);
+				/* Specify that our vertaex data is going into attribute index 0, and contains three floats per vertex */
 				glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
+				/* Enable attribute index 1 as being used */
 				glEnableVertexAttribArray(locs.normal);
+				/* Specify that our coordinate data is going into attribute index 1, and contains three floats per vertex */
 				glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 0, (const void*)(3 * mesh.VertexCount() * sizeof(GLfloat)));
 
 				object.vertsToDraw = mesh.VertexCount();
@@ -333,8 +367,8 @@ namespace cgbv
 		glBindSampler(0, shadowmap_sampler);
 		glUniform1i(locs.shadowmap, 0);
 
-		glBindVertexArray(basesurface.vao);
-		glDrawArrays(GL_TRIANGLES, 0, basesurface.vertsToDraw);
+		//glBindVertexArray(basesurface.vao);
+		//glDrawArrays(GL_TRIANGLES, 0, basesurface.vertsToDraw);
 
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
