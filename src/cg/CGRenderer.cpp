@@ -199,16 +199,21 @@ namespace cgbv
 			fbxs.push_back(cone);
 			std::string cylinder = "";
 			fbxs.push_back(cylinder);
-
-			//cgbv::fbxmodel::FBXModel fbx("../models/stanford-bunny_maya_export.fbx");
-			cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/TRex.fbx");
-			//cgbv::fbxmodel::FBXModel fbx("../fbsmodels/01new/stanford-bunny_maya_export0.fbx");
-			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/dragon.fbx");
-			//cgbv::fbxmodel::FBXModel fbx("../models/Testcube.fbx");
-			//cgbv::fbxmodel::FBXModel fbx(bunny2);
+			
+			//cgbv::fbxmodel::FBXModel fbx("../models/stanford-bunny_maya_export.fbx"); // works!! 
+			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/stanford-bunny_maya_export.fbx"); //Error: nodeAttribs was nullptr.
+			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/TRex.fbx"); //Error: nodeAttribs was nullptr.
+			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/stanford-bunny_maya_export0.fbx"); //Error: nodeAttribs was nullptr.
+			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/dragon.fbx"); // nur Dreieck 
+			//cgbv::fbxmodel::FBXModel fbx("../models/Testcube.fbx"); // mit skalierung sehr klein
+			//cgbv::fbxmodel::FBXModel fbx(bunny); //Error: nodeAttribs was nullptr.
+			cgbv::fbxmodel::FBXModel fbx(bunny2); // works!! 
+			//cgbv::fbxmodel::FBXModel fbx(budda); // works!! 
 
 			glGenVertexArrays(1, &object.vao);
 			glBindVertexArray(object.vao);
+
+			
 
 			for (cgbv::fbxmodel::Mesh mesh : fbx.Meshes())
 			{
@@ -216,7 +221,6 @@ namespace cgbv
 				glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
 				glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
 
-				const float* data = mesh.VertexData().data();
 				//std::vector<GLfloat> vertices;
 				////for (const float* x : data)
 				//for (int i = 0; i < mesh.VertexCount(); i++) {
@@ -231,7 +235,7 @@ namespace cgbv
 
 
 				// Buffer Vetex Data
-				glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), data);
+				glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
 				// Buffer Normal Data
 				glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
 
@@ -329,13 +333,13 @@ namespace cgbv
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
-		std::cout << "Test" << std::endl;
+		//std::cout << "Test" << std::endl;
 	}
-
 
 	void CGRenderer::final_pass()
 	{
 		glViewport(0, 0, window_width, window_height);
+
 
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.default_buffer);
 
@@ -345,7 +349,9 @@ namespace cgbv
 		glm::mat4 view = observer_camera.getViewMatrix();
 		//glm::mat4 view = lightsource_camera.getViewMatrix();
 
-		model = glm::mat4_cast(parameter.globalRotation);
+		//model = glm::mat4_cast(parameter.globalRotation);
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.005f));
+		//model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
 
 		shader->use();
 		normal = glm::transpose(glm::inverse(view * model));
