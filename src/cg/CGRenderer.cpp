@@ -138,8 +138,9 @@ namespace cgbv
 			locs.shadowmap = shader->getUniformLocation("tex.shadowmap");
 			locs.lambertFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "lambert");
 			locs.depthmapFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "depthmap");
-			locs.lightingVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "verts_and_normals");
+			locs.lightingVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "phong"); // verts_and_normals");
 			locs.placementVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "simple_placement");
+			//locs.subFragment = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "phong"); // from cgbv
 		}
 
 

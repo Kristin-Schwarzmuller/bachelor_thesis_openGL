@@ -16,6 +16,18 @@ struct Matrices
 struct Light
 {
     vec3 lightPos;
+	vec4 ambient;
+	vec4 diffus;
+	vec4 specular;
+};
+
+struct Material 
+{
+	vec4 ambient;
+	vec4 diffus;
+	vec4 spekular;
+	vec4 emissiv;
+	float shininess;
 };
 
 
@@ -61,6 +73,7 @@ layout(location = 0) in FragmentInput Input;
 uniform Matrices matrices;
 
 uniform Light light;
+uniform Material material;
 
 uniform Textures tex;
 
@@ -101,9 +114,9 @@ layout (index = 0) subroutine (FragmentProgram) void lambert()
     float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), .35f, 1.f);
 
 
-    //out_color = vec4(1); // jsut white
+    //out_color = vec4(1); // just white
     //shadowsample * intensity * vec4(.7f);
-     out_color = shadowsample * intensity * vec4(.7f);
+    out_color = shadowsample * intensity * vec4(.7f);
     out_color.w = 1.f;
 }
 
@@ -111,5 +124,31 @@ layout (index = 0) subroutine (FragmentProgram) void lambert()
 subroutine (FragmentProgram) void depthmap()
 {
     out_color = vec4(gl_FragCoord.z);
+}
+
+
+layout (index = 1) subroutine (FragmentProgram) void phong()
+{
+
+    Normalized n;
+    n.viewDir = normalize(Input.viewDir);
+    n.lightDir = normalize(Input.lightDir);
+    n.normal = normalize(Input.normal);
+
+    // Ambient light
+    vec4 ambient = light.ambient * material.ambient; 
+
+    // Diffuse light
+	float d = dot(n.normal, n.lightDir);
+	vec4 diffus = d * light.diffus * material.diffus;
+
+    // Specular
+	vec4 specular = vec4(0.f, 0.f, 0.f, 1.f);
+	if (d > 0.f) {
+		vec3 r = reflect(-n.lightDir, n.normal);
+		specular = pow(max(dot(normalize (r), n.normal), 0), material.shininess)*light.specular*material.spekular;
+	}
+	
+	out_color = material.emissiv + ambient  + specular + diffus;
 }
 // =============================================================================================================

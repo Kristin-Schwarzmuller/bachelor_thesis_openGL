@@ -16,6 +16,9 @@ struct Matrices
 struct Light
 {
     vec3 lightPos;
+	vec4 ambient;
+	vec4 diffus;
+	vec4 specular;
 };
 
 
