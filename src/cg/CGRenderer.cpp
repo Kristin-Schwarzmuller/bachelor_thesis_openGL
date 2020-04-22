@@ -138,9 +138,19 @@ namespace cgbv
 			locs.shadowmap = shader->getUniformLocation("tex.shadowmap");
 			locs.lambertFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "lambert");
 			locs.depthmapFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "depthmap");
-			locs.lightingVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "phong"); // verts_and_normals");
+			locs.lightingVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "verts_and_normals");
 			locs.placementVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "simple_placement");
-			//locs.subFragment = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "phong"); // from cgbv
+			// new 
+			locs.lightPhong = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "phong");
+			locs.ambientLight = shader->getUniformLocation("light.ambient");
+			locs.ambientMaterial = shader->getUniformLocation("material.ambient");
+			locs.diffusLight = shader->getUniformLocation("light.diffus");
+			locs.diffusMaterial = shader->getUniformLocation("material.diffus");
+			//locs.emissivMaterial = shader->getUniformLocation("material.emissiv");
+			locs.spekularLight = shader->getUniformLocation("light.specular");
+			locs.spekularMaterial = shader->getUniformLocation("material.spekular");
+			locs.shininessMaterial = shader->getUniformLocation("material.shininess");
+			
 		}
 
 
@@ -154,6 +164,10 @@ namespace cgbv
 			glm::vec3 b(5.f, 0.f, -5.f);
 			glm::vec3 c(5.f, 0.f, 5.f);
 			glm::vec3 d(-5.f, 0.f, 5.f);
+			/*glm::vec3 a(-5000.f, 0.f, -5000.f);
+			glm::vec3 b(5000.f, 0.f, -5000.f);
+			glm::vec3 c(5000.f, 0.f, 5000.f);
+			glm::vec3 d(-5000.f, 0.f, 5000.f);*/
 
 			glm::vec3 n(0.f, 1.f, 0.f);
 
@@ -189,6 +203,7 @@ namespace cgbv
 			std::string bunny = "../fbxmodels/stanford-bunny_maya_export.fbx";
 			fbxs.push_back(bunny);
 			std::string bunny2 = "../fbxmodels/01new/stanford-bunny.fbx";
+			std::string bunny3 = "../fbxmodels/bunny_fbx_16.fbx";
 			fbxs.push_back(bunny2);
 			std::string budda = "../fbxmodels/happy-buddha_maya_export.fbx";
 			fbxs.push_back(budda);
@@ -208,7 +223,8 @@ namespace cgbv
 			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/dragon.fbx"); // nur Dreieck 
 			//cgbv::fbxmodel::FBXModel fbx("../models/Testcube.fbx"); // mit skalierung sehr klein
 			//cgbv::fbxmodel::FBXModel fbx(bunny); //Error: nodeAttribs was nullptr.
-			cgbv::fbxmodel::FBXModel fbx(bunny2); // works!! 
+			
+			cgbv::fbxmodel::FBXModel fbx(bunny3); // works!! 
 			//cgbv::fbxmodel::FBXModel fbx(budda); // works!! 
 
 			glGenVertexArrays(1, &object.vao);
@@ -221,19 +237,6 @@ namespace cgbv
 				glGenBuffers(1, &object.vbo);
 				glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
 				glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
-
-				//std::vector<GLfloat> vertices;
-				////for (const float* x : data)
-				//for (int i = 0; i < mesh.VertexCount(); i++) {
-				//	vertices.push_back(data[i] * 0.1);
-				//}
-				//data = vertices;
-				/*std::vector<float> dataSmall;
-				for (auto v : vertices)
-				{
-					dataSmall.insert(std::end(dataSmall), v, glm::value_ptr(v) + sizeof(GLfloat) / sizeof(GLfloat));
-				}*/
-
 
 				// Buffer Vetex Data
 				glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
@@ -304,12 +307,12 @@ namespace cgbv
 	void CGRenderer::render()
 	{
 		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(1.4f, 1.f);
-		shadowmap_pass();
+		glPolygonOffset(1.4f, 1.f); //ggf ändern
+		shadowmap_pass(); 
 		final_pass();
 	}
 
-
+	// ERstellt die Tiefenkarte / Tiefentextur 
 	void CGRenderer::shadowmap_pass()
 	{
 		glViewport(0, 0, shadowmap_width, shadowmap_height);
@@ -351,10 +354,23 @@ namespace cgbv
 		//glm::mat4 view = lightsource_camera.getViewMatrix();
 
 		//model = glm::mat4_cast(parameter.globalRotation);
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.005f));
 		//model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
 
+		// Scaling the object
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.5f));// 0.003f));
+		
+
 		shader->use();
+		//new 
+		glUniform4fv(locs.ambientLight, 1, glm::value_ptr(parameter.ambientLight));
+		glUniform4fv(locs.diffusLight, 1, glm::value_ptr(parameter.diffusLight));
+		glUniform4fv(locs.spekularLight, 1, glm::value_ptr(parameter.specularLight));
+		glUniform4fv(locs.ambientMaterial, 1, glm::value_ptr(parameter.ambientMaterial));
+		glUniform4fv(locs.diffusMaterial, 1, glm::value_ptr(parameter.diffusMaterial));
+		glUniform4fv(locs.spekularMaterial, 1, glm::value_ptr(parameter.spekularMaterial));
+		//glUniform4fv(locs.emissivMaterial, 1, glm::value_ptr(parameter.emissivMaterial));
+		glUniform1f(locs.shininessMaterial, parameter.shininessMaterial);
+
 		normal = glm::transpose(glm::inverse(view * model));
 		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(observer_projection * view * model));
 		//glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * view * model));
@@ -367,15 +383,15 @@ namespace cgbv
 		glUniform3fv(locs.lightPos, 1, glm::value_ptr(parameter.lightPos));
 
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.lightingVS);
-		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.lambertFS);
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.lightPhong);//&locs.lambertFS);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, shadowmap->getTextureID());
 		glBindSampler(0, shadowmap_sampler);
 		glUniform1i(locs.shadowmap, 0);
 
-		//glBindVertexArray(basesurface.vao);
-		//glDrawArrays(GL_TRIANGLES, 0, basesurface.vertsToDraw);
+		glBindVertexArray(basesurface.vao);
+		glDrawArrays(GL_TRIANGLES, 0, basesurface.vertsToDraw);
 
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);

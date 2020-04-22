@@ -25,6 +25,25 @@ namespace cgbv
 		unsigned int lightPos;
 
         unsigned int shadowmap;
+
+        // new 
+        unsigned int lightPhong;
+
+        unsigned int ambientLight;
+
+        unsigned int diffusLight;
+
+        unsigned int spekularLight;
+
+        unsigned int ambientMaterial;
+
+        unsigned int diffusMaterial;
+
+        unsigned int spekularMaterial;
+
+        //unsigned int emissivMaterial;
+
+        unsigned int shininessMaterial;
     };
 
     struct BufferCombo
@@ -36,6 +55,16 @@ namespace cgbv
 	{
 		glm::quat globalRotation;
         glm::vec4 lightPos = glm::vec4(0.f, 0.f, 50.f, 1.f);
+
+        // new 
+        glm::vec4 ambientLight = glm::vec4(0.1f, 0.1f, 0.1f, 1.f);
+        glm::vec4 diffusLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        glm::vec4 specularLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        glm::vec4 ambientMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+        glm::vec4 diffusMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+        glm::vec4 spekularMaterial = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        glm::vec4 emissivMaterial = glm::vec4(0.f, 0.f, 0.f, 0.f);
+        float shininessMaterial = 10.f;
 
         float f;
 	};

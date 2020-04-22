@@ -115,7 +115,6 @@ layout (index = 0) subroutine (FragmentProgram) void lambert()
 
 
     //out_color = vec4(1); // just white
-    //shadowsample * intensity * vec4(.7f);
     out_color = shadowsample * intensity * vec4(.7f);
     out_color.w = 1.f;
 }
@@ -129,11 +128,13 @@ subroutine (FragmentProgram) void depthmap()
 
 layout (index = 1) subroutine (FragmentProgram) void phong()
 {
-
+  
     Normalized n;
     n.viewDir = normalize(Input.viewDir);
     n.lightDir = normalize(Input.lightDir);
     n.normal = normalize(Input.normal);
+
+    // --------- Phong ---------
 
     // Ambient light
     vec4 ambient = light.ambient * material.ambient; 
@@ -149,6 +150,22 @@ layout (index = 1) subroutine (FragmentProgram) void phong()
 		specular = pow(max(dot(normalize (r), n.normal), 0), material.shininess)*light.specular*material.spekular;
 	}
 	
-	out_color = material.emissiv + ambient  + specular + diffus;
+	vec4 out_phong = ambient  + specular + diffus;
+
+    // --------- Shadows ---------
+    
+    float intensity = dot(n.lightDir, n.normal);
+
+    vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
+//    shadow_coordinates.z -= (.0001f + (1.f - intensity) * .005f); // Needs to be adjusted
+
+    float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), .35f, 1.f);
+    
+    vec4 out_shadow = shadowsample * intensity * vec4(.7f);
+    out_shadow.w = 1.f;
+
+    // --------- Result --------- 
+
+    out_color = out_phong + out_shadow; 
 }
 // =============================================================================================================
