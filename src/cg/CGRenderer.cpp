@@ -203,11 +203,11 @@ namespace cgbv
 			std::string bunny = "../fbxmodels/stanford-bunny_maya_export.fbx";
 			fbxs.push_back(bunny);
 			std::string bunny2 = "../fbxmodels/01new/stanford-bunny.fbx";
-			std::string bunny3 = "../fbxmodels/bunny_fbx_16.fbx";
+			std::string bunny3 = "../modelsScaled/bunny.fbx";
 			fbxs.push_back(bunny2);
 			std::string budda = "../fbxmodels/happy-buddha_maya_export.fbx";
 			fbxs.push_back(budda);
-			std::string dragon = "";
+			std::string dragon = "../modelsScaled/dragon.fbx";
 			fbxs.push_back(dragon);
 			std::string box = "../fbxmodels/Box.fbx";
 			fbxs.push_back(box);
@@ -224,7 +224,7 @@ namespace cgbv
 			//cgbv::fbxmodel::FBXModel fbx("../models/Testcube.fbx"); // mit skalierung sehr klein
 			//cgbv::fbxmodel::FBXModel fbx(bunny); //Error: nodeAttribs was nullptr.
 			
-			cgbv::fbxmodel::FBXModel fbx(bunny3); // works!! 
+			cgbv::fbxmodel::FBXModel fbx(dragon); // works!! 
 			//cgbv::fbxmodel::FBXModel fbx(budda); // works!! 
 
 			glGenVertexArrays(1, &object.vao);
