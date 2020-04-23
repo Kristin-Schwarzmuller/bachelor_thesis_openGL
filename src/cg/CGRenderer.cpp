@@ -200,32 +200,22 @@ namespace cgbv
 
 			std::vector<std::string> fbxs;
 
-			std::string bunny = "../fbxmodels/stanford-bunny_maya_export.fbx";
+			std::string bunny = "../modelsScaled/bunny.fbx";
 			fbxs.push_back(bunny);
-			std::string bunny2 = "../fbxmodels/01new/stanford-bunny.fbx";
-			std::string bunny3 = "../modelsScaled/bunny.fbx";
-			fbxs.push_back(bunny2);
-			std::string budda = "../fbxmodels/happy-buddha_maya_export.fbx";
+			std::string budda = "../modelsScaled/budda.fbx";
 			fbxs.push_back(budda);
-			std::string dragon = "../modelsScaled/dragon.fbx";
-			fbxs.push_back(dragon);
-			std::string box = "../fbxmodels/Box.fbx";
+			std::string box = "../modelsScaled/box.fbx";
 			fbxs.push_back(box);
-			std::string cone = "";
+			std::string cone = "../modelsScaled/cone.fbx";
 			fbxs.push_back(cone);
-			std::string cylinder = "";
+			std::string cylinder = "../modelsScaled/cylinder.fbx";
 			fbxs.push_back(cylinder);
+			std::string ball = "../modelsScaled/ball.fbx";
+			fbxs.push_back(ball);
+			std::string donut = "../modelsScaled/donut.fbx";
+			fbxs.push_back(donut);
 			
-			//cgbv::fbxmodel::FBXModel fbx("../models/stanford-bunny_maya_export.fbx"); // works!! 
-			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/stanford-bunny_maya_export.fbx"); //Error: nodeAttribs was nullptr.
-			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/TRex.fbx"); //Error: nodeAttribs was nullptr.
-			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/stanford-bunny_maya_export0.fbx"); //Error: nodeAttribs was nullptr.
-			//cgbv::fbxmodel::FBXModel fbx("../fbxmodels/01new/dragon.fbx"); // nur Dreieck 
-			//cgbv::fbxmodel::FBXModel fbx("../models/Testcube.fbx"); // mit skalierung sehr klein
-			//cgbv::fbxmodel::FBXModel fbx(bunny); //Error: nodeAttribs was nullptr.
-			
-			cgbv::fbxmodel::FBXModel fbx(dragon); // works!! 
-			//cgbv::fbxmodel::FBXModel fbx(budda); // works!! 
+			cgbv::fbxmodel::FBXModel fbx(donut);
 
 			glGenVertexArrays(1, &object.vao);
 			glBindVertexArray(object.vao);
