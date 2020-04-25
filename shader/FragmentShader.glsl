@@ -120,13 +120,37 @@ layout (index = 0) subroutine (FragmentProgram) void lambert()
 }
 
 
-subroutine (FragmentProgram) void depthmap()
+layout (index = 1) subroutine (FragmentProgram) void depthmap()
 {
     out_color = vec4(gl_FragCoord.z);
 }
 
+layout (index = 2) subroutine (FragmentProgram) void phong()
+{
+  
+    Normalized n;
+    n.viewDir = normalize(Input.viewDir);
+    n.lightDir = normalize(Input.lightDir);
+    n.normal = normalize(Input.normal);
 
-layout (index = 1) subroutine (FragmentProgram) void phong()
+    // Ambient light
+    vec4 ambient = light.ambient * material.ambient; 
+
+    // Diffuse light
+	float d = dot(n.normal, n.lightDir);
+	vec4 diffus = d * light.diffus * material.diffus;
+
+    // Specular
+	vec4 specular = vec4(0.f, 0.f, 0.f, 1.f);
+	if (d > 0.f) {
+		vec3 r = reflect(-n.lightDir, n.normal);
+		specular = pow(max(dot(normalize (r), n.normal), 0), material.shininess) * light.specular * material.spekular;
+	}
+	
+	out_color = ambient  + specular + diffus;
+}
+
+layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 {
   
     Normalized n;
@@ -147,10 +171,10 @@ layout (index = 1) subroutine (FragmentProgram) void phong()
 	vec4 specular = vec4(0.f, 0.f, 0.f, 1.f);
 	if (d > 0.f) {
 		vec3 r = reflect(-n.lightDir, n.normal);
-		specular = pow(max(dot(normalize (r), n.normal), 0), material.shininess)*light.specular*material.spekular;
+		specular = pow(max(dot(normalize (r), n.normal), 0), material.shininess) * light.specular * material.spekular;
 	}
 	
-	vec4 out_phong = ambient  + specular + diffus;
+	//vec4 out_phong = ambient  + specular + diffus;
 
     // --------- Shadows ---------
     
@@ -161,11 +185,12 @@ layout (index = 1) subroutine (FragmentProgram) void phong()
 
     float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), .35f, 1.f);
     
-    vec4 out_shadow = shadowsample * intensity * vec4(.7f);
-    out_shadow.w = 1.f;
+    //vec4 out_shadow = shadowsample * intensity * vec4(.7f);
+    //out_shadow.w = 1.f;
 
     // --------- Result --------- 
 
-    out_color = out_phong + out_shadow; 
+    out_color = shadowsample * intensity * 1.3f * (specular + diffus) + ambient;
+    out_color.w = 1.f;
 }
 // =============================================================================================================

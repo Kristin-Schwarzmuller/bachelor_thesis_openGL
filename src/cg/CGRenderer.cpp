@@ -106,7 +106,7 @@ namespace cgbv
 			//observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, 200.f);
 			observer_projection = glm::perspective(glm::pi<float>() / 5.f, float(window_width) / float(window_height), .1f, 20.f);
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
-			observer_camera.moveTo(0.f, 2.5f, 5.f);
+			observer_camera.moveTo(0.f, 2.5f, 10.f); // here changes happend 5.f --> 10.f
 
 			lightsource_projection = glm::ortho(-8.f, 8.f, -8.f, 8.f, 1.f, 80.f);
 			lightsource_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
@@ -141,7 +141,7 @@ namespace cgbv
 			locs.lightingVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "verts_and_normals");
 			locs.placementVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "simple_placement");
 			// new 
-			locs.lightPhong = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "phong");
+			locs.lightPhong = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "phongWithLambert");
 			locs.ambientLight = shader->getUniformLocation("light.ambient");
 			locs.ambientMaterial = shader->getUniformLocation("material.ambient");
 			locs.diffusLight = shader->getUniformLocation("light.diffus");
@@ -160,10 +160,10 @@ namespace cgbv
 		{
 			std::vector<glm::vec3> vertices;
 
-			glm::vec3 a(-5.f, 0.f, -5.f);
-			glm::vec3 b(5.f, 0.f, -5.f);
-			glm::vec3 c(5.f, 0.f, 5.f);
-			glm::vec3 d(-5.f, 0.f, 5.f);
+			glm::vec3 a(-10.f, 0.f, -10.f);
+			glm::vec3 b(10.f, 0.f, -10.f);
+			glm::vec3 c(10.f, 0.f, 10.f);
+			glm::vec3 d(-10.f, 0.f, 10.f);
 			/*glm::vec3 a(-5000.f, 0.f, -5000.f);
 			glm::vec3 b(5000.f, 0.f, -5000.f);
 			glm::vec3 c(5000.f, 0.f, 5000.f);
@@ -215,7 +215,7 @@ namespace cgbv
 			std::string donut = "../modelsScaled/donut.fbx";
 			fbxs.push_back(donut);
 			
-			cgbv::fbxmodel::FBXModel fbx(donut);
+			cgbv::fbxmodel::FBXModel fbx(budda);
 
 			glGenVertexArrays(1, &object.vao);
 			glBindVertexArray(object.vao);
