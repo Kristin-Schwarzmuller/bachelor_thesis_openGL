@@ -248,8 +248,6 @@ namespace cgbv
 		}
 
 
-
-
 		// GUI
 		{
 			TwInit(TW_OPENGL_CORE, nullptr);
@@ -323,7 +321,8 @@ namespace cgbv
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-		model = glm::mat4_cast(parameter.globalRotation);
+		// model = glm::mat4_cast(parameter.globalRotation);
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.5f));
 
 		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 
@@ -402,7 +401,8 @@ namespace cgbv
 		{
 			std::cout << "Storing Shadowmap to Disk...";
 			std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
-			glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, pixel.get());
+			//glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, pixel.get());
+			glGetTexImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
 
 			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", pixel.get(), shadowmap_width, shadowmap_height, 0);
 			std::cout << "done" << std::endl;
