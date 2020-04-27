@@ -75,6 +75,17 @@ namespace cgbv
         unsigned int default_buffer = 0;
     };
 
+// Create an internal enum to name the meshes
+typedef enum { BUNNY, BUDDHA, BOX, CONE, CYLINDER, BALL, DONUT } MESH_TYPE;
+
+//std::string buddha = "../modelsScaled/budda.fbx";
+//std::string bunny = "../modelsScaled/bunny.fbx";
+//std::string box = "../modelsScaled/box.fbx";
+//std::string cone = "../modelsScaled/cone.fbx";
+//std::string cylinder = "../modelsScaled/cylinder.fbx";
+//std::string ball = "../modelsScaled/ball.fbx";
+//std::string donut = "../modelsScaled/donut.fbx";
+std::string currentObject;
 
 	class CGRenderer : public Renderer
 	{
@@ -114,5 +125,6 @@ namespace cgbv
 		virtual void render();
 		virtual void update();
         void capture();
+        void changeObject(MESH_TYPE currentMesh);
 	};
 }

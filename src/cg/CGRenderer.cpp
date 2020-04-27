@@ -158,6 +158,7 @@ namespace cgbv
 
 		// Geometrie
 		{
+			// Base
 			std::vector<glm::vec3> vertices;
 
 			glm::vec3 a(-50.f, 0.f, -50.f);
@@ -197,30 +198,12 @@ namespace cgbv
 
 			data.clear();
 			vertices.clear();
-
-			std::vector<std::string> fbxs;
-
-			std::string bunny = "../modelsScaled/bunny.fbx";
-			fbxs.push_back(bunny);
-			std::string budda = "../modelsScaled/budda.fbx";
-			fbxs.push_back(budda);
-			std::string box = "../modelsScaled/box.fbx";
-			fbxs.push_back(box);
-			std::string cone = "../modelsScaled/cone.fbx";
-			fbxs.push_back(cone);
-			std::string cylinder = "../modelsScaled/cylinder.fbx";
-			fbxs.push_back(cylinder);
-			std::string ball = "../modelsScaled/ball.fbx";
-			fbxs.push_back(ball);
-			std::string donut = "../modelsScaled/donut.fbx";
-			fbxs.push_back(donut);
 			
-			cgbv::fbxmodel::FBXModel fbx(budda);
+			// FBX Model 
+			cgbv::fbxmodel::FBXModel fbx(cgbv::currentObject);
 
 			glGenVertexArrays(1, &object.vao);
 			glBindVertexArray(object.vao);
-
-			
 
 			for (cgbv::fbxmodel::Mesh mesh : fbx.Meshes())
 			{
@@ -255,6 +238,20 @@ namespace cgbv
 			TwBar* tweakbar = TwNewBar("TweakBar");
 			TwDefine(" TweakBar size='300 400'");
 
+			// http://ogldev.atspace.co.uk/www/tutorial48/tutorial48.html
+			// A variable for the current selection - will be updated by ATB
+			MESH_TYPE currentMesh = BUDDHA;
+			changeObject(currentMesh);
+
+			// Array of drop down items:	BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT
+			TwEnumVal Meshes[] = { {BUDDHA, "Buddha"}, {BUNNY, "Bunny"}, {BOX, "Box"}, {CONE, "Cone"}, {CYLINDER, "Cylinder"}, {BALL, "Ball"}, {DONUT, "Donut"} };
+			// ATB identifier for the array
+			TwType MeshTwType = TwDefineEnum("MeshType", Meshes, 7);
+			// Link it to the tweak bar
+			TwAddVarRW(tweakbar, "Mesh", MeshTwType, &currentMesh, NULL);
+			// The second parameter is an optional name
+			TwAddSeparator(tweakbar, "", NULL);
+
 			TwAddVarRW(tweakbar, "Global Rotation", TW_TYPE_QUAT4F, &parameter.globalRotation, "showval=false opened=true");
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
 			TwAddVarRW(tweakbar, "Lichtrichtung", TW_TYPE_DIR3F, &parameter.lightPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
@@ -268,7 +265,7 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "Ambientes Material", TW_TYPE_COLOR4F, &parameter.ambientMaterial,	" group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "diffuses Material", TW_TYPE_COLOR4F, &parameter.diffusMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Spectacular Material", TW_TYPE_COLOR4F, &parameter.spekularMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
-
+			//TwAddVarRW(tweakbar, "Shadowmap", TW_TYPE_DIR3F, &parameter.shadowmap, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
 
 		}
 
@@ -416,5 +413,70 @@ namespace cgbv
 	void CGRenderer::update()
 	{
 		lightsource_camera.moveTo(parameter.lightPos);
+	}
+
+	void CGRenderer::changeObject(MESH_TYPE currentMesh)
+	{
+		std::string buddha = "../modelsScaled/budda.fbx";
+		std::string bunny = "../modelsScaled/bunny.fbx";
+		std::string box = "../modelsScaled/box.fbx";
+		std::string cone = "../modelsScaled/cone.fbx";
+		std::string cylinder = "../modelsScaled/cylinder.fbx";
+		std::string ball = "../modelsScaled/ball.fbx";
+		std::string donut = "../modelsScaled/donut.fbx";
+		std::string currentObject = buddha;
+
+		/*switch (currentMesh)
+		{
+		case BUDDHA:
+			currentObject = cgbv::buddha;
+			break;
+		case BUNNY:
+			currentObject = cgbv::bunny;
+			break;
+		case BOX:
+			currentObject = cgbv::box;
+			break;
+		case CONE:
+			currentObject = cgbv::cone;
+			break;
+		case CYLINDER:
+			currentObject = cgbv::cylinder;
+			break;
+		case BALL:
+			currentObject = cgbv::ball;
+			break;
+		case DONUT:
+			currentObject = cgbv::donut;
+			break;
+		default:
+			break;
+		}*/
+		switch (currentMesh)
+		{
+		case BUDDHA:
+			currentObject = buddha;
+			break;
+		case BUNNY:
+			currentObject = bunny;
+			break;
+		case BOX:
+			currentObject = box;
+			break;
+		case CONE:
+			currentObject = cone;
+			break;
+		case CYLINDER:
+			currentObject = cylinder;
+			break;
+		case BALL:
+			currentObject = ball;
+			break;
+		case DONUT:
+			currentObject = donut;
+			break;
+		default:
+			break;
+		}
 	}
 }
