@@ -54,7 +54,7 @@ namespace cgbv
 	struct UIParameter
 	{
 		glm::quat globalRotation;
-        glm::vec4 lightPos = glm::vec4(0.f, 0.f, 50.f, 1.f); 
+        glm::vec4 lightPos = glm::vec4(0.f, 0.f, 79.f, 1.f); 
 
         // new 
         glm::vec4 ambientLight = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
@@ -64,7 +64,7 @@ namespace cgbv
         glm::vec4 diffusMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
         glm::vec4 spekularMaterial = glm::vec4(1.f, 1.f, 1.f, 1.f);
         glm::vec4 emissivMaterial = glm::vec4(0.f, 0.f, 0.f, 0.f);
-        float shininessMaterial = 10.f;
+        float shininessMaterial = 20.f;
 
         float f;
 	};
