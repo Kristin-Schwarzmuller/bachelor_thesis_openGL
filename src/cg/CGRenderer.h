@@ -87,6 +87,7 @@ const std::string donut = "../modelsScaled/donut.fbx";
 typedef enum { BUNNY, BUDDHA, BOX, CONE, CYLINDER, BALL, DONUT } MESH_TYPE;
 // global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
 static std::string currentFBXObjectPath = buddha;
+static std::string lastDrawnFBXPath = currentFBXObjectPath;
 
 	class CGRenderer : public Renderer
 	{

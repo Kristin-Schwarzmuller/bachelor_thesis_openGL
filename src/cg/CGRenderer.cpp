@@ -438,9 +438,15 @@ namespace cgbv
 		lightsource_camera.moveTo(parameter.lightPos);
 	}
 
-	void CGRenderer::loadFBX() {
-		// FBX Model 
+	void CGRenderer::loadFBX() 
+	{
+		// If the model did not change do nothing and return 
+		if (currentFBXObjectPath == lastDrawnFBXPath)
+		{
+			return;
+		}
 
+		lastDrawnFBXPath = currentFBXObjectPath;
 		cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
 
 		glGenVertexArrays(1, &object.vao);
