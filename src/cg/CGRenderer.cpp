@@ -288,6 +288,26 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "diffuses Material", TW_TYPE_COLOR4F, &parameter.diffusMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Spectacular Material", TW_TYPE_COLOR4F, &parameter.spekularMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			//TwAddVarRW(tweakbar, "Shadowmap", TW_TYPE_DIR3F, &parameter.shadowmap, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
+			// OLD SHIT THAT IS TOTALLY OUT DATED 
+			//--- Callbacks
+			//--- https://github.com/davidcox/AntTweakBar/blob/master/examples/TwSimpleGLFW.c
+
+			//// Set GLFW event callbacks
+			//// - Redirect window size changes to the callback function WindowSizeCB
+			////glfwSetWindowSizeCallback(resize(w,b));
+			//// - Directly redirect GLFW mouse button events to AntTweakBar
+			//glfwSetMouseButtonCallback((GLFWmousebuttonfun)TwEventMouseButtonGLFW);
+			//// - Directly redirect GLFW mouse position events to AntTweakBar
+			//glfwSetCursorPos((GLFWmouseposfun)TwEventMousePosGLFW);
+			//// - Directly redirect GLFW mouse wheel events to AntTweakBar
+			//glfwSetScrollCallback((GLFWmousewheelfun)TwEventMouseWheelGLFW);
+			//// - Directly redirect GLFW key events to AntTweakBar
+			//glfwSetKeyCallback((GLFWkeyfun)TwEventKeyGLFW);
+			//// - Directly redirect GLFW char events to AntTweakBar
+			//glfwSetCharCallback((GLFWcharfun)TwEventCharGLFW);
+
+			// THE NEW STUFF	
+			// https://www.glfw.org/docs/3.3/quick.html
 
 		}
 
