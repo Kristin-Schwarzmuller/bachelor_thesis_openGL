@@ -78,6 +78,27 @@ namespace cgbv
 			case GLFW_KEY_D:
 				observer_camera.moveRight(-.1f);
 				break;
+			case GLFW_KEY_0:
+				currentFBXObjectPath = buddha;
+				break;
+			case GLFW_KEY_1:
+				currentFBXObjectPath = bunny;
+				break;
+			case GLFW_KEY_2:
+				currentFBXObjectPath = box;
+				break;
+			case GLFW_KEY_3:
+				currentFBXObjectPath = cone;
+				break;
+			case GLFW_KEY_4:
+				currentFBXObjectPath = cylinder;
+				break;
+			case GLFW_KEY_5:
+				currentFBXObjectPath = ball;
+				break;
+			case GLFW_KEY_6:
+				currentFBXObjectPath = donut;
+				break;
 			default:
 				break;
 			}
@@ -199,35 +220,36 @@ namespace cgbv
 			data.clear();
 			vertices.clear();
 			
-			// FBX Model 
-			cgbv::fbxmodel::FBXModel fbx(cgbv::currentObject);
+			//// FBX Model 
+			//
+			//cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
 
-			glGenVertexArrays(1, &object.vao);
-			glBindVertexArray(object.vao);
+			//glGenVertexArrays(1, &object.vao);
+			//glBindVertexArray(object.vao);
 
-			for (cgbv::fbxmodel::Mesh mesh : fbx.Meshes())
-			{
-				glGenBuffers(1, &object.vbo);
-				glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
-				glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
+			//for (cgbv::fbxmodel::Mesh mesh : fbx.Meshes())
+			//{
+			//	glGenBuffers(1, &object.vbo);
+			//	glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
+			//	glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
 
-				// Buffer Vetex Data
-				glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
-				// Buffer Normal Data
-				glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
+			//	// Buffer Vetex Data
+			//	glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
+			//	// Buffer Normal Data
+			//	glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
 
-				/* Enable attribute index 0 as being used */
-				glEnableVertexAttribArray(locs.vertex);
-				/* Specify that our vertaex data is going into attribute index 0, and contains three floats per vertex */
-				glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+			//	/* Enable attribute index 0 as being used */
+			//	glEnableVertexAttribArray(locs.vertex);
+			//	/* Specify that our vertaex data is going into attribute index 0, and contains three floats per vertex */
+			//	glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-				/* Enable attribute index 1 as being used */
-				glEnableVertexAttribArray(locs.normal);
-				/* Specify that our coordinate data is going into attribute index 1, and contains three floats per vertex */
-				glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 0, (const void*)(3 * mesh.VertexCount() * sizeof(GLfloat)));
+			//	/* Enable attribute index 1 as being used */
+			//	glEnableVertexAttribArray(locs.normal);
+			//	/* Specify that our coordinate data is going into attribute index 1, and contains three floats per vertex */
+			//	glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 0, (const void*)(3 * mesh.VertexCount() * sizeof(GLfloat)));
 
-				object.vertsToDraw = mesh.VertexCount();
-			}
+			//	object.vertsToDraw = mesh.VertexCount();
+			//}
 		}
 
 
@@ -248,7 +270,7 @@ namespace cgbv
 			// ATB identifier for the array
 			TwType MeshTwType = TwDefineEnum("MeshType", Meshes, 7);
 			// Link it to the tweak bar
-			TwAddVarRW(tweakbar, "Mesh", MeshTwType, &currentMesh, NULL);
+			TwAddVarRW(tweakbar, "FBX Model", MeshTwType, &currentMesh, "Buddha");
 			// The second parameter is an optional name
 			TwAddSeparator(tweakbar, "", NULL);
 
@@ -305,6 +327,7 @@ namespace cgbv
 	{
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(1.4f, 1.f); //ggf ändern
+		loadFBX();
 		shadowmap_pass(); 
 		final_pass();
 	}
@@ -415,65 +438,63 @@ namespace cgbv
 		lightsource_camera.moveTo(parameter.lightPos);
 	}
 
+	void CGRenderer::loadFBX() {
+		// FBX Model 
+
+		cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
+
+		glGenVertexArrays(1, &object.vao);
+		glBindVertexArray(object.vao);
+
+		for (cgbv::fbxmodel::Mesh mesh : fbx.Meshes())
+		{
+			glGenBuffers(1, &object.vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
+			glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
+
+			// Buffer Vetex Data
+			glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
+			// Buffer Normal Data
+			glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
+
+			/* Enable attribute index 0 as being used */
+			glEnableVertexAttribArray(locs.vertex);
+			/* Specify that our vertaex data is going into attribute index 0, and contains three floats per vertex */
+			glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+			/* Enable attribute index 1 as being used */
+			glEnableVertexAttribArray(locs.normal);
+			/* Specify that our coordinate data is going into attribute index 1, and contains three floats per vertex */
+			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 0, (const void*)(3 * mesh.VertexCount() * sizeof(GLfloat)));
+
+			object.vertsToDraw = mesh.VertexCount();
+		}
+	}
+
 	void CGRenderer::changeObject(MESH_TYPE currentMesh)
 	{
-		std::string buddha = "../modelsScaled/budda.fbx";
-		std::string bunny = "../modelsScaled/bunny.fbx";
-		std::string box = "../modelsScaled/box.fbx";
-		std::string cone = "../modelsScaled/cone.fbx";
-		std::string cylinder = "../modelsScaled/cylinder.fbx";
-		std::string ball = "../modelsScaled/ball.fbx";
-		std::string donut = "../modelsScaled/donut.fbx";
-		std::string currentObject = buddha;
-
-		/*switch (currentMesh)
-		{
-		case BUDDHA:
-			currentObject = cgbv::buddha;
-			break;
-		case BUNNY:
-			currentObject = cgbv::bunny;
-			break;
-		case BOX:
-			currentObject = cgbv::box;
-			break;
-		case CONE:
-			currentObject = cgbv::cone;
-			break;
-		case CYLINDER:
-			currentObject = cgbv::cylinder;
-			break;
-		case BALL:
-			currentObject = cgbv::ball;
-			break;
-		case DONUT:
-			currentObject = cgbv::donut;
-			break;
-		default:
-			break;
-		}*/
 		switch (currentMesh)
 		{
 		case BUDDHA:
-			currentObject = buddha;
+			currentFBXObjectPath = buddha;
 			break;
 		case BUNNY:
-			currentObject = bunny;
+			currentFBXObjectPath = bunny;
 			break;
 		case BOX:
-			currentObject = box;
+			currentFBXObjectPath = box;
 			break;
 		case CONE:
-			currentObject = cone;
+			currentFBXObjectPath = cone;
 			break;
 		case CYLINDER:
-			currentObject = cylinder;
+			currentFBXObjectPath = cylinder;
 			break;
 		case BALL:
-			currentObject = ball;
+			currentFBXObjectPath = ball;
 			break;
 		case DONUT:
-			currentObject = donut;
+			currentFBXObjectPath = donut;
 			break;
 		default:
 			break;

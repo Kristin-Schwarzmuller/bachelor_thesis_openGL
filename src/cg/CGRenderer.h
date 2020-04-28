@@ -75,17 +75,18 @@ namespace cgbv
         unsigned int default_buffer = 0;
     };
 
+const std::string buddha = "../modelsScaled/budda.fbx";
+const std::string bunny = "../modelsScaled/bunny.fbx";
+const std::string box = "../modelsScaled/box.fbx";
+const std::string cone = "../modelsScaled/cone.fbx";
+const std::string cylinder = "../modelsScaled/cylinder.fbx";
+const std::string ball = "../modelsScaled/ball.fbx";
+const std::string donut = "../modelsScaled/donut.fbx";
+
 // Create an internal enum to name the meshes
 typedef enum { BUNNY, BUDDHA, BOX, CONE, CYLINDER, BALL, DONUT } MESH_TYPE;
-
-//std::string buddha = "../modelsScaled/budda.fbx";
-//std::string bunny = "../modelsScaled/bunny.fbx";
-//std::string box = "../modelsScaled/box.fbx";
-//std::string cone = "../modelsScaled/cone.fbx";
-//std::string cylinder = "../modelsScaled/cylinder.fbx";
-//std::string ball = "../modelsScaled/ball.fbx";
-//std::string donut = "../modelsScaled/donut.fbx";
-std::string currentObject;
+// global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
+static std::string currentFBXObjectPath = buddha;
 
 	class CGRenderer : public Renderer
 	{
@@ -125,6 +126,7 @@ std::string currentObject;
 		virtual void render();
 		virtual void update();
         void capture();
+        void loadFBX();
         void changeObject(MESH_TYPE currentMesh);
 	};
 }
