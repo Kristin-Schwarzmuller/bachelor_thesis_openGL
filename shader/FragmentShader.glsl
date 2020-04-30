@@ -193,4 +193,5 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
     out_color = shadowsample * intensity * 1.3f * (specular + diffus) + ambient;
     out_color.w = 1.f;
 }
+
 // =============================================================================================================

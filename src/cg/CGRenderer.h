@@ -44,6 +44,8 @@ namespace cgbv
         //unsigned int emissivMaterial;
 
         unsigned int shininessMaterial;
+
+        unsigned int brightness, contrast; 
     };
 
     struct BufferCombo
@@ -65,6 +67,9 @@ namespace cgbv
         glm::vec4 spekularMaterial = glm::vec4(1.f, 1.f, 1.f, 1.f);
         glm::vec4 emissivMaterial = glm::vec4(0.f, 0.f, 0.f, 0.f);
         float shininessMaterial = 20.f;
+
+        float brightness = .1f;
+        float contrast = 0.0f;
 
         float f;
 	};

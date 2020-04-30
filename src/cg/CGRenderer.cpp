@@ -99,6 +99,22 @@ namespace cgbv
 			case GLFW_KEY_O:
 				currentFBXObjectPath = donut;
 				break;
+
+			//case GLFW_KEY_UP:
+			//	model *= glm::rotate(glm::mat4(1.f), (float)M_PI / 6.f, glm::vec3(1.f, 0.f, 0.f));
+			//	break;
+
+			//case GLFW_KEY_DOWN:
+			//	model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(1.f, 0.f, 0.f));
+			//	break;
+
+			//case GLFW_KEY_LEFT:
+			//	model *= glm::rotate(glm::mat4(1.f), (float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
+			//	break;
+
+			//case GLFW_KEY_RIGHT:
+			//	model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
+			//	break;
 			default:
 				break;
 			}
