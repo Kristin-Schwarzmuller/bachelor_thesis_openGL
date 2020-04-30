@@ -128,6 +128,6 @@ static std::string lastDrawnFBXPath = currentFBXObjectPath;
 		virtual void update();
         void capture();
         void loadFBX();
-        void changeObject(MESH_TYPE currentMesh);
+        void changeFBXObject(MESH_TYPE currentMesh);
 	};
 }

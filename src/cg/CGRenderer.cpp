@@ -78,25 +78,25 @@ namespace cgbv
 			case GLFW_KEY_D:
 				observer_camera.moveRight(-.1f);
 				break;
-			case GLFW_KEY_0:
+			case GLFW_KEY_E:
 				currentFBXObjectPath = buddha;
 				break;
-			case GLFW_KEY_1:
+			case GLFW_KEY_R:
 				currentFBXObjectPath = bunny;
 				break;
-			case GLFW_KEY_2:
+			case GLFW_KEY_T:
 				currentFBXObjectPath = box;
 				break;
-			case GLFW_KEY_3:
+			case GLFW_KEY_Z:
 				currentFBXObjectPath = cone;
 				break;
-			case GLFW_KEY_4:
+			case GLFW_KEY_U:
 				currentFBXObjectPath = cylinder;
 				break;
-			case GLFW_KEY_5:
+			case GLFW_KEY_I:
 				currentFBXObjectPath = ball;
 				break;
-			case GLFW_KEY_6:
+			case GLFW_KEY_O:
 				currentFBXObjectPath = donut;
 				break;
 			default:
@@ -218,38 +218,7 @@ namespace cgbv
 
 
 			data.clear();
-			vertices.clear();
-			
-			//// FBX Model 
-			//
-			//cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
-
-			//glGenVertexArrays(1, &object.vao);
-			//glBindVertexArray(object.vao);
-
-			//for (cgbv::fbxmodel::Mesh mesh : fbx.Meshes())
-			//{
-			//	glGenBuffers(1, &object.vbo);
-			//	glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
-			//	glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
-
-			//	// Buffer Vetex Data
-			//	glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
-			//	// Buffer Normal Data
-			//	glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
-
-			//	/* Enable attribute index 0 as being used */
-			//	glEnableVertexAttribArray(locs.vertex);
-			//	/* Specify that our vertaex data is going into attribute index 0, and contains three floats per vertex */
-			//	glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-			//	/* Enable attribute index 1 as being used */
-			//	glEnableVertexAttribArray(locs.normal);
-			//	/* Specify that our coordinate data is going into attribute index 1, and contains three floats per vertex */
-			//	glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 0, (const void*)(3 * mesh.VertexCount() * sizeof(GLfloat)));
-
-			//	object.vertsToDraw = mesh.VertexCount();
-			//}
+			vertices.clear(); 
 		}
 
 
@@ -263,7 +232,7 @@ namespace cgbv
 			// http://ogldev.atspace.co.uk/www/tutorial48/tutorial48.html
 			// A variable for the current selection - will be updated by ATB
 			MESH_TYPE currentMesh = BUDDHA;
-			changeObject(currentMesh);
+			changeFBXObject(currentMesh);
 
 			// Array of drop down items:	BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT
 			TwEnumVal Meshes[] = { {BUDDHA, "Buddha"}, {BUNNY, "Bunny"}, {BOX, "Box"}, {CONE, "Cone"}, {CYLINDER, "Cylinder"}, {BALL, "Ball"}, {DONUT, "Donut"} };
@@ -287,29 +256,11 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "Ambientes Material", TW_TYPE_COLOR4F, &parameter.ambientMaterial,	" group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "diffuses Material", TW_TYPE_COLOR4F, &parameter.diffusMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Spectacular Material", TW_TYPE_COLOR4F, &parameter.spekularMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
-			//TwAddVarRW(tweakbar, "Shadowmap", TW_TYPE_DIR3F, &parameter.shadowmap, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
-			// OLD SHIT THAT IS TOTALLY OUT DATED 
-			//--- Callbacks
-			//--- https://github.com/davidcox/AntTweakBar/blob/master/examples/TwSimpleGLFW.c
-
-			//// Set GLFW event callbacks
-			//// - Redirect window size changes to the callback function WindowSizeCB
-			////glfwSetWindowSizeCallback(resize(w,b));
-			//// - Directly redirect GLFW mouse button events to AntTweakBar
-			//glfwSetMouseButtonCallback((GLFWmousebuttonfun)TwEventMouseButtonGLFW);
-			//// - Directly redirect GLFW mouse position events to AntTweakBar
-			//glfwSetCursorPos((GLFWmouseposfun)TwEventMousePosGLFW);
-			//// - Directly redirect GLFW mouse wheel events to AntTweakBar
-			//glfwSetScrollCallback((GLFWmousewheelfun)TwEventMouseWheelGLFW);
-			//// - Directly redirect GLFW key events to AntTweakBar
-			//glfwSetKeyCallback((GLFWkeyfun)TwEventKeyGLFW);
-			//// - Directly redirect GLFW char events to AntTweakBar
-			//glfwSetCharCallback((GLFWcharfun)TwEventCharGLFW);
-
-			// THE NEW STUFF	
-			// https://www.glfw.org/docs/3.3/quick.html
-
+			
+			TwAddVarRW(tweakbar, "Shadowmap width", TW_TYPE_UINT16, &shadowmap_width, " group=Shadow");
+			TwAddVarRW(tweakbar, "Shadowmap height", TW_TYPE_UINT16, &shadowmap_height, " group=Shadow");
 		}
+
 
 
 
@@ -497,7 +448,7 @@ namespace cgbv
 		}
 	}
 
-	void CGRenderer::changeObject(MESH_TYPE currentMesh)
+	void CGRenderer::changeFBXObject(MESH_TYPE currentMesh)
 	{
 		switch (currentMesh)
 		{

@@ -12,6 +12,7 @@ void input(GLFWwindow *window, int key, int scancode, int action, int modifiers)
 void errorHandler(int error, const char* description);
 void cursorPos(GLFWwindow *window, double x, double y);
 void mouseButton(GLFWwindow *window, int button, int action, int mods);
+//void inputChar(GLFWwindow* window, unsigned int keycode);
 
 void update();
 void render();
@@ -57,6 +58,29 @@ int main()
 
 	glfwSetCursorPosCallback(window, cursorPos);
 	glfwSetMouseButtonCallback(window, mouseButton);
+    //glfwSetCharCallback(window, inputChar);
+    //glfwSetCharCallback(window, (GLFWcharfun)TwEventCharGLFW);
+
+            // OLD SHIT THAT IS TOTALLY OUT DATED 
+            //--- Callbacks
+            //--- https://github.com/davidcox/AntTweakBar/blob/master/examples/TwSimpleGLFW.c
+
+            //// Set GLFW event callbacks
+            //// - Redirect window size changes to the callback function WindowSizeCB
+            ////glfwSetWindowSizeCallback(resize(w,b));
+            //// - Directly redirect GLFW mouse button events to AntTweakBar
+            //glfwSetMouseButtonCallback((GLFWmousebuttonfun)TwEventMouseButtonGLFW);
+            //// - Directly redirect GLFW mouse position events to AntTweakBar
+            //glfwSetCursorPos((GLFWmouseposfun)TwEventMousePosGLFW);
+            //// - Directly redirect GLFW mouse wheel events to AntTweakBar
+            //glfwSetScrollCallback((GLFWmousewheelfun)TwEventMouseWheelGLFW);
+            //// - Directly redirect GLFW key events to AntTweakBar
+            //glfwSetKeyCallback((GLFWkeyfun)TwEventKeyGLFW);
+            //// - Directly redirect GLFW char events to AntTweakBar
+            //glfwSetCharCallback(window, (GLFWcharfun)TwEventCharGLFW);
+
+            // THE NEW STUFF	
+            // https://www.glfw.org/docs/3.3/quick.html
 
 
 
@@ -132,3 +156,8 @@ void mouseButton(GLFWwindow *window, int button, int action, int mods)
 {
 	TwEventMouseButtonGLFW(button, action);
 }
+
+//void inputChar(GLFWwindow* window, unsigned int keycode)
+//{
+//    TwEventCharGLFW()
+//}
