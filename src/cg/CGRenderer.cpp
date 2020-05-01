@@ -87,25 +87,25 @@ namespace cgbv
 				observer_camera.moveRight(-.1f);
 				break;
 			case GLFW_KEY_E:
-				currentFBXObjectPath = buddha;
+				currentFBXObject = 0;
 				break;
 			case GLFW_KEY_R:
-				currentFBXObjectPath = bunny;
+				currentFBXObject = 1;
 				break;
 			case GLFW_KEY_T:
-				currentFBXObjectPath = box;
+				currentFBXObject = 2;
 				break;
 			case GLFW_KEY_Y: // --> press z on the german keyboard --> translated to y 
-				currentFBXObjectPath = cone;
+				currentFBXObject = 3;
 				break;
 			case GLFW_KEY_U:
-				currentFBXObjectPath = cylinder;
+				currentFBXObject = 4;
 				break;
 			case GLFW_KEY_I:
-				currentFBXObjectPath = ball;
+				currentFBXObject = 5;
 				break;
 			case GLFW_KEY_O:
-				currentFBXObjectPath = donut;
+				currentFBXObject = 6;
 				break;
 
 			//case GLFW_KEY_UP:
@@ -255,11 +255,11 @@ namespace cgbv
 
 			// http://ogldev.atspace.co.uk/www/tutorial48/tutorial48.html
 			// A variable for the current selection - will be updated by ATB
-			MESH_TYPE currentMesh = BUDDHA;
+			MESH_TYPE currentMesh = MESH_TYPE::BUDDHA;
 			changeFBXObject(currentMesh);
 
 			// Array of drop down items:	BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT
-			TwEnumVal Meshes[] = { {BUDDHA, "Buddha"}, {BUNNY, "Bunny"}, {BOX, "Box"}, {CONE, "Cone"}, {CYLINDER, "Cylinder"}, {BALL, "Ball"}, {DONUT, "Donut"} };
+			TwEnumVal Meshes[] = { {0, "Buddha"}, {1, "Bunny"}, {2, "Box"}, {3, "Cone"}, {4, "Cylinder"}, {5, "Ball"}, {6, "Donut"} };
 			// ATB identifier for the array
 			TwType MeshTwType = TwDefineEnum("MeshType", Meshes, 7);
 			// Link it to the tweak bar
@@ -269,18 +269,18 @@ namespace cgbv
 
 			TwAddVarRW(tweakbar, "Global Rotation", TW_TYPE_QUAT4F, &parameter.globalRotation, "showval=false opened=true");
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
-			TwAddVarRW(tweakbar, "Lichtrichtung", TW_TYPE_DIR3F, &parameter.lightPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
+			TwAddVarRW(tweakbar, "Light direction", TW_TYPE_DIR3F, &parameter.lightPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
 			
 			// ====== Light ======
-			TwAddVarRW(tweakbar, "Ambientes Licht", TW_TYPE_COLOR4F, &parameter.ambientLight,"group=Light");
-			TwAddVarRW(tweakbar, "diffuses Licht", TW_TYPE_COLOR4F, &parameter.diffusLight, " group=Light alpha help='Color and transparency of the cube.' ");
-			TwAddVarRW(tweakbar, "Spectacular Licht", TW_TYPE_COLOR4F, &parameter.specularLight, " group=Light alpha help='Color and transparency of the cube.' ");
+			TwAddVarRW(tweakbar, "Ambient Light", TW_TYPE_COLOR4F, &parameter.ambientLight,"group=Light");
+			TwAddVarRW(tweakbar, "diffuse Light", TW_TYPE_COLOR4F, &parameter.diffusLight, " group=Light alpha help='Color and transparency of the cube.' ");
+			TwAddVarRW(tweakbar, "Specular  Light", TW_TYPE_COLOR4F, &parameter.specularLight, " group=Light alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Brightness", TW_TYPE_FLOAT, &parameter.brightnessFactor, " group= 'Light' min = 0.0f max = 5.0f step = 0.1f");
 			//TwAddVarRW(tweakbar, "Emissives Material", TW_TYPE_COLOR4F, &parameter.emissivMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Shininess", TW_TYPE_FLOAT, &parameter.shininessMaterial, " group=Material");
-			TwAddVarRW(tweakbar, "Ambientes Material", TW_TYPE_COLOR4F, &parameter.ambientMaterial,	" group=Material alpha help='Color and transparency of the cube.' ");
-			TwAddVarRW(tweakbar, "diffuses Material", TW_TYPE_COLOR4F, &parameter.diffusMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
-			TwAddVarRW(tweakbar, "Spectacular Material", TW_TYPE_COLOR4F, &parameter.spekularMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
+			TwAddVarRW(tweakbar, "Ambient Material", TW_TYPE_COLOR4F, &parameter.ambientMaterial,	" group=Material alpha help='Color and transparency of the cube.' ");
+			TwAddVarRW(tweakbar, "diffuse Material", TW_TYPE_COLOR4F, &parameter.diffusMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
+			TwAddVarRW(tweakbar, "Specular  Material", TW_TYPE_COLOR4F, &parameter.spekularMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			
 			// ====== Shadow ======
 			TwAddVarRW(tweakbar, "Shadow Offset Factor", TW_TYPE_FLOAT, &parameter.offsetFactor, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
@@ -439,13 +439,14 @@ namespace cgbv
 	void CGRenderer::loadFBX() 
 	{
 		// If the model did not change do nothing and return 
-		if (currentFBXObjectPath == lastDrawnFBXPath)
+		if (currentFBXObject == lastDrawnFBX)
 		{
 			return;
 		}
 
-		lastDrawnFBXPath = currentFBXObjectPath;
-		cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
+		lastDrawnFBX = currentFBXObject;
+		//cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
+		cgbv::fbxmodel::FBXModel fbx(modelPaths[currentFBXObject]);
 
 		glGenVertexArrays(1, &object.vao);
 		glBindVertexArray(object.vao);
@@ -479,26 +480,26 @@ namespace cgbv
 	{
 		switch (currentMesh)
 		{
-		case BUDDHA:
-			currentFBXObjectPath = buddha;
+		case MESH_TYPE::BUDDHA:
+			currentFBXObject = 0;
 			break;
-		case BUNNY:
-			currentFBXObjectPath = bunny;
+		case MESH_TYPE::BUNNY:
+			currentFBXObject = 1;
 			break;
-		case BOX:
-			currentFBXObjectPath = box;
+		case MESH_TYPE::BOX:
+			currentFBXObject = 2;
 			break;
-		case CONE:
-			currentFBXObjectPath = cone;
+		case MESH_TYPE::CONE:
+			currentFBXObject = 3;
 			break;
-		case CYLINDER:
-			currentFBXObjectPath = cylinder;
+		case MESH_TYPE::CYLINDER:
+			currentFBXObject = 4;
 			break;
-		case BALL:
-			currentFBXObjectPath = ball;
+		case MESH_TYPE::BALL:
+			currentFBXObject = 5;
 			break;
-		case DONUT:
-			currentFBXObjectPath = donut;
+		case MESH_TYPE::DONUT:
+			currentFBXObject = 6;
 			break;
 		default:
 			break;

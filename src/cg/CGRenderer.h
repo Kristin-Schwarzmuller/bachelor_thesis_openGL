@@ -58,7 +58,7 @@ namespace cgbv
 		glm::quat globalRotation;
         glm::vec4 lightPos = glm::vec4(0.f, 0.f, 79.f, 1.f); 
 
-        // new 
+        // Light
         glm::vec4 ambientLight = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
         glm::vec4 diffusLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
         glm::vec4 specularLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
@@ -69,9 +69,11 @@ namespace cgbv
         float shininessMaterial = 20.f;
 
         float brightnessFactor = 1.0f;
-        // float contrast = 0.0f;
 
+        // Shadow 
+        //factor: Specifies a scale factor that is used to create a variable depth offset for each polygon.The initial value is 0.
         GLfloat offsetFactor = 1.4f;
+        // units: Is multiplied by an implementation - specific value to create a constant depth offset.The initial value is 0.
         GLfloat offsetUnits = 1.f;
 
         float f;
@@ -83,6 +85,7 @@ namespace cgbv
         unsigned int default_buffer = 0;
     };
 
+
 const std::string buddha = "../modelsScaled/budda.fbx";
 const std::string bunny = "../modelsScaled/bunny.fbx";
 const std::string box = "../modelsScaled/box.fbx";
@@ -91,11 +94,24 @@ const std::string cylinder = "../modelsScaled/cylinder.fbx";
 const std::string ball = "../modelsScaled/ball.fbx";
 const std::string donut = "../modelsScaled/donut.fbx";
 
+const std::string modelPaths[] = { buddha, bunny, box, cone, cylinder, ball, donut };
+
+//const cgbv::fbxmodel::FBXModel model[] = 
+//{
+//    cgbv::fbxmodel::FBXModel(modelPaths[0]),
+//    cgbv::fbxmodel::FBXModel(modelPaths[1]),
+//    cgbv::fbxmodel::FBXModel(modelPaths[2]),
+//    cgbv::fbxmodel::FBXModel(modelPaths[3]),
+//    cgbv::fbxmodel::FBXModel(modelPaths[4]),
+//    cgbv::fbxmodel::FBXModel(modelPaths[5]),
+//    cgbv::fbxmodel::FBXModel(modelPaths[6])
+//};
+
 // Create an internal enum to name the meshes
-typedef enum { BUNNY, BUDDHA, BOX, CONE, CYLINDER, BALL, DONUT } MESH_TYPE;
+enum class MESH_TYPE { BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT } ;
 // global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
-static std::string currentFBXObjectPath = buddha;
-static std::string lastDrawnFBXPath = currentFBXObjectPath;
+static int currentFBXObject = 0;
+static int lastDrawnFBX = currentFBXObject;
 
 	class CGRenderer : public Renderer
 	{
