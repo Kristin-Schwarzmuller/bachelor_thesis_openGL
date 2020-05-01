@@ -71,6 +71,9 @@ namespace cgbv
         float brightness = .1f;
         float contrast = 0.0f;
 
+        GLfloat offsetFactor = 1.4f;
+        GLfloat offsetUnits = 1.f;
+
         float f;
 	};
 

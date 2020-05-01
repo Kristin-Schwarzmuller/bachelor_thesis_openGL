@@ -59,8 +59,16 @@ namespace cgbv
 
 	void CGRenderer::input(int key, int scancode, int action, int modifiers)
 	{
+		if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+		{
+			TwEventCharGLFW(GLFW_KEY_KP_ENTER, action);
+			TwEventKeyGLFW(GLFW_KEY_KP_ENTER, action);
+			return;
+		}
+
 		TwEventCharGLFW(key, action);
 		TwEventKeyGLFW(key, action);
+		std::cout << key << std::endl;
 
 		if (action == GLFW_PRESS)
 		{
@@ -263,7 +271,7 @@ namespace cgbv
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
 			TwAddVarRW(tweakbar, "Lichtrichtung", TW_TYPE_DIR3F, &parameter.lightPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
 			
-			// new
+			// ====== Light ======
 			TwAddVarRW(tweakbar, "Ambientes Licht", TW_TYPE_COLOR4F, &parameter.ambientLight,"group=Light");
 			TwAddVarRW(tweakbar, "diffuses Licht", TW_TYPE_COLOR4F, &parameter.diffusLight, " group=Light alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Spectacular Licht", TW_TYPE_COLOR4F, &parameter.specularLight, " group=Light alpha help='Color and transparency of the cube.' ");
@@ -273,8 +281,9 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "diffuses Material", TW_TYPE_COLOR4F, &parameter.diffusMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Spectacular Material", TW_TYPE_COLOR4F, &parameter.spekularMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			
-			TwAddVarRW(tweakbar, "Shadowmap width", TW_TYPE_UINT16, &shadowmap_width, " group=Shadow");
-			TwAddVarRW(tweakbar, "Shadowmap height", TW_TYPE_UINT16, &shadowmap_height, " group=Shadow");
+			// ====== Shadow ======
+			TwAddVarRW(tweakbar, "Shadow Offset Factor", TW_TYPE_FLOAT, &parameter.offsetFactor, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
+			TwAddVarRW(tweakbar, "Shadowmap Offset Units", TW_TYPE_FLOAT, &parameter.offsetUnits, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
 		}
 
 
@@ -313,7 +322,7 @@ namespace cgbv
 	void CGRenderer::render()
 	{
 		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(1.4f, 1.f); //ggf ändern
+		glPolygonOffset(parameter.offsetFactor, parameter.offsetUnits);
 		loadFBX();
 		shadowmap_pass(); 
 		final_pass();
