@@ -19,6 +19,7 @@ struct Light
 	vec4 ambient;
 	vec4 diffus;
 	vec4 specular;
+    float brightnessFactor;
 };
 
 

@@ -45,7 +45,7 @@ namespace cgbv
 
         unsigned int shininessMaterial;
 
-        unsigned int brightness, contrast; 
+        unsigned int brightnessFactor;
     };
 
     struct BufferCombo
@@ -68,8 +68,8 @@ namespace cgbv
         glm::vec4 emissivMaterial = glm::vec4(0.f, 0.f, 0.f, 0.f);
         float shininessMaterial = 20.f;
 
-        float brightness = .1f;
-        float contrast = 0.0f;
+        float brightnessFactor = 1.0f;
+        // float contrast = 0.0f;
 
         GLfloat offsetFactor = 1.4f;
         GLfloat offsetUnits = 1.f;

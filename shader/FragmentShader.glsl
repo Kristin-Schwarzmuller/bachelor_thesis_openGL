@@ -19,6 +19,7 @@ struct Light
 	vec4 ambient;
 	vec4 diffus;
 	vec4 specular;
+    float brightnessFactor;
 };
 
 struct Material 
@@ -190,7 +191,7 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     // --------- Result --------- 
 
-    out_color = shadowsample * intensity * 1.3f * (specular + diffus) + ambient;
+    out_color = light.brightnessFactor * (shadowsample * intensity * 1.3f * (specular + diffus) + ambient);
     out_color.w = 1.f;
 }
 

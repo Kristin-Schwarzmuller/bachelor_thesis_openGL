@@ -95,7 +95,7 @@ namespace cgbv
 			case GLFW_KEY_T:
 				currentFBXObjectPath = box;
 				break;
-			case GLFW_KEY_Z:
+			case GLFW_KEY_Y: // --> press z on the german keyboard --> translated to y 
 				currentFBXObjectPath = cone;
 				break;
 			case GLFW_KEY_U:
@@ -195,7 +195,7 @@ namespace cgbv
 			locs.spekularLight = shader->getUniformLocation("light.specular");
 			locs.spekularMaterial = shader->getUniformLocation("material.spekular");
 			locs.shininessMaterial = shader->getUniformLocation("material.shininess");
-			
+			locs.brightnessFactor = shader->getUniformLocation("light.brightnessFactor");
 		}
 
 
@@ -251,7 +251,7 @@ namespace cgbv
 			TwInit(TW_OPENGL_CORE, nullptr);
 			TwWindowSize(1280, 720);
 			TwBar* tweakbar = TwNewBar("TweakBar");
-			TwDefine(" TweakBar size='300 400'");
+			TwDefine(" TweakBar size='300 500'");
 
 			// http://ogldev.atspace.co.uk/www/tutorial48/tutorial48.html
 			// A variable for the current selection - will be updated by ATB
@@ -275,6 +275,7 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "Ambientes Licht", TW_TYPE_COLOR4F, &parameter.ambientLight,"group=Light");
 			TwAddVarRW(tweakbar, "diffuses Licht", TW_TYPE_COLOR4F, &parameter.diffusLight, " group=Light alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Spectacular Licht", TW_TYPE_COLOR4F, &parameter.specularLight, " group=Light alpha help='Color and transparency of the cube.' ");
+			TwAddVarRW(tweakbar, "Brightness", TW_TYPE_FLOAT, &parameter.brightnessFactor, " group= 'Light' min = 0.0f max = 5.0f step = 0.1f");
 			//TwAddVarRW(tweakbar, "Emissives Material", TW_TYPE_COLOR4F, &parameter.emissivMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Shininess", TW_TYPE_FLOAT, &parameter.shininessMaterial, " group=Material");
 			TwAddVarRW(tweakbar, "Ambientes Material", TW_TYPE_COLOR4F, &parameter.ambientMaterial,	" group=Material alpha help='Color and transparency of the cube.' ");
@@ -387,6 +388,7 @@ namespace cgbv
 		glUniform4fv(locs.spekularMaterial, 1, glm::value_ptr(parameter.spekularMaterial));
 		//glUniform4fv(locs.emissivMaterial, 1, glm::value_ptr(parameter.emissivMaterial));
 		glUniform1f(locs.shininessMaterial, parameter.shininessMaterial);
+		glUniform1f(locs.brightnessFactor, parameter.brightnessFactor);
 
 		normal = glm::transpose(glm::inverse(view * model));
 		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(observer_projection * view * model));
