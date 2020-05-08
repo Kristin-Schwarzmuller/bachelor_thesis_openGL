@@ -10,6 +10,8 @@
 #include <FrameCounter.h>
 #include <Camera.h>
 #include <bitset>
+#include <fstream>
+#include <fstream>
 
 
 namespace cgbv
@@ -128,7 +130,15 @@ namespace cgbv
                            300, 305, 310, 315, 320, 325, 330, 335, 340, 345, 350, 355 };
 
         // array with anzimult angels --> from 0 to 355 degrees
-        std::vector<std::vector<int> >anzimuthCamera;
+        std::vector<std::vector<int> >anzimuthObject;
+
+        // create an ofstream for the file output (see the link on streams for
+        // more info)
+        std::ofstream outputFile;
+        std::ofstream reportCSV;
+            // create a name for the file output
+         std::string csvFile = "imageInfo.csv";
+
     };
 
 	class CGRenderer : public Renderer
@@ -176,6 +186,7 @@ namespace cgbv
 		virtual void update();
         void capture();
         void loadFBX();
+        void loadFBX(std::string path);
 
         bool setupAutopilot();
         bool runAutopilot();
