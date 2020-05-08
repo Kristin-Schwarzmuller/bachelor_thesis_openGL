@@ -85,36 +85,55 @@ namespace cgbv
         unsigned int default_buffer = 0;
     };
 
+    struct ModelFBX
+    {
 
-const std::string buddha = "../modelsScaled/budda.fbx";
-const std::string bunny = "../modelsScaled/bunny.fbx";
-const std::string box = "../modelsScaled/box.fbx";
-const std::string cone = "../modelsScaled/cone.fbx";
-const std::string cylinder = "../modelsScaled/cylinder.fbx";
-const std::string ball = "../modelsScaled/ball.fbx";
-const std::string donut = "../modelsScaled/donut.fbx";
+        const std::string buddha = "../modelsScaled/budda.fbx";
+        const std::string bunny = "../modelsScaled/bunny.fbx";
+        const std::string box = "../modelsScaled/box.fbx";
+        const std::string cone = "../modelsScaled/cone.fbx";
+        const std::string cylinder = "../modelsScaled/cylinder.fbx";
+        const std::string ball = "../modelsScaled/ball.fbx";
+        const std::string donut = "../modelsScaled/donut.fbx";
 
-const std::string modelPaths[] = { buddha, bunny, box, cone, cylinder, ball, donut };
+        std::string modelPaths[7] =   { buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
+        int modelMaxTurn[7] =         { 355,     355,    85,     0,      0,          0,      175 };
 
-//const cgbv::fbxmodel::FBXModel model[] = 
-//{
-//    cgbv::fbxmodel::FBXModel(modelPaths[0]),
-//    cgbv::fbxmodel::FBXModel(modelPaths[1]),
-//    cgbv::fbxmodel::FBXModel(modelPaths[2]),
-//    cgbv::fbxmodel::FBXModel(modelPaths[3]),
-//    cgbv::fbxmodel::FBXModel(modelPaths[4]),
-//    cgbv::fbxmodel::FBXModel(modelPaths[5]),
-//    cgbv::fbxmodel::FBXModel(modelPaths[6])
-//};
+        //const cgbv::fbxmodel::FBXModel model[] = 
+        //{
+        //    cgbv::fbxmodel::FBXModel(modelPaths[0]),
+        //    cgbv::fbxmodel::FBXModel(modelPaths[1]),
+        //    cgbv::fbxmodel::FBXModel(modelPaths[2]),
+        //    cgbv::fbxmodel::FBXModel(modelPaths[3]),
+        //    cgbv::fbxmodel::FBXModel(modelPaths[4]),
+        //    cgbv::fbxmodel::FBXModel(modelPaths[5]),
+        //    cgbv::fbxmodel::FBXModel(modelPaths[6])
+        //};
 
-// Create an internal enum to name the meshes
-enum class MESH_TYPE { BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT } ;
-// global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
-static int currentFBXObject = 0;
-static int lastDrawnFBX = currentFBXObject;
+        // global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
+        int currentFBXObject = 0;
+        int lastDrawnFBX = currentFBXObject;
+
+    };
+    struct Autopilot
+    {
+
+        // array with elevation angels --> from 0 to 90 degrees
+        const std::vector<int> elevation = { 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90 };
+
+        // array with anzimult angels --> from 0 to 355 degrees
+        std::vector<int> anzimuthLight = { 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95,
+                           100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195,
+                           200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295,
+                           300, 305, 310, 315, 320, 325, 330, 335, 340, 345, 350, 355 };
+
+        // array with anzimult angels --> from 0 to 355 degrees
+        std::vector<std::vector<int> >anzimuthCamera;
+    };
 
 	class CGRenderer : public Renderer
 	{
+        friend class Autopilot;
         std::unique_ptr<cgbv::shader::GLSLShaderprogram> shader;
 
         ShaderLocations locs;
@@ -129,6 +148,10 @@ static int lastDrawnFBX = currentFBXObject;
 
         Framebuffers framebuffers;
 
+        ModelFBX modelfbx;
+
+        Autopilot autopilot;
+
         std::unique_ptr<cgbv::textures::Texture> shadowmap;
         unsigned int shadowmap_sampler;
         int shadowmap_width = 4096, shadowmap_height = 4096;
@@ -141,6 +164,7 @@ static int lastDrawnFBX = currentFBXObject;
         void final_pass();
 
 	public:
+        
         CGRenderer(GLFWwindow *window);
 		~CGRenderer(void);
 
@@ -152,6 +176,8 @@ static int lastDrawnFBX = currentFBXObject;
 		virtual void update();
         void capture();
         void loadFBX();
-        void changeFBXObject(MESH_TYPE currentMesh);
+
+        bool setupAutopilot();
+        bool runAutopilot();
 	};
 }

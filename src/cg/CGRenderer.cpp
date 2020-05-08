@@ -87,25 +87,25 @@ namespace cgbv
 				observer_camera.moveRight(-.1f);
 				break;
 			case GLFW_KEY_E:
-				currentFBXObject = 0;
+				modelfbx.currentFBXObject = 0;
 				break;
 			case GLFW_KEY_R:
-				currentFBXObject = 1;
+				modelfbx.currentFBXObject = 1;
 				break;
 			case GLFW_KEY_T:
-				currentFBXObject = 2;
+				modelfbx.currentFBXObject = 2;
 				break;
 			case GLFW_KEY_Y: // --> press z on the german keyboard --> translated to y 
-				currentFBXObject = 3;
+				modelfbx.currentFBXObject = 3;
 				break;
 			case GLFW_KEY_U:
-				currentFBXObject = 4;
+				modelfbx.currentFBXObject = 4;
 				break;
 			case GLFW_KEY_I:
-				currentFBXObject = 5;
+				modelfbx.currentFBXObject = 5;
 				break;
 			case GLFW_KEY_O:
-				currentFBXObject = 6;
+				modelfbx.currentFBXObject = 6;
 				break;
 
 			//case GLFW_KEY_UP:
@@ -252,20 +252,6 @@ namespace cgbv
 			TwWindowSize(1280, 720);
 			TwBar* tweakbar = TwNewBar("TweakBar");
 			TwDefine(" TweakBar size='300 500'");
-
-			// http://ogldev.atspace.co.uk/www/tutorial48/tutorial48.html
-			// A variable for the current selection - will be updated by ATB
-			MESH_TYPE currentMesh = MESH_TYPE::BUDDHA;
-			changeFBXObject(currentMesh);
-
-			// Array of drop down items:	BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT
-			TwEnumVal Meshes[] = { {0, "Buddha"}, {1, "Bunny"}, {2, "Box"}, {3, "Cone"}, {4, "Cylinder"}, {5, "Ball"}, {6, "Donut"} };
-			// ATB identifier for the array
-			TwType MeshTwType = TwDefineEnum("MeshType", Meshes, 7);
-			// Link it to the tweak bar
-			TwAddVarRW(tweakbar, "FBX Model", MeshTwType, &currentMesh, "Buddha");
-			// The second parameter is an optional name
-			TwAddSeparator(tweakbar, "", NULL);
 
 			TwAddVarRW(tweakbar, "Global Rotation", TW_TYPE_QUAT4F, &parameter.globalRotation, "showval=false opened=true");
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
@@ -439,14 +425,14 @@ namespace cgbv
 	void CGRenderer::loadFBX() 
 	{
 		// If the model did not change do nothing and return 
-		if (currentFBXObject == lastDrawnFBX)
+		if (modelfbx.currentFBXObject == modelfbx.lastDrawnFBX)
 		{
 			return;
 		}
 
-		lastDrawnFBX = currentFBXObject;
+		modelfbx.lastDrawnFBX = modelfbx.currentFBXObject;
 		//cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
-		cgbv::fbxmodel::FBXModel fbx(modelPaths[currentFBXObject]);
+		cgbv::fbxmodel::FBXModel fbx(modelfbx.modelPaths[modelfbx.currentFBXObject]);
 
 		glGenVertexArrays(1, &object.vao);
 		glBindVertexArray(object.vao);
@@ -475,34 +461,27 @@ namespace cgbv
 			object.vertsToDraw = mesh.VertexCount();
 		}
 	}
-
-	void CGRenderer::changeFBXObject(MESH_TYPE currentMesh)
+	bool CGRenderer::setupAutopilot()
 	{
-		switch (currentMesh)
+		// define the different turning ranges for the different models 
+		std::vector<int> tmp;
+		for (auto maxturn : cgbv::CGRenderer::modelfbx.modelMaxTurn)
 		{
-		case MESH_TYPE::BUDDHA:
-			currentFBXObject = 0;
-			break;
-		case MESH_TYPE::BUNNY:
-			currentFBXObject = 1;
-			break;
-		case MESH_TYPE::BOX:
-			currentFBXObject = 2;
-			break;
-		case MESH_TYPE::CONE:
-			currentFBXObject = 3;
-			break;
-		case MESH_TYPE::CYLINDER:
-			currentFBXObject = 4;
-			break;
-		case MESH_TYPE::BALL:
-			currentFBXObject = 5;
-			break;
-		case MESH_TYPE::DONUT:
-			currentFBXObject = 6;
-			break;
-		default:
-			break;
+			for (int i = 0; i <= maxturn; i + 5) {
+				tmp.push_back(i);
+			}
+			autopilot.anzimuthCamera.push_back(tmp);
+			tmp.clear();
 		}
+		return true;
+	}
+	bool CGRenderer::runAutopilot()
+	{
+		// iterate over all models
+		for (auto mod : modelfbx.modelPaths) {
+
+		}
+
+			return true;
 	}
 }

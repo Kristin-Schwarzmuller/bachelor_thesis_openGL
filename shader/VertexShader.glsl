@@ -86,6 +86,7 @@ subroutine (VertexProgram) void verts_and_normals()
     vec4 h = matrices.mv * vertex;
     vec3 mvPos = h.xyz / h.w;
 
+    // Here define if light is directional or point 
     Output.lightDir = light.lightPos - mvPos;
     Output.viewDir = -mvPos;
 
