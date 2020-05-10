@@ -99,7 +99,7 @@ namespace cgbv
         const std::string donut = "../modelsScaled/donut.fbx";
 
         std::string modelPaths[7] =   { buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
-        int modelMaxTurn[7] =         { 355,     355,    85,     0,      0,          0,      175 };
+        int modelMaxTurn[7] =         { 360,     360,    90,     5,      5,          5,      180 };
 
         //const cgbv::fbxmodel::FBXModel model[] = 
         //{
@@ -117,33 +117,10 @@ namespace cgbv
         int lastDrawnFBX = currentFBXObject;
 
     };
-    struct Autopilot
-    {
 
-        // array with elevation angels --> from 0 to 90 degrees
-        const std::vector<int> elevation = { 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90 };
-
-        // array with anzimult angels --> from 0 to 355 degrees
-        std::vector<int> anzimuthLight = { 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95,
-                           100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195,
-                           200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295,
-                           300, 305, 310, 315, 320, 325, 330, 335, 340, 345, 350, 355 };
-
-        // array with anzimult angels --> from 0 to 355 degrees
-        std::vector<std::vector<int> >anzimuthObject;
-
-        // create an ofstream for the file output (see the link on streams for
-        // more info)
-        std::ofstream outputFile;
-        std::ofstream reportCSV;
-            // create a name for the file output
-         std::string csvFile = "imageInfo.csv";
-
-    };
 
 	class CGRenderer : public Renderer
 	{
-        friend class Autopilot;
         std::unique_ptr<cgbv::shader::GLSLShaderprogram> shader;
 
         ShaderLocations locs;
@@ -188,7 +165,6 @@ namespace cgbv
         void loadFBX();
         void loadFBX(std::string path);
 
-        bool setupAutopilot();
-        bool runAutopilot();
+        friend class Autopilot;
 	};
 }
