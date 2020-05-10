@@ -12,6 +12,7 @@
 #include <bitset>
 #include <fstream>
 #include <fstream>
+#include "../../opengl-training-data/Autopilot.h"
 
 
 namespace cgbv
@@ -98,8 +99,8 @@ namespace cgbv
         const std::string ball = "../modelsScaled/ball.fbx";
         const std::string donut = "../modelsScaled/donut.fbx";
 
-        std::string modelPaths[7] =   { buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
-        int modelMaxTurn[7] =         { 360,     360,    90,     5,      5,          5,      180 };
+        const std::string modelPaths[7] =   { buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
+        const int modelMaxTurn[7] =         { 360,     360,    90,     5,      5,          5,      180 };
 
         //const cgbv::fbxmodel::FBXModel model[] = 
         //{

@@ -31,6 +31,12 @@ class Autopilot
 public:
     bool setup();
     bool run();
+
+    bool tick();
+    bool tickElevationLight();
+    bool tickAzimuthLight(); 
+    bool tickElevationCamera();
+    bool tickAzimuthObject();
 };
 
 

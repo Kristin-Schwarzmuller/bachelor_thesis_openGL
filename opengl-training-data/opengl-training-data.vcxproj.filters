@@ -51,6 +51,9 @@
     <ClInclude Include="..\src\OBJModel.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="Autopilot.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\cg\CGRenderer.cpp">
@@ -81,6 +84,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="..\src\OBJModel.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Autopilot.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
