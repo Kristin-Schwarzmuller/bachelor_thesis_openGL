@@ -22,7 +22,9 @@ bool Autopilot::setupAzimuthObject()
 
 bool Autopilot::setupVector(int from, int to, int step_size, std::vector<int> vector)
 {
-	for()
+	for (int i = from; i < to; i + step_size) {
+		vector.push_back(i);
+	}
 	return true;
 }
 
@@ -50,11 +52,11 @@ bool Autopilot::run()
 		for (auto elL : elevation)
 		{
 			// iterate over the elevation 
-			for (auto anzL : anzimuthLight)
+			for (auto anzL : azimuthLight)
 			{
 				for (auto elO : elevation)
 				{
-					for (auto anzORange : anzimuthObject)
+					for (auto anzORange : azimuthObject)
 					{
 						for (auto anzO : anzORange)
 						{
@@ -77,6 +79,6 @@ bool Autopilot::run()
 
 	}
 	// close the output file
-	autopilot.reportCSV.close();
+	reportCSV.close();
 	return true;
 }

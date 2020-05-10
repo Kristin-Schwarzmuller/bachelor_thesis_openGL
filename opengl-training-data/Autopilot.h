@@ -26,13 +26,11 @@ class Autopilot
     // create a name for the file output
     std::string csvFile = "imageInfo.csv";
     bool setupAzimuthObject();
-    bool setupAzimuthLight();
-    bool setupElevation(int from, int to, int step_size);
+    bool setupVector(int from, int to, int step_size, std::vector<int> vector);
 
 public:
     bool setup();
     bool run();
-
 };
 
 
