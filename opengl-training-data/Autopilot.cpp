@@ -8,7 +8,7 @@ bool Autopilot::setupAzimuthObject()
 	std::vector<int> tmp;
 	for (auto maxturn : cgbv::CGRenderer::modelfbx.modelMaxTurn)
 	{
-		for (int i = 0; i < maxturn; i + 5) {
+		for (int i = 0; i < maxturn; i=+5) {
 			tmp.push_back(i);
 		}
 		tmp.push_back(-1); // add termination criterion in the end
@@ -49,6 +49,10 @@ bool Autopilot::run()
 	for (auto mod : cgbv::ModelFBX::modelPaths)
 	{
 		loadFBX(mod);
+		elevationLightPtr = elevation.begin();
+		elevationCameraPtr = elevation.begin();
+		azimuthLightPtr = azimuthLight.begin();
+		azimuthObjectPtr = azimuthObject.begin();
 
 		//// iterate over anzimuth of the light 
 		//for (auto elL : elevation)
@@ -87,7 +91,15 @@ bool Autopilot::run()
 
 bool Autopilot::tickElevationLight()
 {
-	return false;
+	if (elevationLightPtr++ < elevation.size())
+	{
+		return true;
+	}
+	else
+	{
+		elevationLightPtr = 0; 
+		return false; 
+	}
 }
 
 bool Autopilot::tickAzimuthLight()
@@ -107,6 +119,7 @@ bool Autopilot::tickAzimuthObject()
 
 bool Autopilot::tick()
 {
+
 	// run through all light azimuths 
 	// next
 	// if next == -1 -> next = first && tickElevation();
