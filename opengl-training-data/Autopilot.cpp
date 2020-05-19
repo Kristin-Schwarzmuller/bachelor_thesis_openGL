@@ -2,6 +2,17 @@
 #include <cg\CGRenderer.h>
 using namespace cgbv;
 
+
+bool Autopilot::setup()
+{
+	// Write the values into the vectors to iterate over it later 
+	setupAzimuthObject();
+	setupVector(0, 95, 5, elevation); // 95 because 90 should be inclueded 
+	setupVector(0, 360, 5, azimuthLight); // 360 should be excluded because 360 ~> 0
+
+	return true;
+}
+
 bool Autopilot::setupAzimuthObject()
 {
 	// define the different turning ranges for the different models 
@@ -28,14 +39,6 @@ bool Autopilot::setupVector(int from, int to, int step_size, std::vector<int> ve
 	return true;
 }
 
-bool Autopilot::setup()
-{
-	setupAzimuthObject();
-	setupVector(0, 90, 5, elevation);
-	setupVector(0, 360, 5, azimuthLight);
-		
-	return true;
-}
 bool Autopilot::run()
 {
 
@@ -48,11 +51,20 @@ bool Autopilot::run()
 	//for (auto mod : cgbv::CGRenderer::modelfbx.modelPaths)
 	for (auto mod : cgbv::ModelFBX::modelPaths)
 	{
-		loadFBX(mod);
+		CGRenderer::loadFBX(mod);
+		// for (std::vector<int>::iterator it = elevation.begin(); it != elevation.end(); ++it)
 		elevationLightPtr = elevation.begin();
 		elevationCameraPtr = elevation.begin();
 		azimuthLightPtr = azimuthLight.begin();
 		azimuthObjectPtr = azimuthObject.begin();
+
+		do
+		{
+			defImageName();
+			writeDataCSV();
+			CGRenderer::capture();
+		} while (Autopilot::tick);
+
 
 		//// iterate over anzimuth of the light 
 		//for (auto elL : elevation)
@@ -89,26 +101,30 @@ bool Autopilot::run()
 	return true;
 }
 
-bool Autopilot::tickElevationLight()
+bool Autopilot::tickLight()
 {
-	if (elevationLightPtr++ < elevation.size())
+	if (++elevationLightPtr != elevation.end())
 	{
 		return true;
 	}
-	else
+
+	//else reached end of elevation vector = 90 degres on top 
+	// --> reset elevation and tick azimuth light 
+	elevationLightPtr = elevation.begin();
+	if (++azimuthLightPtr != azimuthLight.end())
 	{
-		elevationLightPtr = 0; 
-		return false; 
+		return true;
 	}
+	// both vectors ended --> all light directions from this camera position are done
+	return false; 	
 }
 
-bool Autopilot::tickAzimuthLight()
+bool Autopilot::tickCamera()
 {
-	return false;
-}
-
-bool Autopilot::tickElevationCamera()
-{
+	if (++elevationCameraPtr != elevation.end())
+	{
+		return true;
+	}
 	return false;
 }
 
@@ -119,17 +135,25 @@ bool Autopilot::tickAzimuthObject()
 
 bool Autopilot::tick()
 {
+	// first try to move the light 
+	if (tickLight) {
+		return true;
+	}
+	// if the vectors already reached their end, reset them and tick the camera  
+	elevationLightPtr = elevation.begin();
+	azimuthLightPtr = azimuthLight.begin();
+	if (tickCamera) {
+		return true;
+	}
+	return false;
+}
 
-	// run through all light azimuths 
-	// next
-	// if next == -1 -> next = first && tickElevation();
+bool Autopilot::defImageName()
+{
+	return false;
+}
 
-	// runn through all light elevations 
-
-	// run through all camera elevations 
-
-	// run through all camera azimuths
-	// if end is reaches --> return false
-
-	return true;
+bool Autopilot::writeDataCSV()
+{
+	return false;
 }

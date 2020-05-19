@@ -91,13 +91,13 @@ namespace cgbv
     struct ModelFBX
     {
 
-        const std::string buddha = "../modelsScaled/budda.fbx";
-        const std::string bunny = "../modelsScaled/bunny.fbx";
-        const std::string box = "../modelsScaled/box.fbx";
-        const std::string cone = "../modelsScaled/cone.fbx";
-        const std::string cylinder = "../modelsScaled/cylinder.fbx";
-        const std::string ball = "../modelsScaled/ball.fbx";
-        const std::string donut = "../modelsScaled/donut.fbx";
+        const   std::string buddha = "../modelsScaled/budda.fbx";
+        const   std::string bunny = "../modelsScaled/bunny.fbx";
+        const   std::string box = "../modelsScaled/box.fbx";
+        const   std::string cone = "../modelsScaled/cone.fbx";
+        const   std::string cylinder = "../modelsScaled/cylinder.fbx";
+        const   std::string ball = "../modelsScaled/ball.fbx";
+        const   std::string donut = "../modelsScaled/donut.fbx";
 
         const std::string modelPaths[7] =   { buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
         const int modelMaxTurn[7] =         { 360,     360,    90,     5,      5,          5,      180 };
@@ -122,6 +122,7 @@ namespace cgbv
 
 	class CGRenderer : public Renderer
 	{
+        friend class Autopilot;
         std::unique_ptr<cgbv::shader::GLSLShaderprogram> shader;
 
         ShaderLocations locs;
@@ -166,6 +167,6 @@ namespace cgbv
         void loadFBX();
         void loadFBX(std::string path);
 
-        friend class Autopilot;
+        
 	};
 }

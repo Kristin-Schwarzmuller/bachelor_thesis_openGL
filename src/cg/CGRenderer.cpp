@@ -434,7 +434,7 @@ namespace cgbv
 		loadFBX(modelfbx.modelPaths[modelfbx.currentFBXObject]);
 
 	}
-	void CGRenderer::loadFBX(std::string path)
+	 void CGRenderer::loadFBX(std::string path)
 	{
 		//cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
 		cgbv::fbxmodel::FBXModel fbx(modelfbx.modelPaths[modelfbx.currentFBXObject]);
