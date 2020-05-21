@@ -271,6 +271,7 @@ namespace cgbv
 			// ====== Shadow ======
 			TwAddVarRW(tweakbar, "Shadow Offset Factor", TW_TYPE_FLOAT, &parameter.offsetFactor, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
 			TwAddVarRW(tweakbar, "Shadowmap Offset Units", TW_TYPE_FLOAT, &parameter.offsetUnits, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
+			// todo Callback mit Modelauswahl
 		}
 
 
@@ -419,6 +420,7 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
+		//todo: autopilot.update();
 		lightsource_camera.moveTo(parameter.lightPos);
 	}
 

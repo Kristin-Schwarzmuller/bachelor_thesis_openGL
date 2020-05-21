@@ -15,7 +15,7 @@ class Autopilot
     std::vector<int>::const_iterator elevationLightPtr;
     std::vector<int>::const_iterator elevationCameraPtr;
 
-    // array with anzimult angels --> from 0 to 355 degrees
+    // array with anzimult angels for the light --> from 0 to 355 degrees
     std::vector<int> azimuthLight;
     std::vector<int>::const_iterator azimuthLightPtr;
 
@@ -35,13 +35,14 @@ class Autopilot
     bool setupVector(int from, int to, int step_size, std::vector<int> vector);
 
 public:
-    bool setup();
+    bool setup(); // Kosntruktor relevante infos 
     bool run();
-
+    
+    bool defImageName();
+    bool writeDataCSV();
     bool tick();
-    bool tickElevationLight();
-    bool tickAzimuthLight(); 
-    bool tickElevationCamera();
+    bool tickLight();
+    bool tickCamera();
     bool tickAzimuthObject();
 };
 
