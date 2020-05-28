@@ -9,10 +9,13 @@
 #include <Texture.h>
 #include <FrameCounter.h>
 #include <Camera.h>
+#include <FBXModel.h>
 #include <bitset>
 #include <fstream>
 #include <fstream>
 #include "../../opengl-training-data/Autopilot.h"
+
+
 
 
 namespace cgbv
@@ -99,23 +102,23 @@ namespace cgbv
         const   std::string ball = "../modelsScaled/ball.fbx";
         const   std::string donut = "../modelsScaled/donut.fbx";
 
-        const std::string modelPaths[7] =   { buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
-        const int modelMaxTurn[7] =         { 360,     360,    90,     5,      5,          5,      180 };
+        const std::vector <std::string> modelPaths{ buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
+        const std::vector<int> modelMaxTurn{ 360,     360,    90,     5,      5,          5,      180 };
 
-        //const cgbv::fbxmodel::FBXModel model[] = 
-        //{
-        //    cgbv::fbxmodel::FBXModel(modelPaths[0]),
-        //    cgbv::fbxmodel::FBXModel(modelPaths[1]),
-        //    cgbv::fbxmodel::FBXModel(modelPaths[2]),
-        //    cgbv::fbxmodel::FBXModel(modelPaths[3]),
-        //    cgbv::fbxmodel::FBXModel(modelPaths[4]),
-        //    cgbv::fbxmodel::FBXModel(modelPaths[5]),
-        //    cgbv::fbxmodel::FBXModel(modelPaths[6])
-        //};
+        const fbxmodel::FBXModel model[7] =
+        {
+            fbxmodel::FBXModel(modelPaths[0]),
+            fbxmodel::FBXModel(modelPaths[1]),
+            fbxmodel::FBXModel(modelPaths[2]),
+            fbxmodel::FBXModel(modelPaths[3]),
+            fbxmodel::FBXModel(modelPaths[4]),
+            fbxmodel::FBXModel(modelPaths[5]),
+            fbxmodel::FBXModel(modelPaths[6])
+        };
 
         // global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
-        int currentFBXObject = 0;
-        int lastDrawnFBX = currentFBXObject;
+        unsigned int currentFBXObject;
+        unsigned int lastDrawnFBX = currentFBXObject;
 
     };
 
@@ -139,7 +142,7 @@ namespace cgbv
 
         ModelFBX modelfbx;
 
-        Autopilot autopilot;
+        //Autopilot autopilot(modelfbx.modelMaxTurn);
 
         std::unique_ptr<cgbv::textures::Texture> shadowmap;
         unsigned int shadowmap_sampler;
@@ -153,7 +156,7 @@ namespace cgbv
         void final_pass();
 
 	public:
-        
+
         CGRenderer(GLFWwindow *window);
 		~CGRenderer(void);
 

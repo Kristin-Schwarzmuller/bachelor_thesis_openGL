@@ -1,5 +1,4 @@
 #include <cg/CGRenderer.h>
-#include <FBXModel.h>
 
 #include <iostream>
 #include <AntTweakBar.h>
@@ -7,10 +6,20 @@
 namespace cgbv
 {
 	void TW_CALL handleScreenshot(void* data)
-	{
+	{ 
 		CGRenderer* renderer = reinterpret_cast<CGRenderer*>(data);
 		renderer->capture();
 	}
+
+	//void TW_CALL modelSetCallback(const void* value, void* clientData)
+	//{
+	//	cgbv::CGRenderer::modelfbx.currentFBXObject = *(const unsigned int*)value;
+
+
+	//	//std::cout << cgbv::ModelFBX::modelPaths[currentFBXObjec] << std::endl;
+
+	//	CGRenderer::modelfbx.loadFBX();
+	//}
 
 
 	CGRenderer::CGRenderer(GLFWwindow* window) : Renderer(window)
