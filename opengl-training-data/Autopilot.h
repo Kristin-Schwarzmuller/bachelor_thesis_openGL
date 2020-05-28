@@ -20,27 +20,25 @@ class Autopilot
     const std::vector<int> elevation;
     std::vector<int>::const_iterator elevationLightPtr;
     std::vector<int>::const_iterator elevationCameraPtr;
+    const float lightDistance;
 
     // array with anzimult angels for the light --> from 0 to 355 degrees
     std::vector<int> azimuthLight;
     std::vector<int>::const_iterator azimuthLightPtr;
-
+    const float cameraDistance;
 
     // array with anzimult angels --> from 0 to 355 degrees
     std::vector<std::vector<int>> azimuthCamera;
     std::vector<int>::const_iterator azimuthCameraPtr;
 
     std::vector<int> modelMaxTurn;
-
-    glm::mat4 rotationMat = glm::mat4(1.0f);
    
     // Output that needs to be processed in the CGRederer Class 
     class ReturnValues {
         
-        std::vector<float> cameraPos;
-        std::vector<float> lightPos;
+        glm::vec3 cameraPos;
+        glm::vec3 lightPos;
         unsigned int currentModel;
-
     };
 
     // create an ofstream for the file output (see the link on streams for
@@ -58,12 +56,11 @@ public:
     ~Autopilot();
     bool run();
     
-    bool defImageName();
+    std::string defImageName();
     bool writeDataCSV();
     bool tick();
     bool tickLight();
     bool tickCamera();
-    bool tickAzimuthObject();
 };
 
 
