@@ -4,7 +4,67 @@
 #include <iomanip>
 using namespace cgbv;
 
-bool Autopilot::setupAzimuthObject()
+Autopilot::Autopilot(std::vector<int> modelMaxTurn, float lightDistance, float cameraDistance)
+{
+	// allocate the transfered variables 
+	modelMaxTurn = modelMaxTurn;
+	lightDistance = lightDistance;
+	cameraDistance = cameraDistance;
+
+	// Write the values into the vectors to iterate over it later 
+	setupAzimuthCamera();
+	setupVector(0, 95, 5, elevation); // 95 because 90 should be inclueded 
+	setupVector(0, 360, 5, azimuthLight); // 360 should be excluded because 360 ~> 0
+
+	// Send the column name to the file stream
+	for (auto name : colname)
+	{
+		csvFile << name << u;
+	}
+	csvFile << n;
+
+	// Disable vertical sync (faster image generation) 
+	glfwSwapInterval(0);
+}
+
+Autopilot::~Autopilot()
+{
+	csvFile.close();
+}
+
+Autopilot::ReturnValues::ReturnValues(glm::vec3 cameraPos, glm::vec3 lightPos, unsigned int currentModel)
+{
+	cameraPos = cameraPos;
+	lightPos = lightPos;
+	currentModel = currentModel;
+}
+
+Autopilot::ReturnValues Autopilot::run()
+{
+	// iterate over all models
+	//for (auto mod : cgbv::CGRenderer::modelfbx.modelPaths)
+	for (currentModel = 0; currentModel < modelMaxTurn.size(); currentModel++)
+	{
+		// for (std::vector<int>::iterator it = elevation.begin(); it != elevation.end(); ++it)
+		elevationLightPtr = elevation.begin();
+		elevationCameraPtr = elevation.begin();
+		azimuthLightPtr = azimuthLight.begin();
+		azimuthCameraPtr = azimuthCamera.at(currentModel).begin();
+
+		do
+		{
+			defImageName();
+			writeDataCSV();
+			counter++;
+		} while (tick());
+
+
+	}
+	csvFile.close();
+	return Autopilot::ReturnValues::ReturnValues(null, null, currentModel);
+}
+
+bool Autopilot::setupAzimuthCamera()
 {
 	// define the different turning ranges for the different models 
 	std::vector<int> tmp;
@@ -30,78 +90,19 @@ bool Autopilot::setupVector(int from, int to, int step_size, std::vector<int> ve
 	return true;
 }
 
-Autopilot::Autopilot(std::vector<int> modelMaxs)
+bool Autopilot::tick()
 {
-	modelMaxTurn = modelMaxs;
-	// Write the values into the vectors to iterate over it later 
-	setupAzimuthObject();
-	setupVector(0, 95, 5, elevation); // 95 because 90 should be inclueded 
-	setupVector(0, 360, 5, azimuthLight); // 360 should be excluded because 360 ~> 0
-}
-
-Autopilot::~Autopilot()
-{
-}
-
-bool Autopilot::run()
-{
-
-	// opens an existing csv file or creates a new file. 
-	//autopilot.reportCSV.open(autopilot.outputFile, autopilot.csvFile);
-	// write the file headers
-	outputFile << "Filename" << "," << "Anzimuth Light" << "," << "Elevation Light" << "," << "Anzimuth object" << "," << "Elevation object" << "," << std::endl;
-	std::string imageName;
-	// iterate over all models
-	//for (auto mod : cgbv::CGRenderer::modelfbx.modelPaths)
-	for (currentModel = 0; currentModel < modelMaxTurn.size(); currentModel++)
-	{
-		// for (std::vector<int>::iterator it = elevation.begin(); it != elevation.end(); ++it)
-		elevationLightPtr = elevation.begin();
-		elevationCameraPtr = elevation.begin();
-		azimuthLightPtr = azimuthLight.begin();
-		azimuthCameraPtr = azimuthCamera.at(currentModel).begin();
-
-		do
-		{
-			defImageName();
-			writeDataCSV();
-			counter++;
-		} while (Autopilot::tick);
-
-
-		//// iterate over anzimuth of the light 
-		//for (auto elL : elevation)
-		//{
-		//	// iterate over the elevation 
-		//	for (auto anzL : azimuthLight)
-		//	{
-		//		for (auto elO : elevation)
-		//		{
-		//			for (auto anzORange : azimuthObject)
-		//			{
-		//				for (auto anzO : anzORange)
-		//				{
-		//					//imageName = mod;
-		//					//std::size_t found = mod.find("/");
-		//					//if (found != std::string::npos)
-		//					//	std::cout << "first 'needle' found at: " << found << '\n';
-
-		//					//found = str.find("needles are small", found + 1, 6);
-
-		//					//std::string str3 = str.substr(pos)
-		//					//imageName = model + "AL" + anzL + "EL" + elL + "AO" + anzO + "EO" + elO;
-		//					//// write the data to the output file
-		//					//autopilot.outputFile << imageName << "," << anzL << "," << elL << "," << anzO << "," << elO << std::endl;
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
-
+	// first try to move the light 
+	if (tickLight()) {
+		return true;
 	}
-	// close the output file
-	reportCSV.close();
-	return true;
+	// if the vectors already reached their end, reset them and tick the camera  
+	elevationLightPtr = elevation.begin();
+	azimuthLightPtr = azimuthLight.begin();
+	if (tickCamera()) {
+		return true;
+	}
+	return false;
 }
 
 bool Autopilot::tickLight()
@@ -138,28 +139,27 @@ bool Autopilot::tickCamera()
 	return false;
 }
 
-bool Autopilot::tick()
-{
-	// first try to move the light 
-	if (tickLight) {
-		return true;
-	}
-	// if the vectors already reached their end, reset them and tick the camera  
-	elevationLightPtr = elevation.begin();
-	azimuthLightPtr = azimuthLight.begin();
-	if (tickCamera) {
-		return true;
-	}
-	return false;
-}
 
-bool Autopilot::defImageName()
+std::string Autopilot::defImageName()
 {
 
-	return true;
+	return "";
 }
 
 bool Autopilot::writeDataCSV()
 {
-	return false;
+	//Filename Azimuth	Elevation S_x S_y C_A C_E
+	csvFile << imageName << u;
+	csvFile << *azimuthLightPtr << u;
+	csvFile << *elevationLightPtr << u;
+	csvFile << sx << u;
+	csvFile << sy << u;
+	csvFile << *azimuthCameraPtr << u;
+	csvFile << *elevationCameraPtr << n;
+	return true;
+}
+
+glm::vec3 Autopilot::calPos(std::vector<int>::const_iterator azimuthPtr, std::vector<int>::const_iterator elevationPtr, float distance)
+{
+	return glm::vec3();
 }
