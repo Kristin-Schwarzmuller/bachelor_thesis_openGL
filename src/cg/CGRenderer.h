@@ -142,7 +142,7 @@ namespace cgbv
 
         ModelFBX modelfbx;
 
-        //Autopilot autopilot(modelfbx.modelMaxTurn);
+        //Autopilot autopilot(modelfbx.modelMaxTurn, );
 
         std::unique_ptr<cgbv::textures::Texture> shadowmap;
         unsigned int shadowmap_sampler;

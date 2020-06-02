@@ -6,6 +6,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <math.h>
 //	===========================================================================================================================================================================================		#####
 using namespace cgbv; 
 
@@ -34,10 +35,13 @@ class Autopilot
     // Integer values how much every model needs to be turned around it self 
     std::vector<int> modelMaxTurn;
 
-    float cameraDistance;
-    float lightDistance;
-    float sx;
-    float sy; 
+    float distanceCamera;
+    float distanceLight;
+
+    // the coordinates for the distance calculation 
+    float x;
+    float y;
+    float z;
     // ========================================================================================================================
     // Output that needs to be processed in the CGRederer Class 
     class ReturnValues {
@@ -59,18 +63,20 @@ class Autopilot
     std::vector<std::string> colname{ "Filename", "Azimuth", "Elevation", "S_x", "S_y", "C_A", "C_E"};
     std::ofstream csvFile;
     // ========================================================================================================================
-    
+    // set up the vectors to iterate over them 
     bool setupAzimuthCamera();
     bool setupVector(int from, int to, int step_size, std::vector<int> vector);
 
+    // Tick to the next position
     bool tick();
     bool tickLight();
     bool tickCamera();
 
-    glm::vec3 calPos(std::vector<int>::const_iterator azimuthPtr, std::vector<int>::const_iterator elevationPtr, float distance);
 
     std::string defImageName();
     bool writeDataCSV();
+    glm::vec3 calPos(std::vector<int>::const_iterator azimuthPtr, std::vector<int>::const_iterator elevationPtr, float distance);
+    // todo: cal stereographisch projizierten Koordinaten
 
 public:
     Autopilot(std::vector<int> modelMaxTurn, float lightDistance, float cameraDistance);

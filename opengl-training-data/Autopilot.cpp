@@ -2,6 +2,7 @@
 #include <cg\CGRenderer.h>
 #include <iostream>
 #include <iomanip>
+
 using namespace cgbv;
 
 Autopilot::Autopilot(std::vector<int> modelMaxTurn, float lightDistance, float cameraDistance)
@@ -32,10 +33,10 @@ Autopilot::~Autopilot()
 	csvFile.close();
 }
 
-Autopilot::ReturnValues::ReturnValues(glm::vec3 cameraPos, glm::vec3 lightPos, unsigned int currentModel)
+Autopilot::ReturnValues::ReturnValues(glm::vec3 posCamera, glm::vec3 posLight, unsigned int currentModel)
 {
-	cameraPos = cameraPos;
-	lightPos = lightPos;
+	posCamera = posCamera;
+	posLight = posLight;
 	currentModel = currentModel;
 }
 
@@ -53,7 +54,7 @@ Autopilot::ReturnValues Autopilot::run()
 
 		do
 		{
-			defImageName();
+			imageName = defImageName();
 			writeDataCSV();
 			counter++;
 		} while (tick());
@@ -61,7 +62,11 @@ Autopilot::ReturnValues Autopilot::run()
 
 	}
 	csvFile.close();
-	return Autopilot::ReturnValues::ReturnValues(null, null, currentModel);
+
+	return Autopilot::ReturnValues::ReturnValues(
+		calPos(azimuthCameraPtr,elevationCameraPtr, distanceCamera), 
+		calPos(azimuthLightPtr, elevationLightPtr, distanceLight), 
+		currentModel);
 }
 
 bool Autopilot::setupAzimuthCamera()
@@ -152,8 +157,8 @@ bool Autopilot::writeDataCSV()
 	csvFile << imageName << u;
 	csvFile << *azimuthLightPtr << u;
 	csvFile << *elevationLightPtr << u;
-	csvFile << sx << u;
-	csvFile << sy << u;
+	//csvFile << sx << u;
+	//csvFile << sy << u;
 	csvFile << *azimuthCameraPtr << u;
 	csvFile << *elevationCameraPtr << n;
 	return true;
@@ -161,5 +166,10 @@ bool Autopilot::writeDataCSV()
 
 glm::vec3 Autopilot::calPos(std::vector<int>::const_iterator azimuthPtr, std::vector<int>::const_iterator elevationPtr, float distance)
 {
-	return glm::vec3();
+	// https://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
+	x = distance * sin(*elevationPtr) * cos(*azimuthPtr);
+	y = distance * sin(*elevationPtr) * sin(*azimuthPtr);
+	z = distance * cos(*elevationPtr);
+
+	return glm::vec3(x, y, z);
 }
