@@ -160,7 +160,7 @@ namespace cgbv
 			//observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, 200.f);
 			observer_projection = glm::perspective(glm::pi<float>() / 5.f, float(window_width) / float(window_height), .1f, 20.f);
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
-			observer_camera.moveTo(0.f, 2.5f, 10.f); // here changes happend 5.f --> 10.f
+			observer_camera.moveTo(0.f, 2.5f, parameter.diastanceCamera); // here changes happend 5.f --> 10.f
 
 			lightsource_projection = glm::ortho(-8.f, 8.f, -8.f, 8.f, 1.f, 80.f);
 			lightsource_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));

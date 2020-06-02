@@ -75,7 +75,7 @@ class Autopilot
 
     std::string defImageName();
     bool writeDataCSV();
-    glm::vec3 calPos(std::vector<int>::const_iterator azimuthPtr, std::vector<int>::const_iterator elevationPtr, float distance);
+    glm::vec4 calPos(std::vector<int>::const_iterator azimuthPtr, std::vector<int>::const_iterator elevationPtr, float distance);
     // todo: cal stereographisch projizierten Koordinaten
 
 public:

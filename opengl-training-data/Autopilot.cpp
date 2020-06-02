@@ -164,12 +164,12 @@ bool Autopilot::writeDataCSV()
 	return true;
 }
 
-glm::vec3 Autopilot::calPos(std::vector<int>::const_iterator azimuthPtr, std::vector<int>::const_iterator elevationPtr, float distance)
+glm::vec4 Autopilot::calPos(std::vector<int>::const_iterator azimuthPtr, std::vector<int>::const_iterator elevationPtr, float distance)
 {
 	// https://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
 	x = distance * sin(*elevationPtr) * cos(*azimuthPtr);
 	y = distance * sin(*elevationPtr) * sin(*azimuthPtr);
 	z = distance * cos(*elevationPtr);
 
-	return glm::vec3(x, y, z);
+	return glm::vec4(x, y, z, 1.f);
 }

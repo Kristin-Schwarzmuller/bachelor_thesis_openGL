@@ -62,7 +62,9 @@ namespace cgbv
 	struct UIParameter
 	{
 		glm::quat globalRotation;
-        glm::vec4 lightPos = glm::vec4(0.f, 0.f, 79.f, 1.f); 
+        float distanceLight = 79.f;
+        float diastanceCamera = 10.f;
+        glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
 
         // Light
         glm::vec4 ambientLight = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
@@ -83,6 +85,8 @@ namespace cgbv
         GLfloat offsetUnits = 1.f;
 
         float f;
+
+
 	};
 
     struct Framebuffers
@@ -142,7 +146,7 @@ namespace cgbv
 
         ModelFBX modelfbx;
 
-        //Autopilot autopilot(modelfbx.modelMaxTurn, );
+        Autopilot autopilot(modelfbx.modelMaxTurn, parameter.diastanceLight, parameter.diastanceCamera);
 
         std::unique_ptr<cgbv::textures::Texture> shadowmap;
         unsigned int shadowmap_sampler;
