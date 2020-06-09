@@ -63,7 +63,7 @@ namespace cgbv
 	{
 		glm::quat globalRotation;
         float distanceLight = 79.f;
-        float diastanceCamera = 10.f;
+        float distanceCamera = 10.f;
         glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
 
         // Light
@@ -146,7 +146,7 @@ namespace cgbv
 
         ModelFBX modelfbx;
 
-        Autopilot autopilot(modelfbx.modelMaxTurn, parameter.diastanceLight, parameter.diastanceCamera);
+        Autopilot autopilot;
 
         std::unique_ptr<cgbv::textures::Texture> shadowmap;
         unsigned int shadowmap_sampler;

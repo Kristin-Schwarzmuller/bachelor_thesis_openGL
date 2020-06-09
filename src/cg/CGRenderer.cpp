@@ -141,12 +141,15 @@ namespace cgbv
 
 	bool CGRenderer::setup()
 	{
+		autopilot.init(modelfbx.modelMaxTurn, parameter.distanceLight, parameter.distanceCamera);
+		
 		glfwGetFramebufferSize(window, &window_width, &window_height);
 
 
 		if (!gladLoadGL())
 			return false;
-
+		// Disable vertical sync (faster image generation) 
+		glfwSwapInterval(0);
 
 		// GL States
 		glClearColor(0.4f, 0.4f, 0.4f, 1.f);
@@ -160,7 +163,7 @@ namespace cgbv
 			//observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, 200.f);
 			observer_projection = glm::perspective(glm::pi<float>() / 5.f, float(window_width) / float(window_height), .1f, 20.f);
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
-			observer_camera.moveTo(0.f, 2.5f, parameter.diastanceCamera); // here changes happend 5.f --> 10.f
+			observer_camera.moveTo(0.f, 2.5f, parameter.distanceCamera); // here changes happend 5.f --> 10.f
 
 			lightsource_projection = glm::ortho(-8.f, 8.f, -8.f, 8.f, 1.f, 80.f);
 			lightsource_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
@@ -320,7 +323,8 @@ namespace cgbv
 	{
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(parameter.offsetFactor, parameter.offsetUnits);
-		loadFBX();
+		loadFBX(); // todo versetzen 
+		// autopilot.getValues();
 		shadowmap_pass(); 
 		final_pass();
 	}
@@ -429,7 +433,7 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		//todo: autopilot.update();
+		//todo: autopilot.step();
 		lightsource_camera.moveTo(parameter.lightPos);
 	}
 
