@@ -108,6 +108,7 @@ namespace cgbv
 
         const std::vector <std::string> modelPaths{ buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
         const std::vector<int> modelMaxTurn{ 360,     360,    90,     5,      5,          5,      180 };
+        cosnt std::vector<std::string> modelNames{ "buddha", "bunny", "box", "cone", "cylinder", "ball", "donut" };
 
         const fbxmodel::FBXModel model[7] =
         {
@@ -147,6 +148,7 @@ namespace cgbv
         ModelFBX modelfbx;
 
         Autopilot autopilot;
+        cgbv::Autopilot::ReturnValues returnValues;
 
         std::unique_ptr<cgbv::textures::Texture> shadowmap;
         unsigned int shadowmap_sampler;
@@ -171,9 +173,8 @@ namespace cgbv
 		virtual void render();
 		virtual void update();
         void capture();
-        void loadFBX();
-        void loadFBX(std::string path);
-
-        
+        //void loadFBX();
+        void loadFBX(int currentMod);
+        //void loadFBX(std::string path);    
 	};
 }

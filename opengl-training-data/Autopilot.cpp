@@ -7,10 +7,43 @@
 
 namespace cgbv
 {
+	//===========================================================================================
+	// class ReturnValues
+	Autopilot::ReturnValues::ReturnValues()
+	{
+	}
+
+	Autopilot::ReturnValues::ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, unsigned int modelID, std::string imageName)
+	{
+		this->lightPos = lightPos;
+		this->cameraPos = cameraPos;
+		this->modelID = modelID;
+		this->imageName = imageName;
+	}
+
+	glm::vec3 Autopilot::ReturnValues::getLightPos()
+	{
+		return lightPos;
+	}
+
+	glm::vec3 Autopilot::ReturnValues::getCameraPos()
+	{
+		return cameraPos;
+	}
+
+	unsigned int Autopilot::ReturnValues::getModelID()
+	{
+		return modelID;
+	}
+	std::string Autopilot::ReturnValues::getImageName()
+	{
+		return imageName;
+	}
+	// ===========================================================================================
+	// class Autopilot 
 
 	Autopilot::Autopilot()
 	{
-
 	}
 
 	Autopilot::~Autopilot()
@@ -45,24 +78,18 @@ namespace cgbv
 		return true;
 	}
 
-	Autopilot::ReturnValues::ReturnValues(glm::vec3 posCamera, glm::vec3 posLight, unsigned int currentModel)
-	{
-		this->posCamera = posCamera;
-		this->posLight = posLight;
-		this->currentModel = currentModel;
-	}
-
 	Autopilot::ReturnValues Autopilot::getValues()
 	{
 		return Autopilot::ReturnValues::ReturnValues(
-			calPos(*azimuthCameraPtr, *elevationCameraPtr, distanceCamera),
 			calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight),
-			currentModel);
+			calPos(*azimuthCameraPtr, *elevationCameraPtr, distanceCamera),
+			currentModel,
+			currentImageName);
 	}
 
 	void Autopilot::step()
 	{
-		imageName = defImageName();
+		currentImageName = defImageName();
 		writeDataCSV();
 		counter++;
 		tick();
@@ -78,7 +105,6 @@ namespace cgbv
 			for (int i = 0; i < maxturn; i+=45) {
 				tmp.push_back(i);
 			}
-			//tmp.push_back(-1); // add termination criterion in the end
 			azimuthCamera.push_back(tmp);
 			tmp.clear();
 		}
@@ -166,7 +192,7 @@ namespace cgbv
 	bool Autopilot::writeDataCSV()
 	{
 		//Filename Azimuth	Elevation S_x S_y C_A C_E
-		csvFile << imageName << u;
+		csvFile << currentImageName << u;
 		csvFile << *azimuthLightPtr << u;
 		csvFile << *elevationLightPtr << u;
 		//csvFile << sx << u;

@@ -19,7 +19,7 @@ namespace cgbv
         // Number of pictures taken
         unsigned int counter = 0;
         // name of the currently drawn iamge
-        std::string imageName = "i bims 1 Bild";
+        std::string currentImageName = "i bims 1 Bild";
 
         // array with elevation angels --> from 0 to 90 degrees
         const std::vector<int> elevation;
@@ -70,17 +70,23 @@ namespace cgbv
         glm::vec3 calPos(int azimuthPtr, int elevationPtr, float distance);
 
     public:
-
         // evtl todo: reset
         // ========================================================================================================================
         // Output that needs to be processed in the CGRederer Class 
         class ReturnValues {
 
+            glm::vec3 lightPos; 
             glm::vec3 cameraPos;
-            glm::vec3 lightPos;
-            unsigned int currentModel;
+            unsigned int modelID;
+            std::string imageName;
 
-            ReturnValues(glm::vec3 cameraPos, glm::vec3 lightPos, unsigned int currentModel);
+        public:
+            ReturnValues();
+            ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, unsigned int modelID, std::string imageName); 
+            glm::vec3 getLightPos();
+            glm::vec3 getCameraPos();
+            unsigned int getModelID();
+            std::string getImageName();
         };
         // ========================================================================================================================
         Autopilot();

@@ -26,7 +26,7 @@ namespace cgbv
 	{
 
 	}
-
+	
 
 	CGRenderer::~CGRenderer()
 	{
@@ -283,7 +283,7 @@ namespace cgbv
 			// ====== Shadow ======
 			TwAddVarRW(tweakbar, "Shadow Offset Factor", TW_TYPE_FLOAT, &parameter.offsetFactor, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
 			TwAddVarRW(tweakbar, "Shadowmap Offset Units", TW_TYPE_FLOAT, &parameter.offsetUnits, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
-			// todo Callback mit Modelauswahl
+			//todo Callback mit Modelauswahl
 		}
 
 
@@ -323,8 +323,7 @@ namespace cgbv
 	{
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(parameter.offsetFactor, parameter.offsetUnits);
-		loadFBX(); // todo versetzen 
-		// autopilot.getValues();
+		update();
 		shadowmap_pass(); 
 		final_pass();
 	}
@@ -433,26 +432,32 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		//todo: autopilot.step();
-		lightsource_camera.moveTo(parameter.lightPos);
-	}
-
-	void CGRenderer::loadFBX() 
-	{
-		// If the model did not change do nothing and return 
-		if (modelfbx.currentFBXObject == modelfbx.lastDrawnFBX)
+		returnValues = autopilot.getValues();
+		lightsource_camera.moveTo(returnValues.getLightPos());
+		observer_camera.moveTo(returnValues.getCameraPos());
+		if (returnValues.getModelID() != modelfbx.currentFBXObject)
 		{
-			return;
+			modelfbx.currentFBXObject = returnValues.getModelID();
+			loadFBX(modelfbx.currentFBXObject);
 		}
-
-		modelfbx.lastDrawnFBX = modelfbx.currentFBXObject;
-		loadFBX(modelfbx.modelPaths[modelfbx.currentFBXObject]);
-
+		autopilot.step();
 	}
-	 void CGRenderer::loadFBX(std::string path)
+
+	//void CGRenderer::loadFBX() 
+	//{
+	//	// If the model did not change do nothing and return 
+	//	if (modelfbx.currentFBXObject == modelfbx.lastDrawnFBX)
+	//	{
+	//		return;
+	//	}
+
+	//	modelfbx.lastDrawnFBX = modelfbx.currentFBXObject;
+	//	loadFBX(modelfbx.modelPaths[modelfbx.currentFBXObject]);
+
+	//}
+	void CGRenderer::loadFBX(int currentMod)
 	{
-		//cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
-		cgbv::fbxmodel::FBXModel fbx(modelfbx.modelPaths[modelfbx.currentFBXObject]);
+		cgbv::fbxmodel::FBXModel fbx(modelfbx.modelPaths[currentMod]);
 
 		glGenVertexArrays(1, &object.vao);
 		glBindVertexArray(object.vao);
@@ -481,5 +486,37 @@ namespace cgbv
 			object.vertsToDraw = mesh.VertexCount();
 		}
 	}
+	// void CGRenderer::loadFBX(std::string path)
+	//{
+	//	//cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
+	//	cgbv::fbxmodel::FBXModel fbx(modelfbx.modelPaths[modelfbx.currentFBXObject]);
+
+	//	glGenVertexArrays(1, &object.vao);
+	//	glBindVertexArray(object.vao);
+
+	//	for (cgbv::fbxmodel::Mesh mesh : fbx.Meshes())
+	//	{
+	//		glGenBuffers(1, &object.vbo);
+	//		glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
+	//		glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
+
+	//		// Buffer Vetex Data
+	//		glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
+	//		// Buffer Normal Data
+	//		glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
+
+	//		/* Enable attribute index 0 as being used */
+	//		glEnableVertexAttribArray(locs.vertex);
+	//		/* Specify that our vertaex data is going into attribute index 0, and contains three floats per vertex */
+	//		glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	//		/* Enable attribute index 1 as being used */
+	//		glEnableVertexAttribArray(locs.normal);
+	//		/* Specify that our coordinate data is going into attribute index 1, and contains three floats per vertex */
+	//		glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 0, (const void*)(3 * mesh.VertexCount() * sizeof(GLfloat)));
+
+	//		object.vertsToDraw = mesh.VertexCount();
+	//	}
+	//}
 	
 }
