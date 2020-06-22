@@ -11,15 +11,24 @@ namespace cgbv
 		renderer->capture();
 	}
 
-	//void TW_CALL modelSetCallback(const void* value, void* clientData)
-	//{
-	//	cgbv::CGRenderer::modelfbx.currentFBXObject = *(const unsigned int*)value;
+	void TW_CALL modelSetCallback(const void* value, void* clientData)
+	{
+		auto package = static_cast<TweakbarPackage*>(clientData);
+		auto model = static_cast<ModelFBX*>(package->object1);
+		auto cgrenderer = static_cast<CGRenderer*>(package->object2);
+		model->modelSelection = (*(const unsigned int*)value);
 
+		std::cout << "getcallback" << model->modelSelection << std::endl;
+		cgrenderer->loadFBX(model->modelSelection);
+	}
 
-	//	//std::cout << cgbv::ModelFBX::modelPaths[currentFBXObjec] << std::endl;
-
-	//	CGRenderer::modelfbx.loadFBX();
-	//}
+	void TW_CALL modelGetCallback(void* value, void* clientData)
+	{
+		auto package = static_cast<TweakbarPackage*>(clientData);
+		auto model = static_cast<ModelFBX*>(package->object1);
+		std::cout << "getcallback" << model->modelSelection << std::endl;
+		*(unsigned int*)value = model->modelSelection;
+	}
 
 
 	CGRenderer::CGRenderer(GLFWwindow* window) : Renderer(window)
@@ -96,25 +105,25 @@ namespace cgbv
 				observer_camera.moveRight(-.1f);
 				break;
 			case GLFW_KEY_E:
-				modelfbx.currentFBXObject = 0;
+				modelfbx.modelSelection = 0;
 				break;
 			case GLFW_KEY_R:
-				modelfbx.currentFBXObject = 1;
+				modelfbx.modelSelection = 1;
 				break;
 			case GLFW_KEY_T:
-				modelfbx.currentFBXObject = 2;
+				modelfbx.modelSelection = 2;
 				break;
 			case GLFW_KEY_Y: // --> press z on the german keyboard --> translated to y 
-				modelfbx.currentFBXObject = 3;
+				modelfbx.modelSelection = 3;
 				break;
 			case GLFW_KEY_U:
-				modelfbx.currentFBXObject = 4;
+				modelfbx.modelSelection = 4;
 				break;
 			case GLFW_KEY_I:
-				modelfbx.currentFBXObject = 5;
+				modelfbx.modelSelection = 5;
 				break;
 			case GLFW_KEY_O:
-				modelfbx.currentFBXObject = 6;
+				modelfbx.modelSelection = 6;
 				break;
 
 			//case GLFW_KEY_UP:
@@ -283,7 +292,26 @@ namespace cgbv
 			// ====== Shadow ======
 			TwAddVarRW(tweakbar, "Shadow Offset Factor", TW_TYPE_FLOAT, &parameter.offsetFactor, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
 			TwAddVarRW(tweakbar, "Shadowmap Offset Units", TW_TYPE_FLOAT, &parameter.offsetUnits, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
-			//todo Callback mit Modelauswahl
+			// ====== Modelauswahl ======
+			// Create an internal enum to name the meshes
+			//typedef enum { BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT } MESH_TYPE;
+			std::string meshtypes = "BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT";
+			TwType meshType = TwDefineEnumFromString("vertexType", meshtypes.c_str());
+
+			// A variable for the current selection - will be updated by ATB
+			//MESH_TYPE m_currentMesh = BUDDHA;
+
+			// Array of drop down items
+			//TwEnumVal Meshes[] = { {BUDDHA, "Buddha"}, {BUNNY, "Bunny"}, {BOX, "Box"},  };
+
+			// ATB identifier for the array
+			//TwType MeshTwType = TwDefineEnum("MeshType", Meshes, 3);
+
+			// Link it to the tweak bar
+			//TwAddVarRW(tweakbar, "Mesh", meshType, &cgbv::ModelFBX::modelSelection, NULL);
+			modelSelectionPackage.object1 = &modelfbx;
+			modelSelectionPackage.object2 = this;
+			TwAddVarCB(tweakbar, "Model auswählen", TW_TYPE_UINT32, modelSetCallback, modelGetCallback, &modelSelectionPackage, "group = 'Präsentation' min = 0 max = 6");
 		}
 
 
@@ -432,20 +460,21 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		returnValues = autopilot.getValues();
-		lightsource_camera.moveTo(returnValues.getLightPos());
-		observer_camera.moveTo(returnValues.getCameraPos());
-		if (returnValues.getModelID() != modelfbx.currentFBXObject)
-		{
-			modelfbx.currentFBXObject = returnValues.getModelID();
-			loadFBX(modelfbx.currentFBXObject);
-		}
-		autopilot.step();
+		//returnValues = autopilot.getValues();
+		//lightsource_camera.moveTo(returnValues.getLightPos());
+		//observer_camera.moveTo(returnValues.getCameraPos());
+		//if (returnValues.getModelID() != modelfbx.modelSelection)
+		//{
+		//	modelfbx.modelSelection = returnValues.getModelID();
+		//	loadFBX(modelfbx.modelSelection);
+		//}
+		////screenshot.set();
+		//autopilot.step();
 	}
 
 	//void CGRenderer::loadFBX() 
 	//{
-	//	// If the model did not change do nothing and return 
+	//	// If the model did not change do nothing and return cc
 	//	if (modelfbx.currentFBXObject == modelfbx.lastDrawnFBX)
 	//	{
 	//		return;
@@ -518,5 +547,4 @@ namespace cgbv
 	//		object.vertsToDraw = mesh.VertexCount();
 	//	}
 	//}
-	
 }

@@ -13,7 +13,7 @@
 #include <bitset>
 #include <fstream>
 #include <fstream>
-#include "../../opengl-training-data/Autopilot.h"
+#include <Autopilot.h>
 
 
 
@@ -97,7 +97,6 @@ namespace cgbv
 
     struct ModelFBX
     {
-
         const   std::string buddha = "../modelsScaled/budda.fbx";
         const   std::string bunny = "../modelsScaled/bunny.fbx";
         const   std::string box = "../modelsScaled/box.fbx";
@@ -106,11 +105,11 @@ namespace cgbv
         const   std::string ball = "../modelsScaled/ball.fbx";
         const   std::string donut = "../modelsScaled/donut.fbx";
 
-        const std::vector <std::string> modelPaths{ buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
+        const std::vector<std::string> modelPaths{ buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
         const std::vector<int> modelMaxTurn{ 360,     360,    90,     5,      5,          5,      180 };
-        cosnt std::vector<std::string> modelNames{ "buddha", "bunny", "box", "cone", "cylinder", "ball", "donut" };
+        const std::vector<std::string> modelNames{ "buddha", "bunny", "box", "cone", "cylinder", "ball", "donut" };
 
-        const fbxmodel::FBXModel model[7] =
+        const fbxmodel::FBXModel models[7] =
         {
             fbxmodel::FBXModel(modelPaths[0]),
             fbxmodel::FBXModel(modelPaths[1]),
@@ -122,9 +121,14 @@ namespace cgbv
         };
 
         // global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
-        unsigned int currentFBXObject;
-        unsigned int lastDrawnFBX = currentFBXObject;
+        unsigned int modelSelection;
+        unsigned int lastDrawnFBX = modelSelection;
+    };
 
+    struct TweakbarPackage
+    {
+        void* object1;
+        void* object2;
     };
 
 
@@ -145,10 +149,10 @@ namespace cgbv
 
         Framebuffers framebuffers;
 
-        ModelFBX modelfbx;
-
         Autopilot autopilot;
         cgbv::Autopilot::ReturnValues returnValues;
+
+        TweakbarPackage modelSelectionPackage;
 
         std::unique_ptr<cgbv::textures::Texture> shadowmap;
         unsigned int shadowmap_sampler;
@@ -165,6 +169,8 @@ namespace cgbv
 
         CGRenderer(GLFWwindow *window);
 		~CGRenderer(void);
+
+        ModelFBX modelfbx;
 
 		virtual void destroy();
 		virtual void resize(int width, int height);

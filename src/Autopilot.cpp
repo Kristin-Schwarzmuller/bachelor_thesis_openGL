@@ -51,17 +51,18 @@ namespace cgbv
 		csvFile.close();
 	}
 
-	bool Autopilot::init(const std::vector<int> modelMaxTurn, float distanceLight, float distanceCamera)
+	bool Autopilot::init(const std::vector<int> modelMaxTurn, const std::vector<std::string> modelNames, float distanceLight, float distanceCamera)
 	{
 		// allocate the transfered variables 
 		this->modelMaxTurn = modelMaxTurn;
+		this->modelNames = modelNames;
 		this->distanceLight = distanceLight;
 		this->distanceCamera = distanceCamera;
 
 		// Write the values into the vectors to iterate over it later 
 		setupAzimuthCamera();
-		setupVector(0, 95, 5, elevation); // 95 because 90 should be inclueded 
-		setupVector(0, 360, 5, azimuthLight); // 360 should be excluded because 360 ~> 0
+		elevation = setupVector(0, 90, 5); 
+		azimuthLight = setupVector(0, 355, 5); 
 
 		// Initialize the iterators  
 		elevationLightPtr = elevation.begin();
@@ -82,6 +83,7 @@ namespace cgbv
 	{
 		return Autopilot::ReturnValues::ReturnValues(
 			calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight),
+
 			calPos(*azimuthCameraPtr, *elevationCameraPtr, distanceCamera),
 			currentModel,
 			currentImageName);
@@ -89,16 +91,15 @@ namespace cgbv
 
 	void Autopilot::step()
 	{
-		currentImageName = defImageName();
+		defImageName();
 		writeDataCSV();
-		counter++;
 		tick();
 	}
 
 	bool Autopilot::setupAzimuthCamera()
 	{
-		// todo: nur ein vector pro maxturn value 
-		// define the different turning ranges for the different models 
+		 //todo: nur ein vector pro maxturn value 
+		 //define the different turning ranges for the different models 
 		std::vector<int> tmp;
 		for (auto maxturn : modelMaxTurn)
 		{
@@ -113,13 +114,15 @@ namespace cgbv
 		return true;
 	}
 
-	bool Autopilot::setupVector(int from, int to, int step_size, std::vector<int> vector)
+	std::vector<int> Autopilot::setupVector(int from, int to, int step_size)
 	{
-		for (int i = from; i < to; i+=step_size) {
-			vector.push_back(i);
+		std::vector<int> vec;
+		for (int i = from; i <= to; i += step_size) {
+			vec.push_back(i);
 		}
-		return true;
+		return vec;
 	}
+
 
 	bool Autopilot::tick()
 	{
@@ -183,10 +186,10 @@ namespace cgbv
 	}
 
 
-	std::string Autopilot::defImageName()
+	void Autopilot::defImageName()
 	{
-
-		return "";
+		sprintf_s(nameBuffer, "%08d", counter++);
+		currentImageName = std::string(nameBuffer) + modelNames.at(currentModel);
 	}
 
 	bool Autopilot::writeDataCSV()
@@ -198,8 +201,19 @@ namespace cgbv
 		//csvFile << sx << u;
 		//csvFile << sy << u;
 		csvFile << *azimuthCameraPtr << u;
-		csvFile << *elevationCameraPtr << n;
+		csvFile << *elevationCameraPtr << u;
+		csvFile << clampAround(*azimuthLightPtr - *azimuthCameraPtr, 360) << u;
+		csvFile << clampAround(*elevationLightPtr - *elevationCameraPtr, 90) << n;
 		return true;
+	}
+
+	int Autopilot::clampAround(int value, int to)
+	{
+		while (value < 0)
+		{
+			to + value;
+		}
+		return value % to ;
 	}
 
 	glm::vec3 Autopilot::calPos(int azimuthPtr, int elevationPtr, float distance)

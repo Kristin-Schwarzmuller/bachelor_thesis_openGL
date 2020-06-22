@@ -15,14 +15,15 @@ namespace cgbv
     {
 
         // Number of FBX models that need to be drawn
-        int currentModel = 0;
+        unsigned int currentModel = 0;
         // Number of pictures taken
         unsigned int counter = 0;
+        char nameBuffer[50];
         // name of the currently drawn iamge
-        std::string currentImageName = "i bims 1 Bild";
+        std::string currentImageName;
 
         // array with elevation angels --> from 0 to 90 degrees
-        const std::vector<int> elevation;
+        std::vector<int> elevation;
         std::vector<int>::const_iterator elevationLightPtr;
         std::vector<int>::const_iterator elevationCameraPtr;
 
@@ -36,6 +37,8 @@ namespace cgbv
 
         // Integer values how much every model needs to be turned around it self 
         std::vector<int> modelMaxTurn;
+        // Names of the models for the filenames
+        std::vector<std::string> modelNames;
 
         float distanceCamera;
         float distanceLight;
@@ -51,13 +54,12 @@ namespace cgbv
         std::string csvName = "labelsKS.csv";
         std::string u = ";";
         std::string n = "\n";
-        std::vector<std::string> colname{ "Filename", "Azimuth", "Elevation", "S_x", "S_y", "C_A", "C_E" };
+        std::vector<std::string> colname{ "Filename", "Azimuth_objektiv", "Elevation_objectiv", "C_A", "C_E", "Azimuth_subjektiv", "Elevation_subjectiv" };
         std::ofstream csvFile;
         // ========================================================================================================================
         // set up the vectors to iterate over them 
         bool setupAzimuthCamera();
-        bool setupVector(int from, int to, int step_size, std::vector<int> vector);
-
+        std::vector<int> setupVector(int from, int to, int step_size);
 
         // Tick to the next position
         bool tick();
@@ -65,8 +67,9 @@ namespace cgbv
         bool tickCamera();
 
 
-        std::string defImageName();
+        void defImageName();
         bool writeDataCSV();
+        int clampAround(int value, int to);
         glm::vec3 calPos(int azimuthPtr, int elevationPtr, float distance);
 
     public:
@@ -91,7 +94,8 @@ namespace cgbv
         // ========================================================================================================================
         Autopilot();
         ~Autopilot();
-        bool init(const std::vector<int> modelMaxTurn, float lightDistance, float cameraDistance);
+        bool init(const std::vector<int> modelMaxTurn, const std::vector<std::string> modelNames,
+            float lightDistance, float cameraDistance);
         ReturnValues getValues();
         void step();
     };

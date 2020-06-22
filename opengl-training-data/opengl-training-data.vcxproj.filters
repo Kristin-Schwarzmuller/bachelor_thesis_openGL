@@ -51,7 +51,7 @@
     <ClInclude Include="..\src\OBJModel.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Autopilot.h">
+    <ClInclude Include="..\src\Autopilot.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
@@ -86,7 +86,7 @@
     <ClCompile Include="..\src\OBJModel.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="Autopilot.cpp">
+    <ClCompile Include="..\src\Autopilot.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
