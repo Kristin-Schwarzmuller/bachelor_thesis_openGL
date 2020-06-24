@@ -6,7 +6,7 @@
 namespace cgbv
 {
 	void TW_CALL handleScreenshot(void* data)
-	{ 
+	{
 		CGRenderer* renderer = reinterpret_cast<CGRenderer*>(data);
 		renderer->capture();
 	}
@@ -17,8 +17,6 @@ namespace cgbv
 		auto model = static_cast<ModelFBX*>(package->object1);
 		auto cgrenderer = static_cast<CGRenderer*>(package->object2);
 		model->modelSelection = (*(const unsigned int*)value);
-
-		std::cout << "getcallback" << model->modelSelection << std::endl;
 		cgrenderer->loadFBX(model->modelSelection);
 	}
 
@@ -26,7 +24,6 @@ namespace cgbv
 	{
 		auto package = static_cast<TweakbarPackage*>(clientData);
 		auto model = static_cast<ModelFBX*>(package->object1);
-		std::cout << "getcallback" << model->modelSelection << std::endl;
 		*(unsigned int*)value = model->modelSelection;
 	}
 
@@ -35,7 +32,7 @@ namespace cgbv
 	{
 
 	}
-	
+
 
 	CGRenderer::~CGRenderer()
 	{
@@ -126,21 +123,21 @@ namespace cgbv
 				modelfbx.modelSelection = 6;
 				break;
 
-			//case GLFW_KEY_UP:
-			//	model *= glm::rotate(glm::mat4(1.f), (float)M_PI / 6.f, glm::vec3(1.f, 0.f, 0.f));
-			//	break;
+				//case GLFW_KEY_UP:
+				//	model *= glm::rotate(glm::mat4(1.f), (float)M_PI / 6.f, glm::vec3(1.f, 0.f, 0.f));
+				//	break;
 
-			//case GLFW_KEY_DOWN:
-			//	model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(1.f, 0.f, 0.f));
-			//	break;
+				//case GLFW_KEY_DOWN:
+				//	model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(1.f, 0.f, 0.f));
+				//	break;
 
-			//case GLFW_KEY_LEFT:
-			//	model *= glm::rotate(glm::mat4(1.f), (float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
-			//	break;
+				//case GLFW_KEY_LEFT:
+				//	model *= glm::rotate(glm::mat4(1.f), (float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
+				//	break;
 
-			//case GLFW_KEY_RIGHT:
-			//	model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
-			//	break;
+				//case GLFW_KEY_RIGHT:
+				//	model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
+				//	break;
 			default:
 				break;
 			}
@@ -150,8 +147,8 @@ namespace cgbv
 
 	bool CGRenderer::setup()
 	{
-		autopilot.init(modelfbx.modelMaxTurn, parameter.distanceLight, parameter.distanceCamera);
-		
+		autopilot.init(modelfbx.modelMaxTurn, modelfbx.modelNames, parameter.distanceLight, parameter.distanceCamera);
+
 		glfwGetFramebufferSize(window, &window_width, &window_height);
 
 
@@ -263,7 +260,7 @@ namespace cgbv
 
 
 			data.clear();
-			vertices.clear(); 
+			vertices.clear();
 		}
 
 
@@ -277,18 +274,18 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "Global Rotation", TW_TYPE_QUAT4F, &parameter.globalRotation, "showval=false opened=true");
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
 			TwAddVarRW(tweakbar, "Light direction", TW_TYPE_DIR3F, &parameter.lightPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
-			
+
 			// ====== Light ======
-			TwAddVarRW(tweakbar, "Ambient Light", TW_TYPE_COLOR4F, &parameter.ambientLight,"group=Light");
+			TwAddVarRW(tweakbar, "Ambient Light", TW_TYPE_COLOR4F, &parameter.ambientLight, "group=Light");
 			TwAddVarRW(tweakbar, "diffuse Light", TW_TYPE_COLOR4F, &parameter.diffusLight, " group=Light alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Specular  Light", TW_TYPE_COLOR4F, &parameter.specularLight, " group=Light alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Brightness", TW_TYPE_FLOAT, &parameter.brightnessFactor, " group= 'Light' min = 0.0f max = 5.0f step = 0.1f");
 			//TwAddVarRW(tweakbar, "Emissives Material", TW_TYPE_COLOR4F, &parameter.emissivMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Shininess", TW_TYPE_FLOAT, &parameter.shininessMaterial, " group=Material");
-			TwAddVarRW(tweakbar, "Ambient Material", TW_TYPE_COLOR4F, &parameter.ambientMaterial,	" group=Material alpha help='Color and transparency of the cube.' ");
+			TwAddVarRW(tweakbar, "Ambient Material", TW_TYPE_COLOR4F, &parameter.ambientMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "diffuse Material", TW_TYPE_COLOR4F, &parameter.diffusMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Specular  Material", TW_TYPE_COLOR4F, &parameter.spekularMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
-			
+
 			// ====== Shadow ======
 			TwAddVarRW(tweakbar, "Shadow Offset Factor", TW_TYPE_FLOAT, &parameter.offsetFactor, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
 			TwAddVarRW(tweakbar, "Shadowmap Offset Units", TW_TYPE_FLOAT, &parameter.offsetUnits, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
@@ -311,7 +308,7 @@ namespace cgbv
 			//TwAddVarRW(tweakbar, "Mesh", meshType, &cgbv::ModelFBX::modelSelection, NULL);
 			modelSelectionPackage.object1 = &modelfbx;
 			modelSelectionPackage.object2 = this;
-			TwAddVarCB(tweakbar, "Model auswählen", TW_TYPE_UINT32, modelSetCallback, modelGetCallback, &modelSelectionPackage, "group = 'Präsentation' min = 0 max = 6");
+			TwAddVarCB(tweakbar, "Model", meshType, modelSetCallback, modelGetCallback, &modelSelectionPackage, "group = 'Model'");// min = 0 max = 6");
 		}
 
 
@@ -324,7 +321,7 @@ namespace cgbv
 
 			glGenFramebuffers(1, &framebuffers.shadowmap_buffer);
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.shadowmap_buffer);
-			
+
 			glBindTexture(GL_TEXTURE_2D, shadowmap->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, shadowmap_width, shadowmap_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
@@ -352,7 +349,7 @@ namespace cgbv
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(parameter.offsetFactor, parameter.offsetUnits);
 		update();
-		shadowmap_pass(); 
+		shadowmap_pass();
 		final_pass();
 	}
 
@@ -403,7 +400,7 @@ namespace cgbv
 
 		// Scaling the object
 		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.35f));// 0.003f));
-		
+
 
 		shader->use();
 		//new 
@@ -460,7 +457,7 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		//returnValues = autopilot.getValues();
+		returnValues = autopilot.getValues();
 		//lightsource_camera.moveTo(returnValues.getLightPos());
 		//observer_camera.moveTo(returnValues.getCameraPos());
 		//if (returnValues.getModelID() != modelfbx.modelSelection)
@@ -469,21 +466,9 @@ namespace cgbv
 		//	loadFBX(modelfbx.modelSelection);
 		//}
 		////screenshot.set();
-		//autopilot.step();
+		autopilot.step();
 	}
 
-	//void CGRenderer::loadFBX() 
-	//{
-	//	// If the model did not change do nothing and return cc
-	//	if (modelfbx.currentFBXObject == modelfbx.lastDrawnFBX)
-	//	{
-	//		return;
-	//	}
-
-	//	modelfbx.lastDrawnFBX = modelfbx.currentFBXObject;
-	//	loadFBX(modelfbx.modelPaths[modelfbx.currentFBXObject]);
-
-	//}
 	void CGRenderer::loadFBX(int currentMod)
 	{
 		cgbv::fbxmodel::FBXModel fbx(modelfbx.modelPaths[currentMod]);
@@ -515,36 +500,4 @@ namespace cgbv
 			object.vertsToDraw = mesh.VertexCount();
 		}
 	}
-	// void CGRenderer::loadFBX(std::string path)
-	//{
-	//	//cgbv::fbxmodel::FBXModel fbx(currentFBXObjectPath);
-	//	cgbv::fbxmodel::FBXModel fbx(modelfbx.modelPaths[modelfbx.currentFBXObject]);
-
-	//	glGenVertexArrays(1, &object.vao);
-	//	glBindVertexArray(object.vao);
-
-	//	for (cgbv::fbxmodel::Mesh mesh : fbx.Meshes())
-	//	{
-	//		glGenBuffers(1, &object.vbo);
-	//		glBindBuffer(GL_ARRAY_BUFFER, object.vbo);
-	//		glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
-
-	//		// Buffer Vetex Data
-	//		glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
-	//		// Buffer Normal Data
-	//		glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
-
-	//		/* Enable attribute index 0 as being used */
-	//		glEnableVertexAttribArray(locs.vertex);
-	//		/* Specify that our vertaex data is going into attribute index 0, and contains three floats per vertex */
-	//		glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	//		/* Enable attribute index 1 as being used */
-	//		glEnableVertexAttribArray(locs.normal);
-	//		/* Specify that our coordinate data is going into attribute index 1, and contains three floats per vertex */
-	//		glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 0, (const void*)(3 * mesh.VertexCount() * sizeof(GLfloat)));
-
-	//		object.vertsToDraw = mesh.VertexCount();
-	//	}
-	//}
 }

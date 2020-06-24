@@ -21,156 +21,156 @@
 namespace cgbv
 {
 	struct ShaderLocations
-    {
-        unsigned int vertex, normal;
+	{
+		unsigned int vertex, normal;
 
-        unsigned int modelViewProjection, normalmatrix, modelview, biasedModelViewProjection;
+		unsigned int modelViewProjection, normalmatrix, modelview, biasedModelViewProjection;
 
-        unsigned int placementVS, lightingVS, lambertFS, depthmapFS;
+		unsigned int placementVS, lightingVS, lambertFS, depthmapFS;
 
 		unsigned int lightPos;
 
-        unsigned int shadowmap;
+		unsigned int shadowmap;
 
-        // new 
-        unsigned int lightPhong;
+		// new 
+		unsigned int lightPhong;
 
-        unsigned int ambientLight;
+		unsigned int ambientLight;
 
-        unsigned int diffusLight;
+		unsigned int diffusLight;
 
-        unsigned int spekularLight;
+		unsigned int spekularLight;
 
-        unsigned int ambientMaterial;
+		unsigned int ambientMaterial;
 
-        unsigned int diffusMaterial;
+		unsigned int diffusMaterial;
 
-        unsigned int spekularMaterial;
+		unsigned int spekularMaterial;
 
-        //unsigned int emissivMaterial;
+		//unsigned int emissivMaterial;
 
-        unsigned int shininessMaterial;
+		unsigned int shininessMaterial;
 
-        unsigned int brightnessFactor;
-    };
+		unsigned int brightnessFactor;
+	};
 
-    struct BufferCombo
-    {
-        unsigned int vao, vbo, vertsToDraw;
-    };
+	struct BufferCombo
+	{
+		unsigned int vao, vbo, vertsToDraw;
+	};
 
 	struct UIParameter
 	{
 		glm::quat globalRotation;
-        float distanceLight = 79.f;
-        float distanceCamera = 10.f;
-        glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
+		float distanceLight = 79.f;
+		float distanceCamera = 10.f;
+		glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
 
-        // Light
-        glm::vec4 ambientLight = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
-        glm::vec4 diffusLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
-        glm::vec4 specularLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
-        glm::vec4 ambientMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
-        glm::vec4 diffusMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
-        glm::vec4 spekularMaterial = glm::vec4(1.f, 1.f, 1.f, 1.f);
-        glm::vec4 emissivMaterial = glm::vec4(0.f, 0.f, 0.f, 0.f);
-        float shininessMaterial = 20.f;
+		// Light
+		glm::vec4 ambientLight = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
+		glm::vec4 diffusLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
+		glm::vec4 specularLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
+		glm::vec4 ambientMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+		glm::vec4 diffusMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+		glm::vec4 spekularMaterial = glm::vec4(1.f, 1.f, 1.f, 1.f);
+		glm::vec4 emissivMaterial = glm::vec4(0.f, 0.f, 0.f, 0.f);
+		float shininessMaterial = 20.f;
 
-        float brightnessFactor = 1.0f;
+		float brightnessFactor = 1.0f;
 
-        // Shadow 
-        //factor: Specifies a scale factor that is used to create a variable depth offset for each polygon.The initial value is 0.
-        GLfloat offsetFactor = 1.4f;
-        // units: Is multiplied by an implementation - specific value to create a constant depth offset.The initial value is 0.
-        GLfloat offsetUnits = 1.f;
+		// Shadow 
+		//factor: Specifies a scale factor that is used to create a variable depth offset for each polygon.The initial value is 0.
+		GLfloat offsetFactor = 1.4f;
+		// units: Is multiplied by an implementation - specific value to create a constant depth offset.The initial value is 0.
+		GLfloat offsetUnits = 1.f;
 
-        float f;
+		float f;
 
 
 	};
 
-    struct Framebuffers
-    {
-        unsigned int shadowmap_buffer;
-        unsigned int default_buffer = 0;
-    };
+	struct Framebuffers
+	{
+		unsigned int shadowmap_buffer;
+		unsigned int default_buffer = 0;
+	};
 
-    struct ModelFBX
-    {
-        const   std::string buddha = "../modelsScaled/budda.fbx";
-        const   std::string bunny = "../modelsScaled/bunny.fbx";
-        const   std::string box = "../modelsScaled/box.fbx";
-        const   std::string cone = "../modelsScaled/cone.fbx";
-        const   std::string cylinder = "../modelsScaled/cylinder.fbx";
-        const   std::string ball = "../modelsScaled/ball.fbx";
-        const   std::string donut = "../modelsScaled/donut.fbx";
+	struct ModelFBX
+	{
+		const   std::string buddha = "../modelsScaled/budda.fbx";
+		const   std::string bunny = "../modelsScaled/bunny.fbx";
+		const   std::string box = "../modelsScaled/box.fbx";
+		const   std::string cone = "../modelsScaled/cone.fbx";
+		const   std::string cylinder = "../modelsScaled/cylinder.fbx";
+		const   std::string ball = "../modelsScaled/ball.fbx";
+		const   std::string donut = "../modelsScaled/donut.fbx";
 
-        const std::vector<std::string> modelPaths{ buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
-        const std::vector<int> modelMaxTurn{ 360,     360,    90,     5,      5,          5,      180 };
-        const std::vector<std::string> modelNames{ "buddha", "bunny", "box", "cone", "cylinder", "ball", "donut" };
+		const std::vector<std::string> modelPaths{ buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
+		const std::vector<int> modelMaxTurn{ 360,     360,    90,     5,      5,          5,      180 };
+		const std::vector<std::string> modelNames{ "buddha", "bunny", "box", "cone", "cylinder", "ball", "donut" };
 
-        const fbxmodel::FBXModel models[7] =
-        {
-            fbxmodel::FBXModel(modelPaths[0]),
-            fbxmodel::FBXModel(modelPaths[1]),
-            fbxmodel::FBXModel(modelPaths[2]),
-            fbxmodel::FBXModel(modelPaths[3]),
-            fbxmodel::FBXModel(modelPaths[4]),
-            fbxmodel::FBXModel(modelPaths[5]),
-            fbxmodel::FBXModel(modelPaths[6])
-        };
+		const fbxmodel::FBXModel models[7] =
+		{
+			fbxmodel::FBXModel(modelPaths[0]),
+			fbxmodel::FBXModel(modelPaths[1]),
+			fbxmodel::FBXModel(modelPaths[2]),
+			fbxmodel::FBXModel(modelPaths[3]),
+			fbxmodel::FBXModel(modelPaths[4]),
+			fbxmodel::FBXModel(modelPaths[5]),
+			fbxmodel::FBXModel(modelPaths[6])
+		};
 
-        // global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
-        unsigned int modelSelection;
-        unsigned int lastDrawnFBX = modelSelection;
-    };
+		// global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
+		unsigned int modelSelection;
+		unsigned int lastDrawnFBX = modelSelection;
+	};
 
-    struct TweakbarPackage
-    {
-        void* object1;
-        void* object2;
-    };
+	struct TweakbarPackage
+	{
+		void* object1;
+		void* object2;
+	};
 
 
 	class CGRenderer : public Renderer
 	{
-        friend class Autopilot;
-        std::unique_ptr<cgbv::shader::GLSLShaderprogram> shader;
+		friend class Autopilot;
+		std::unique_ptr<cgbv::shader::GLSLShaderprogram> shader;
 
-        ShaderLocations locs;
+		ShaderLocations locs;
 
-        BufferCombo basesurface, object;
+		BufferCombo basesurface, object;
 
-        glm::mat4 observer_projection, lightsource_projection, model, bias;
+		glm::mat4 observer_projection, lightsource_projection, model, bias;
 
-        glm::mat3 normal;
+		glm::mat3 normal;
 
 		UIParameter parameter;
 
-        Framebuffers framebuffers;
+		Framebuffers framebuffers;
 
-        Autopilot autopilot;
-        cgbv::Autopilot::ReturnValues returnValues;
+		Autopilot autopilot;
+		cgbv::Autopilot::ReturnValues returnValues;
 
-        TweakbarPackage modelSelectionPackage;
+		TweakbarPackage modelSelectionPackage;
 
-        std::unique_ptr<cgbv::textures::Texture> shadowmap;
-        unsigned int shadowmap_sampler;
-        int shadowmap_width = 4096, shadowmap_height = 4096;
+		std::unique_ptr<cgbv::textures::Texture> shadowmap;
+		unsigned int shadowmap_sampler;
+		int shadowmap_width = 4096, shadowmap_height = 4096;
 
-        cgbv::Camera observer_camera, lightsource_camera;
+		cgbv::Camera observer_camera, lightsource_camera;
 
-        std::bitset<1> screenshot;
+		std::bitset<1> screenshot;
 
-        void shadowmap_pass();
-        void final_pass();
+		void shadowmap_pass();
+		void final_pass();
 
 	public:
 
-        CGRenderer(GLFWwindow *window);
+		CGRenderer(GLFWwindow* window);
 		~CGRenderer(void);
 
-        ModelFBX modelfbx;
+		ModelFBX modelfbx;
 
 		virtual void destroy();
 		virtual void resize(int width, int height);
@@ -178,9 +178,9 @@ namespace cgbv
 		virtual bool setup();
 		virtual void render();
 		virtual void update();
-        void capture();
-        //void loadFBX();
-        void loadFBX(int currentMod);
-        //void loadFBX(std::string path);    
+		void capture();
+		//void loadFBX();
+		void loadFBX(int currentMod);
+		//void loadFBX(std::string path);    
 	};
 }

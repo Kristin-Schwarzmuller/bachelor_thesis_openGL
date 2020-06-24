@@ -61,12 +61,13 @@ namespace cgbv
 
 		// Write the values into the vectors to iterate over it later 
 		setupAzimuthCamera();
-		elevation = setupVector(0, 90, 5); 
-		azimuthLight = setupVector(0, 355, 5); 
+		elevationLight = setupVector(0, 90, 5);
+		elevationCamera = setupVector(0, 90, 30);
+		azimuthLight = setupVector(0, 355, 5);
 
 		// Initialize the iterators  
-		elevationLightPtr = elevation.begin();
-		elevationCameraPtr = elevation.begin();
+		elevationLightPtr = elevationLight.begin();
+		elevationCameraPtr = elevationCamera.begin();
 		azimuthLightPtr = azimuthLight.begin();
 		azimuthCameraPtr = azimuthCamera.at(currentModel).begin();
 
@@ -98,12 +99,12 @@ namespace cgbv
 
 	bool Autopilot::setupAzimuthCamera()
 	{
-		 //todo: nur ein vector pro maxturn value 
-		 //define the different turning ranges for the different models 
+		//todo: nur ein vector pro maxturn value 
+		//define the different turning ranges for the different models 
 		std::vector<int> tmp;
 		for (auto maxturn : modelMaxTurn)
 		{
-			for (int i = 0; i < maxturn; i+=45) {
+			for (int i = 0; i < maxturn; i += 45) {
 				tmp.push_back(i);
 			}
 			azimuthCamera.push_back(tmp);
@@ -127,42 +128,42 @@ namespace cgbv
 	bool Autopilot::tick()
 	{
 		// first try to move the light 
-		if (tickLight()) 
+		if (tickLight())
 		{
 			return true;
 		}
 		// if the vectors already reached their end, reset them and tick the camera  
-		if (tickCamera()) 
+		if (tickCamera())
 		{
-			elevationLightPtr = elevation.begin();
+			elevationLightPtr = elevationLight.begin();
 			azimuthLightPtr = azimuthLight.begin();
 			return true;
 		}
 		// else: 
 		if (++currentModel < modelMaxTurn.size())
 		{
-			elevationLightPtr = elevation.begin();
-			elevationCameraPtr = elevation.begin();
+			elevationLightPtr = elevationLight.begin();
+			elevationCameraPtr = elevationCamera.begin();
 			azimuthLightPtr = azimuthLight.begin();
 			azimuthCameraPtr = azimuthCamera.at(currentModel).begin();
 			return true;
 		}
-
 		return false;
 	}
 
 	bool Autopilot::tickLight()
 	{
-		if (++elevationLightPtr != elevation.end())
+		if (++elevationLightPtr != elevationLight.end())
 		{
 			return true;
 		}
 
 		//else reached end of elevation vector = 90 degres on top 
 		// --> reset elevation and tick azimuth light 
-		elevationLightPtr = elevation.begin();
+
 		if (++azimuthLightPtr != azimuthLight.end())
 		{
+			elevationLightPtr = elevationLight.begin();
 			return true;
 		}
 		// both vectors ended --> all light directions from this camera position are done
@@ -171,15 +172,16 @@ namespace cgbv
 
 	bool Autopilot::tickCamera()
 	{
-		if (++elevationCameraPtr != elevation.end())
+		if (++elevationCameraPtr != elevationCamera.end())
 		{
 			return true;
 		}
 		//else reached end of elevation vector = 90 degres on top 
 		// --> reset elevation and tick azimuth camera 
-		elevationCameraPtr = elevation.begin();
+
 		if (++azimuthCameraPtr != azimuthCamera.at(currentModel).end())
 		{
+			elevationCameraPtr = elevationCamera.begin();
 			return true;
 		}
 		return false;
@@ -213,7 +215,7 @@ namespace cgbv
 		{
 			to + value;
 		}
-		return value % to ;
+		return value % to;
 	}
 
 	glm::vec3 Autopilot::calPos(int azimuthPtr, int elevationPtr, float distance)
