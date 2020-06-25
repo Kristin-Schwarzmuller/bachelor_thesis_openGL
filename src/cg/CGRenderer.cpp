@@ -5,6 +5,7 @@
 
 namespace cgbv
 {
+	// ======= Callbach funktions ===============================
 	void TW_CALL handleScreenshot(void* data)
 	{
 		CGRenderer* renderer = reinterpret_cast<CGRenderer*>(data);
@@ -26,7 +27,7 @@ namespace cgbv
 		auto model = static_cast<ModelFBX*>(package->object1);
 		*(unsigned int*)value = model->modelSelection;
 	}
-
+	// ==========================================================
 
 	CGRenderer::CGRenderer(GLFWwindow* window) : Renderer(window)
 	{
@@ -123,21 +124,18 @@ namespace cgbv
 				modelfbx.modelSelection = 6;
 				break;
 
-				//case GLFW_KEY_UP:
-				//	model *= glm::rotate(glm::mat4(1.f), (float)M_PI / 6.f, glm::vec3(1.f, 0.f, 0.f));
-				//	break;
-
-				//case GLFW_KEY_DOWN:
-				//	model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(1.f, 0.f, 0.f));
-				//	break;
-
-				//case GLFW_KEY_LEFT:
-				//	model *= glm::rotate(glm::mat4(1.f), (float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
-				//	break;
-
-				//case GLFW_KEY_RIGHT:
-				//	model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
-				//	break;
+			case GLFW_KEY_B:
+				model = glm::rotate(glm::mat4(1.f), glm::radians(90.0f), glm::vec3(0.f, 1.f, 0.f)) * model;
+				break;
+			case GLFW_KEY_N:
+				model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(1.f, 0.f, 0.f));
+				break;
+			case GLFW_KEY_M:
+				model *= glm::rotate(glm::mat4(1.f), (float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
+				break;
+			case GLFW_KEY_RIGHT:
+				model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
+				break;
 			default:
 				break;
 			}
@@ -400,7 +398,7 @@ namespace cgbv
 
 		// Scaling the object
 		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.35f));// 0.003f));
-
+		model = glm::rotate(glm::mat4(1.f), glm::radians(autopilot.getValues.getModelRotation()), glm::vec3(0.f, 1.f, 0.f)) * model;
 
 		shader->use();
 		//new 
@@ -457,7 +455,7 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		returnValues = autopilot.getValues();
+		//returnValues = autopilot.getValues();
 		//lightsource_camera.moveTo(returnValues.getLightPos());
 		//observer_camera.moveTo(returnValues.getCameraPos());
 		//if (returnValues.getModelID() != modelfbx.modelSelection)
@@ -466,7 +464,7 @@ namespace cgbv
 		//	loadFBX(modelfbx.modelSelection);
 		//}
 		////screenshot.set();
-		autopilot.step();
+		//autopilot.step();
 	}
 
 	void CGRenderer::loadFBX(int currentMod)

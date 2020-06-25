@@ -13,7 +13,6 @@ namespace cgbv
 
 	class Autopilot
 	{
-
 		// Number of FBX models that need to be drawn
 		unsigned int currentModel = 0;
 		// Number of pictures taken
@@ -22,9 +21,16 @@ namespace cgbv
 		// name of the currently drawn iamge
 		std::string currentImageName;
 
-		// array with elevation angels --> from 0 to 90 degrees
-		std::vector<int> elevation;
+		int stepSizeElevationLight = 5;
+		int stepSizeElevationCamera = 30;
+		int stepSizeAzimuthLight = 5;
+		int stepSizeAzimuthCamera = 45;
+		// Light Elevation
+		std::vector<int> elevationLight;
 		std::vector<int>::const_iterator elevationLightPtr;
+
+		// Camera Elevation
+		std::vector<int> elevationCamera;
 		std::vector<int>::const_iterator elevationCameraPtr;
 
 		// array with anzimult angels for the light --> from 0 to 355 degrees
@@ -69,7 +75,6 @@ namespace cgbv
 
 		void defImageName();
 		bool writeDataCSV();
-		int clampAround(int value, int to);
 		glm::vec3 calPos(int azimuthPtr, int elevationPtr, float distance);
 
 	public:
@@ -80,14 +85,16 @@ namespace cgbv
 
 			glm::vec3 lightPos;
 			glm::vec3 cameraPos;
+			unsigned int modelRotation;
 			unsigned int modelID;
 			std::string imageName;
 
 		public:
 			ReturnValues();
-			ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, unsigned int modelID, std::string imageName);
+			ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, unsigned int modelRotation, unsigned int modelID, std::string imageName);
 			glm::vec3 getLightPos();
 			glm::vec3 getCameraPos();
+			int getModelRotation();
 			unsigned int getModelID();
 			std::string getImageName();
 		};

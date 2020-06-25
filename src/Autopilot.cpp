@@ -13,10 +13,11 @@ namespace cgbv
 	{
 	}
 
-	Autopilot::ReturnValues::ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, unsigned int modelID, std::string imageName)
+	Autopilot::ReturnValues::ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, unsigned int modelRotation, unsigned int modelID, std::string imageName)
 	{
 		this->lightPos = lightPos;
 		this->cameraPos = cameraPos;
+		this->modelRotation = modelRotation;
 		this->modelID = modelID;
 		this->imageName = imageName;
 	}
@@ -29,6 +30,11 @@ namespace cgbv
 	glm::vec3 Autopilot::ReturnValues::getCameraPos()
 	{
 		return cameraPos;
+	}
+
+	int Autopilot::ReturnValues::getModelRotation()
+	{
+		return modelRotation;
 	}
 
 	unsigned int Autopilot::ReturnValues::getModelID()
@@ -61,9 +67,9 @@ namespace cgbv
 
 		// Write the values into the vectors to iterate over it later 
 		setupAzimuthCamera();
-		elevationLight = setupVector(0, 90, 5);
-		elevationCamera = setupVector(0, 90, 30);
-		azimuthLight = setupVector(0, 355, 5);
+		elevationLight = setupVector(0, 90, stepSizeElevationLight);
+		elevationCamera = setupVector(0, 90, stepSizeElevationCamera);
+		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight);
 
 		// Initialize the iterators  
 		elevationLightPtr = elevationLight.begin();
@@ -84,8 +90,8 @@ namespace cgbv
 	{
 		return Autopilot::ReturnValues::ReturnValues(
 			calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight),
-
-			calPos(*azimuthCameraPtr, *elevationCameraPtr, distanceCamera),
+			calPos(0, *elevationCameraPtr, distanceCamera),
+			*azimuthCameraPtr,
 			currentModel,
 			currentImageName);
 	}
@@ -104,7 +110,7 @@ namespace cgbv
 		std::vector<int> tmp;
 		for (auto maxturn : modelMaxTurn)
 		{
-			for (int i = 0; i < maxturn; i += 45) {
+			for (int i = 0; i < maxturn; i += stepSizeAzimuthCamera) {
 				tmp.push_back(i);
 			}
 			azimuthCamera.push_back(tmp);
@@ -148,6 +154,8 @@ namespace cgbv
 			azimuthCameraPtr = azimuthCamera.at(currentModel).begin();
 			return true;
 		}
+		// everything is done
+		csvFile.close();
 		return false;
 	}
 
@@ -204,18 +212,9 @@ namespace cgbv
 		//csvFile << sy << u;
 		csvFile << *azimuthCameraPtr << u;
 		csvFile << *elevationCameraPtr << u;
-		csvFile << clampAround(*azimuthLightPtr - *azimuthCameraPtr, 360) << u;
-		csvFile << clampAround(*elevationLightPtr - *elevationCameraPtr, 90) << n;
+		csvFile << *azimuthLightPtr << u;
+		csvFile << *elevationLightPtr << n;
 		return true;
-	}
-
-	int Autopilot::clampAround(int value, int to)
-	{
-		while (value < 0)
-		{
-			to + value;
-		}
-		return value % to;
 	}
 
 	glm::vec3 Autopilot::calPos(int azimuthPtr, int elevationPtr, float distance)
