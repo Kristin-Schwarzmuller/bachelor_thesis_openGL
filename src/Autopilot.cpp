@@ -17,7 +17,7 @@ namespace cgbv
 	{
 		this->lightPos = lightPos;
 		this->cameraPos = cameraPos;
-		this->modelRotation = modelRotation;
+		this->modelRotation = (float) modelRotation;
 		this->modelID = modelID;
 		this->imageName = imageName;
 	}
@@ -32,7 +32,7 @@ namespace cgbv
 		return cameraPos;
 	}
 
-	int Autopilot::ReturnValues::getModelRotation()
+	float Autopilot::ReturnValues::getModelRotation()
 	{
 		return modelRotation;
 	}

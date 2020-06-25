@@ -362,7 +362,8 @@ namespace cgbv
 
 		// model = glm::mat4_cast(parameter.globalRotation);
 		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.35f));
-
+		model = glm::rotate(glm::mat4(1.f), glm::radians(autopilot.getValues().getModelRotation()), glm::vec3(0.f, 1.f, 0.f)) * model;
+	
 		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 
 		shader->use();
@@ -398,7 +399,7 @@ namespace cgbv
 
 		// Scaling the object
 		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.35f));// 0.003f));
-		model = glm::rotate(glm::mat4(1.f), glm::radians(autopilot.getValues.getModelRotation()), glm::vec3(0.f, 1.f, 0.f)) * model;
+		model = glm::rotate(glm::mat4(1.f), glm::radians(autopilot.getValues().getModelRotation()), glm::vec3(0.f, 1.f, 0.f)) * model;
 
 		shader->use();
 		//new 
