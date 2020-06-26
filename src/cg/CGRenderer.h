@@ -134,7 +134,6 @@ namespace cgbv
 
 	class CGRenderer : public Renderer
 	{
-		friend class Autopilot;
 		std::unique_ptr<cgbv::shader::GLSLShaderprogram> shader;
 
 		ShaderLocations locs;

@@ -260,6 +260,7 @@ namespace cgbv
 			data.clear();
 			vertices.clear();
 		}
+		loadFBX(modelfbx.modelSelection);
 
 
 		// GUI
@@ -456,7 +457,7 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		//returnValues = autopilot.getValues();
+		returnValues = autopilot.getValues();
 		//lightsource_camera.moveTo(returnValues.getLightPos());
 		//observer_camera.moveTo(returnValues.getCameraPos());
 		//if (returnValues.getModelID() != modelfbx.modelSelection)
@@ -465,7 +466,7 @@ namespace cgbv
 		//	loadFBX(modelfbx.modelSelection);
 		//}
 		////screenshot.set();
-		//autopilot.step();
+		autopilot.step();
 	}
 
 	void CGRenderer::loadFBX(int currentMod)

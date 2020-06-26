@@ -57,10 +57,10 @@ namespace cgbv
 		// Used to write the CSV 
 	   // create an ofstream for the file output (see the link on streams for
 	   // more info
-		std::string csvName = "labelsKS.csv";
+		std::string csvName = "labels_ks.csv";
 		std::string u = ";";
 		std::string n = "\n";
-		std::vector<std::string> colname{ "Filename", "Azimuth_objektiv", "Elevation_objectiv", "C_A", "C_E", "Azimuth_subjektiv", "Elevation_subjectiv" };
+		const std::vector<std::string> colname{ "Filename", "Azimuth", "Elevation", "C_A", "C_E"};
 		std::ofstream csvFile;
 		// ========================================================================================================================
 		// set up the vectors to iterate over them 
@@ -85,7 +85,7 @@ namespace cgbv
 
 			glm::vec3 lightPos;
 			glm::vec3 cameraPos;
-			unsigned int modelRotation;
+			float modelRotation;
 			unsigned int modelID;
 			std::string imageName;
 
@@ -94,7 +94,7 @@ namespace cgbv
 			ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, unsigned int modelRotation, unsigned int modelID, std::string imageName);
 			glm::vec3 getLightPos();
 			glm::vec3 getCameraPos();
-			int getModelRotation();
+			float getModelRotation();
 			unsigned int getModelID();
 			std::string getImageName();
 		};

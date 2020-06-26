@@ -77,12 +77,24 @@ namespace cgbv
 		azimuthLightPtr = azimuthLight.begin();
 		azimuthCameraPtr = azimuthCamera.at(currentModel).begin();
 
+		csvFile.open(csvName, std::ofstream::out | std::ofstream::trunc);
+
+
+		std::ofstream test;
+		test.open("test.txt", std::ofstream::out | std::ofstream::trunc);
+		test.flush();
+		test.close();
 		// Send the column name to the file stream
+		if (!csvFile) {
+			std::cout << "Da stinkt was" << std::endl; 
+		}
 		for (auto name : colname)
 		{
-			csvFile << name << u;
+			csvFile <<  name << u;
 		}
 		csvFile << n;
+		csvFile.flush();
+		defImageName();
 		return true;
 	}
 
@@ -98,9 +110,9 @@ namespace cgbv
 
 	void Autopilot::step()
 	{
-		defImageName();
 		writeDataCSV();
 		tick();
+		defImageName();
 	}
 
 	bool Autopilot::setupAzimuthCamera()
@@ -116,8 +128,6 @@ namespace cgbv
 			azimuthCamera.push_back(tmp);
 			tmp.clear();
 		}
-		azimuthCamera.push_back(tmp);
-
 		return true;
 	}
 
@@ -211,9 +221,8 @@ namespace cgbv
 		//csvFile << sx << u;
 		//csvFile << sy << u;
 		csvFile << *azimuthCameraPtr << u;
-		csvFile << *elevationCameraPtr << u;
-		csvFile << *azimuthLightPtr << u;
-		csvFile << *elevationLightPtr << n;
+		csvFile << *elevationCameraPtr << n;
+		csvFile.flush();
 		return true;
 	}
 
