@@ -222,10 +222,10 @@ namespace cgbv
 			// Base
 			std::vector<glm::vec3> vertices;
 
-			glm::vec3 a(-50.f, 0.f, -50.f);
-			glm::vec3 b(50.f, 0.f, -50.f);
-			glm::vec3 c(50.f, 0.f, 50.f);
-			glm::vec3 d(-50.f, 0.f, 50.f);
+			glm::vec3 a(-750.f, 750.f, -750.f);
+			glm::vec3 b(750.f, 0.f, -750.f);
+			glm::vec3 c(750.f, 0.f, 750.f);
+			glm::vec3 d(-750.f, 0.f, 750.f);
 			/*glm::vec3 a(-5000.f, 0.f, -5000.f);
 			glm::vec3 b(5000.f, 0.f, -5000.f);
 			glm::vec3 c(5000.f, 0.f, 5000.f);
@@ -307,7 +307,7 @@ namespace cgbv
 			//TwAddVarRW(tweakbar, "Mesh", meshType, &cgbv::ModelFBX::modelSelection, NULL);
 			modelSelectionPackage.object1 = &modelfbx;
 			modelSelectionPackage.object2 = this;
-			TwAddVarCB(tweakbar, "Model", meshType, modelSetCallback, modelGetCallback, &modelSelectionPackage, "group = 'Model'");// min = 0 max = 6");
+			TwAddVarCB(tweakbar, "Model", meshType, modelSetCallback, modelGetCallback, &modelSelectionPackage, "");// min = 0 max = 6");
 		}
 
 
@@ -347,7 +347,6 @@ namespace cgbv
 	{
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(parameter.offsetFactor, parameter.offsetUnits);
-		update();
 		shadowmap_pass();
 		final_pass();
 	}
@@ -362,8 +361,8 @@ namespace cgbv
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		// model = glm::mat4_cast(parameter.globalRotation);
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.35f));
-		model = glm::rotate(glm::mat4(1.f), glm::radians(autopilot.getValues().getModelRotation()), glm::vec3(0.f, 1.f, 0.f)) * model;
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.003f));
+		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
 	
 		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 
@@ -399,8 +398,8 @@ namespace cgbv
 		//model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
 
 		// Scaling the object
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.35f));// 0.003f));
-		model = glm::rotate(glm::mat4(1.f), glm::radians(autopilot.getValues().getModelRotation()), glm::vec3(0.f, 1.f, 0.f)) * model;
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.003f));
+		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
 
 		shader->use();
 		//new 
@@ -439,17 +438,29 @@ namespace cgbv
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
-		if (screenshot[0])
-		{
-			std::cout << "Storing Shadowmap to Disk...";
-			std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
-			//glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, pixel.get());
-			glGetTexImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
+		//if (screenshot[0])
+		//{
+		//	std::cout << "Storing Shadowmap to Disk...";
+		//	std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
+		//	//glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, pixel.get());
+		//	glGetTexImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
 
-			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", pixel.get(), shadowmap_width, shadowmap_height, 0);
-			std::cout << "done" << std::endl;
-			screenshot.reset();
-		}
+		//	cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.imageName, pixel.get(), shadowmap_width, shadowmap_height, 0);
+		//	std::cout << "done" << std::endl;
+		//	screenshot.reset();
+		//}
+
+		//if (screenshot[0])
+		//{
+		//	std::cout << "Storing Shadowmap to Disk...";
+		//	std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
+		//	//glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, pixel.get());
+		//	glGetTexImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
+
+		//	cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.imageName, pixel.get(), shadowmap_width, shadowmap_height, 0);
+		//	std::cout << "done" << std::endl;
+		//	screenshot.reset();
+		//}
 
 		TwDraw();
 	}
@@ -458,14 +469,19 @@ namespace cgbv
 	void CGRenderer::update()
 	{
 		returnValues = autopilot.getValues();
-		//lightsource_camera.moveTo(returnValues.getLightPos());
-		//observer_camera.moveTo(returnValues.getCameraPos());
-		//if (returnValues.getModelID() != modelfbx.modelSelection)
-		//{
-		//	modelfbx.modelSelection = returnValues.getModelID();
-		//	loadFBX(modelfbx.modelSelection);
-		//}
-		////screenshot.set();
+		// Light
+		lightsource_camera.moveTo(returnValues.getLightPos());
+		parameter.lightPos = glm::vec4(returnValues.getLightPos(),0); 
+		// Camera view on the model
+		observer_camera.moveTo(returnValues.getCameraPos());
+		parameter.modelRotation = returnValues.getModelRotation();
+		// Model
+		if (returnValues.getModelID() != modelfbx.modelSelection)
+		{
+			modelfbx.modelSelection = returnValues.getModelID();
+			loadFBX(modelfbx.modelSelection);
+		}
+		//screenshot.set();
 		autopilot.step();
 	}
 

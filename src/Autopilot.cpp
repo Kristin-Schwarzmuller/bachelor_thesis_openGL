@@ -86,7 +86,7 @@ namespace cgbv
 		test.close();
 		// Send the column name to the file stream
 		if (!csvFile) {
-			std::cout << "Da stinkt was" << std::endl; 
+			std::cout << "Error while creating csv" << std::endl; 
 		}
 		for (auto name : colname)
 		{
@@ -103,7 +103,7 @@ namespace cgbv
 		return Autopilot::ReturnValues::ReturnValues(
 			calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight),
 			calPos(0, *elevationCameraPtr, distanceCamera),
-			*azimuthCameraPtr,
+			-(*azimuthCameraPtr),
 			currentModel,
 			currentImageName);
 	}
@@ -196,7 +196,7 @@ namespace cgbv
 		}
 		//else reached end of elevation vector = 90 degres on top 
 		// --> reset elevation and tick azimuth camera 
-
+		// just for the labeling in the csv --> needs to be 
 		if (++azimuthCameraPtr != azimuthCamera.at(currentModel).end())
 		{
 			elevationCameraPtr = elevationCamera.begin();
@@ -230,10 +230,11 @@ namespace cgbv
 	glm::vec3 Autopilot::calPos(int azimuthPtr, int elevationPtr, float distance)
 	{
 		// https://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
-		x = distance * sinf(static_cast<float>(elevationPtr)) * cosf(static_cast<float>(azimuthPtr));
-		y = distance * sinf(static_cast<float>(elevationPtr)) * sinf(static_cast<float>(azimuthPtr));
-		z = distance * cosf(static_cast<float>(elevationPtr));
+		x = distance * cosf(static_cast<float>(elevationPtr)) * cosf(static_cast<float>(azimuthPtr));
+		y = distance * cosf(static_cast<float>(elevationPtr)) * sinf(static_cast<float>(azimuthPtr));
+		z = distance * sinf(static_cast<float>(elevationPtr));
 
-		return glm::vec3(x, y, z);
+		//return glm::vec3(y, z, x);
+		return glm::vec3(x,y,z);
 	}
 }
