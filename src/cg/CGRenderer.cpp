@@ -222,10 +222,14 @@ namespace cgbv
 			// Base
 			std::vector<glm::vec3> vertices;
 
-			glm::vec3 a(-750.f, 750.f, -750.f);
-			glm::vec3 b(750.f, 0.f, -750.f);
-			glm::vec3 c(750.f, 0.f, 750.f);
-			glm::vec3 d(-750.f, 0.f, 750.f);
+			//glm::vec3 a(-750.f, 0.f, -750.f);
+			//glm::vec3 b(750.f, 0.f, -750.f);
+			//glm::vec3 c(750.f, 0.f, 750.f);
+			//glm::vec3 d(-750.f, 0.f, 750.f);
+			glm::vec3 a(-50.f, 0.f, -50.f);
+			glm::vec3 b(50.f, 0.f, -50.f);
+			glm::vec3 c(50.f, 0.f, 50.f);
+			glm::vec3 d(-50.f, 0.f, 50.f);
 			/*glm::vec3 a(-5000.f, 0.f, -5000.f);
 			glm::vec3 b(5000.f, 0.f, -5000.f);
 			glm::vec3 c(5000.f, 0.f, 5000.f);
@@ -361,9 +365,9 @@ namespace cgbv
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		// model = glm::mat4_cast(parameter.globalRotation);
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.003f));
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(.35f));
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
-	
+
 		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 
 		shader->use();
@@ -398,7 +402,7 @@ namespace cgbv
 		//model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
 
 		// Scaling the object
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(0.003f));
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(.35f));
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
 
 		shader->use();
@@ -450,18 +454,6 @@ namespace cgbv
 		//	screenshot.reset();
 		//}
 
-		//if (screenshot[0])
-		//{
-		//	std::cout << "Storing Shadowmap to Disk...";
-		//	std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
-		//	//glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, pixel.get());
-		//	glGetTexImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
-
-		//	cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.imageName, pixel.get(), shadowmap_width, shadowmap_height, 0);
-		//	std::cout << "done" << std::endl;
-		//	screenshot.reset();
-		//}
-
 		TwDraw();
 	}
 
@@ -481,6 +473,7 @@ namespace cgbv
 			modelfbx.modelSelection = returnValues.getModelID();
 			loadFBX(modelfbx.modelSelection);
 		}
+		parameter.screenShotName = returnValues.getImageName();
 		//screenshot.set();
 		autopilot.step();
 	}

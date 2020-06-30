@@ -62,8 +62,9 @@ namespace cgbv
 	struct UIParameter
 	{
 		glm::quat globalRotation;
-		float distanceLight = 200.f; // 79.f;
-		float distanceCamera = 150.f; // 10.f;
+		float distanceLight = 79.f;
+		float distanceCamera =  10.f;
+
 		glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
 
 		// Light
@@ -87,7 +88,7 @@ namespace cgbv
 		float f;
 		// Model parameters 
 		float modelRotation;
-		std::string imageName;
+		std::string screenShotName;
 
 
 	};
@@ -109,7 +110,7 @@ namespace cgbv
 		const   std::string donut = "../modelsScaled/donut.fbx";
 
 		const std::vector<std::string> modelPaths{ buddha,  bunny,  box,    cone,   cylinder,   ball,   donut };
-		const std::vector<int> modelMaxTurn{ 360,     360,    90,     5,      5,          5,      180 };
+		const std::vector<float> modelMaxTurn{ 360.f,       360.f,  90.f,    5.f,      5.f,    5.f,      180.f };
 		const std::vector<std::string> modelNames{ "buddha", "bunny", "box", "cone", "cylinder", "ball", "donut" };
 
 		const fbxmodel::FBXModel models[7] =

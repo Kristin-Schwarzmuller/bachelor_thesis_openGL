@@ -21,28 +21,28 @@ namespace cgbv
 		// name of the currently drawn iamge
 		std::string currentImageName;
 
-		int stepSizeElevationLight = 5;
-		int stepSizeElevationCamera = 30;
-		int stepSizeAzimuthLight = 5;
-		int stepSizeAzimuthCamera = 45;
+		float stepSizeElevationLight = 5;
+		float stepSizeElevationCamera = 30;
+		float stepSizeAzimuthLight = 5;
+		float stepSizeAzimuthCamera = 45;
 		// Light Elevation
-		std::vector<int> elevationLight;
-		std::vector<int>::const_iterator elevationLightPtr;
+		std::vector<float> elevationLight;
+		std::vector<float>::const_iterator elevationLightPtr;
 
 		// Camera Elevation
-		std::vector<int> elevationCamera;
-		std::vector<int>::const_iterator elevationCameraPtr;
+		std::vector<float> elevationCamera;
+		std::vector<float>::const_iterator elevationCameraPtr;
 
 		// array with anzimult angels for the light --> from 0 to 355 degrees
-		std::vector<int> azimuthLight;
-		std::vector<int>::const_iterator azimuthLightPtr;
+		std::vector<float> azimuthLight;
+		std::vector<float>::const_iterator azimuthLightPtr;
 
 		// array with anzimult angels --> from 0 to 355 degrees
-		std::vector<std::vector<int>> azimuthCamera;
-		std::vector<int>::const_iterator azimuthCameraPtr;
+		std::vector<std::vector<float>> azimuthCamera;
+		std::vector<float>::const_iterator azimuthCameraPtr;
 
 		// Integer values how much every model needs to be turned around it self 
-		std::vector<int> modelMaxTurn;
+		std::vector<float> modelMaxTurn;
 		// Names of the models for the filenames
 		std::vector<std::string> modelNames;
 
@@ -65,7 +65,7 @@ namespace cgbv
 		// ========================================================================================================================
 		// set up the vectors to iterate over them 
 		bool setupAzimuthCamera();
-		std::vector<int> setupVector(int from, int to, int step_size);
+		std::vector<float> setupVector(float from, float to, float step_size, bool firstNotZero);
 
 		// Tick to the next position
 		bool tick();
@@ -75,7 +75,7 @@ namespace cgbv
 
 		void defImageName();
 		bool writeDataCSV();
-		glm::vec3 calPos(int azimuthPtr, int elevationPtr, float distance);
+		glm::vec3 calPos(float azimuthPtr, float elevationPtr, float distance);
 
 	public:
 		// evtl todo: reset
@@ -91,7 +91,7 @@ namespace cgbv
 
 		public:
 			ReturnValues();
-			ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, unsigned int modelRotation, unsigned int modelID, std::string imageName);
+			ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, float modelRotation, unsigned int modelID, std::string imageName);
 			glm::vec3 getLightPos();
 			glm::vec3 getCameraPos();
 			float getModelRotation();
@@ -101,7 +101,7 @@ namespace cgbv
 		// ========================================================================================================================
 		Autopilot();
 		~Autopilot();
-		bool init(const std::vector<int> modelMaxTurn, const std::vector<std::string> modelNames,
+		bool init(const std::vector<float> modelMaxTurn, const std::vector<std::string> modelNames,
 			float lightDistance, float cameraDistance);
 		ReturnValues getValues();
 		void step();

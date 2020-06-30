@@ -62,7 +62,7 @@ int main()
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(0); //1
 
     do
     {

@@ -13,11 +13,11 @@ namespace cgbv
 	{
 	}
 
-	Autopilot::ReturnValues::ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, unsigned int modelRotation, unsigned int modelID, std::string imageName)
+	Autopilot::ReturnValues::ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, float modelRotation, unsigned int modelID, std::string imageName)
 	{
 		this->lightPos = lightPos;
 		this->cameraPos = cameraPos;
-		this->modelRotation = (float) modelRotation;
+		this->modelRotation = (float)modelRotation;
 		this->modelID = modelID;
 		this->imageName = imageName;
 	}
@@ -57,7 +57,7 @@ namespace cgbv
 		csvFile.close();
 	}
 
-	bool Autopilot::init(const std::vector<int> modelMaxTurn, const std::vector<std::string> modelNames, float distanceLight, float distanceCamera)
+	bool Autopilot::init(const std::vector<float> modelMaxTurn, const std::vector<std::string> modelNames, float distanceLight, float distanceCamera)
 	{
 		// allocate the transfered variables 
 		this->modelMaxTurn = modelMaxTurn;
@@ -67,9 +67,9 @@ namespace cgbv
 
 		// Write the values into the vectors to iterate over it later 
 		setupAzimuthCamera();
-		elevationLight = setupVector(0, 90, stepSizeElevationLight);
-		elevationCamera = setupVector(0, 90, stepSizeElevationCamera);
-		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight);
+		elevationLight = setupVector(0, 90, stepSizeElevationLight, false);
+		elevationCamera = setupVector(0, 90, stepSizeElevationCamera, true);
+		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight, false);
 
 		// Initialize the iterators  
 		elevationLightPtr = elevationLight.begin();
@@ -86,11 +86,11 @@ namespace cgbv
 		test.close();
 		// Send the column name to the file stream
 		if (!csvFile) {
-			std::cout << "Error while creating csv" << std::endl; 
+			std::cout << "Error while creating csv" << std::endl;
 		}
 		for (auto name : colname)
 		{
-			csvFile <<  name << u;
+			csvFile << name << u;
 		}
 		csvFile << n;
 		csvFile.flush();
@@ -111,18 +111,20 @@ namespace cgbv
 	void Autopilot::step()
 	{
 		writeDataCSV();
-		tick();
-		defImageName();
+		if (tick())
+		{
+			defImageName();
+		}
 	}
 
 	bool Autopilot::setupAzimuthCamera()
 	{
 		//todo: nur ein vector pro maxturn value 
 		//define the different turning ranges for the different models 
-		std::vector<int> tmp;
+		std::vector<float> tmp;
 		for (auto maxturn : modelMaxTurn)
 		{
-			for (int i = 0; i < maxturn; i += stepSizeAzimuthCamera) {
+			for (float i = 0; i < maxturn; i += stepSizeAzimuthCamera) {
 				tmp.push_back(i);
 			}
 			azimuthCamera.push_back(tmp);
@@ -131,11 +133,15 @@ namespace cgbv
 		return true;
 	}
 
-	std::vector<int> Autopilot::setupVector(int from, int to, int step_size)
+	std::vector<float> Autopilot::setupVector(float from, float to, float step_size, bool firstNotZero)
 	{
-		std::vector<int> vec;
-		for (int i = from; i <= to; i += step_size) {
+		std::vector<float> vec;
+		for (float i = from; i <= to; i += step_size) {
 			vec.push_back(i);
+		}
+		if (firstNotZero)
+		{
+			vec.at(0) = 1;
 		}
 		return vec;
 	}
@@ -227,7 +233,7 @@ namespace cgbv
 		return true;
 	}
 
-	glm::vec3 Autopilot::calPos(int azimuthPtr, int elevationPtr, float distance)
+	glm::vec3 Autopilot::calPos(float azimuthPtr, float elevationPtr, float distance)
 	{
 		// https://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
 		x = distance * cosf(static_cast<float>(elevationPtr)) * cosf(static_cast<float>(azimuthPtr));
@@ -235,6 +241,6 @@ namespace cgbv
 		z = distance * sinf(static_cast<float>(elevationPtr));
 
 		//return glm::vec3(y, z, x);
-		return glm::vec3(x,y,z);
+		return glm::vec3(x, y, z);
 	}
 }
