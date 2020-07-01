@@ -102,7 +102,7 @@ namespace cgbv
 	{
 		return Autopilot::ReturnValues::ReturnValues(
 			calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight),
-			calPos(0, *elevationCameraPtr, distanceCamera),
+			calPos(0.f, *elevationCameraPtr, distanceCamera),
 			-(*azimuthCameraPtr),
 			currentModel,
 			currentImageName);
@@ -236,9 +236,9 @@ namespace cgbv
 	glm::vec3 Autopilot::calPos(float azimuthPtr, float elevationPtr, float distance)
 	{
 		// https://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
-		x = distance * cosf(static_cast<float>(elevationPtr)) * cosf(static_cast<float>(azimuthPtr));
-		y = distance * cosf(static_cast<float>(elevationPtr)) * sinf(static_cast<float>(azimuthPtr));
-		z = distance * sinf(static_cast<float>(elevationPtr));
+		x = distance * cosf(glm::radians(elevationPtr)) * cosf(glm::radians(azimuthPtr));
+		y = distance * cosf(glm::radians(elevationPtr)) * sinf(glm::radians(azimuthPtr));
+		z = distance * sinf(glm::radians(elevationPtr));
 
 		//return glm::vec3(y, z, x);
 		return glm::vec3(x, y, z);
