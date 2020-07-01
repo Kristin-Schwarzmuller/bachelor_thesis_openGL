@@ -65,7 +65,7 @@ namespace cgbv
 		// ========================================================================================================================
 		// set up the vectors to iterate over them 
 		bool setupAzimuthCamera();
-		std::vector<float> setupVector(float from, float to, float step_size, bool firstNotZero);
+		std::vector<float> setupVector(float from, float to, float step_size, bool first);
 
 		// Tick to the next position
 		bool tick();

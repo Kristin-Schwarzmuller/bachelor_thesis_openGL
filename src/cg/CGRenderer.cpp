@@ -247,6 +247,27 @@ namespace cgbv
 				data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
 				basesurface.vertsToDraw++;
 			}
+			// ============= wall for testing 
+			//glm::vec3 e(-10.f, 0.f, 10.f);
+			//glm::vec3 f(-10.f, 0.f, -10.f);
+			//glm::vec3 g(-10.f, 10.f, 10.f);
+			//glm::vec3 h(-10.f, 10.f, -10.f);
+			///*glm::vec3 a(-5000.f, 0.f, -5000.f);
+			//glm::vec3 b(5000.f, 0.f, -5000.f);
+			//glm::vec3 c(5000.f, 0.f, 5000.f);
+			//glm::vec3 d(-5000.f, 0.f, 5000.f);*/
+
+			//vertices.push_back(h); vertices.push_back(g); vertices.push_back(e);
+			//vertices.push_back(e); vertices.push_back(g); vertices.push_back(f);
+
+			//for (auto v : vertices)
+			//{
+			//	data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+			//	data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
+			//	basesurface.vertsToDraw++;
+			//}
+
+			//  ========== wall for testing end 
 
 			glGenVertexArrays(1, &basesurface.vao);
 			glBindVertexArray(basesurface.vao);
@@ -263,6 +284,8 @@ namespace cgbv
 
 			data.clear();
 			vertices.clear();
+
+
 		}
 		loadFBX(modelfbx.modelSelection);
 

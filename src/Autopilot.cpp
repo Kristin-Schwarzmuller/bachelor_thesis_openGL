@@ -240,7 +240,7 @@ namespace cgbv
 		y = distance * cosf(glm::radians(elevationPtr)) * sinf(glm::radians(azimuthPtr));
 		z = distance * sinf(glm::radians(elevationPtr));
 
-		//return glm::vec3(y, z, x);
-		return glm::vec3(x, y, z);
+		return glm::vec3(y, z, x);
+		//return glm::vec3(x, y, z);
 	}
 }
