@@ -250,9 +250,9 @@ namespace cgbv
 
 		char nameBuffer[50];
 		sprintf_s(nameBuffer, "%02d", newtime.tm_mon + 1);
-		dateFolder = "..\\" + std::to_string(newtime.tm_year - 100) + nameBuffer;
+		dateFolder = "..\\..\\ImageData\\" + std::to_string(newtime.tm_year - 100) + nameBuffer;
 		sprintf_s(nameBuffer, "%02d", newtime.tm_mday);
-		dateFolder += nameBuffer + std::to_string(newtime.tm_hour) + std::to_string(newtime.tm_min);
+		dateFolder += nameBuffer + '_' + std::to_string(newtime.tm_hour) + std::to_string(newtime.tm_min) + "Images";
 
 		std::filesystem::create_directory(dateFolder.c_str());
 		std::cout << "Folder: " << dateFolder << " created" << std::endl;

@@ -137,8 +137,6 @@ namespace cgbv
 
 		if (!gladLoadGL())
 			return false;
-		// Disable vertical sync (faster image generation) 
-		glfwSwapInterval(0);
 
 		// GL States
 		glClearColor(0.4f, 0.4f, 0.4f, 1.f);
