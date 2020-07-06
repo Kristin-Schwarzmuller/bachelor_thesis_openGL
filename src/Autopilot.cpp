@@ -3,6 +3,8 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <filesystem>
+
 
 
 namespace cgbv
@@ -76,14 +78,10 @@ namespace cgbv
 		elevationCameraPtr = elevationCamera.begin();
 		azimuthLightPtr = azimuthLight.begin();
 		azimuthCameraPtr = azimuthCamera.at(currentModel).begin();
+			
+		createFolders();
+		csvFile.open((dateFolder + "\\" + csvName), std::ofstream::out | std::ofstream::trunc);
 
-		csvFile.open(csvName, std::ofstream::out | std::ofstream::trunc);
-
-
-		std::ofstream test;
-		test.open("test.txt", std::ofstream::out | std::ofstream::trunc);
-		test.flush();
-		test.close();
 		// Send the column name to the file stream
 		if (!csvFile) {
 			std::cout << "Error while creating csv" << std::endl;
@@ -216,7 +214,7 @@ namespace cgbv
 	{
 		sprintf_s(nameBuffer, "%08d", counter++);
 		// todo here exeption bei current Model = 7 weil es das nicht mehr gibt 
-		currentImageName = std::string(nameBuffer) + modelNames.at(currentModel) + ".png";
+		currentImageName = dateFolder + "\\" + modelNames.at(currentModel) + "\\" + std::string(nameBuffer) + modelNames.at(currentModel) + ".png";
 	}
 
 	bool Autopilot::writeDataCSV()
@@ -243,4 +241,28 @@ namespace cgbv
 		return glm::vec3(y, z, x);
 		//return glm::vec3(x, y, z);
 	}
+
+	bool Autopilot::createFolders()
+	{
+		struct tm newtime;
+		time_t now = time(0);
+		localtime_s(&newtime, &now);
+
+		char nameBuffer[50];
+		sprintf_s(nameBuffer, "%02d", newtime.tm_mon + 1);
+		dateFolder = "..\\" + std::to_string(newtime.tm_year - 100) + nameBuffer;
+		sprintf_s(nameBuffer, "%02d", newtime.tm_mday);
+		dateFolder += nameBuffer + std::to_string(newtime.tm_hour) + std::to_string(newtime.tm_min);
+
+		std::filesystem::create_directory(dateFolder.c_str());
+		std::cout << "Folder: " << dateFolder << " created" << std::endl;
+
+		for (std::string modelName : modelNames)
+		{
+			std::filesystem::create_directory((dateFolder + "\\" + modelName).c_str());
+		}
+
+		return true;
+	}
+
 }

@@ -57,6 +57,7 @@ namespace cgbv
 		// Used to write the CSV 
 	   // create an ofstream for the file output (see the link on streams for
 	   // more info
+		std::string dateFolder;
 		std::string csvName = "labels_ks.csv";
 		std::string u = ";";
 		std::string n = "\n";
@@ -76,6 +77,7 @@ namespace cgbv
 		void defImageName();
 		bool writeDataCSV();
 		glm::vec3 calPos(float azimuthPtr, float elevationPtr, float distance);
+		bool createFolders();
 
 	public:
 		// evtl todo: reset
