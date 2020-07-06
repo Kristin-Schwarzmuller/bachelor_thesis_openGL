@@ -62,7 +62,9 @@ int main()
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-    glfwSwapInterval(1); 
+    // Disable vertical sync (faster image generation) 
+    glfwSwapInterval(1);
+
 
     do
     {

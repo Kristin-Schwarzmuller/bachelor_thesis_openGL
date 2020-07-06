@@ -70,6 +70,10 @@ artifacts/
 # StyleCop
 StyleCopReport.xml
 
+# Generated Files 
+*.png
+*.csv
+
 # Files built by Visual Studio
 *_i.c
 *_p.c

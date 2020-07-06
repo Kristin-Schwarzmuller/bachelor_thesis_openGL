@@ -62,8 +62,14 @@ namespace cgbv
 	struct UIParameter
 	{
 		glm::quat globalRotation;
-		float distanceLight = 79.f;
-		float distanceCamera =  10.f;
+		float distanceLight = 79.f;// 200.f;
+		float distanceCamera = 10.f; // 150.f;
+		float observerprojection_far = 20.f;
+		float lightprojection_xy = 8.f;
+		float lightprojection_zfrom = 1.f;
+		float lightprojection_zto = 80.f;
+		float model_scalation = .35f;
+
 
 		glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
 

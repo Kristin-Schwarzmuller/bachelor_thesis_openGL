@@ -216,7 +216,7 @@ namespace cgbv
 	{
 		sprintf_s(nameBuffer, "%08d", counter++);
 		// todo here exeption bei current Model = 7 weil es das nicht mehr gibt 
-		currentImageName = std::string(nameBuffer) + modelNames.at(currentModel);
+		currentImageName = std::string(nameBuffer) + modelNames.at(currentModel) + ".png";
 	}
 
 	bool Autopilot::writeDataCSV()

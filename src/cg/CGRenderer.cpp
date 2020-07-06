@@ -123,21 +123,6 @@ namespace cgbv
 			case GLFW_KEY_O:
 				modelfbx.modelSelection = 6;
 				break;
-
-			case GLFW_KEY_B:
-				model = glm::rotate(glm::mat4(1.f), glm::radians(90.0f), glm::vec3(0.f, 1.f, 0.f)) * model;
-				break;
-			case GLFW_KEY_N:
-				model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(1.f, 0.f, 0.f));
-				break;
-			case GLFW_KEY_M:
-				model *= glm::rotate(glm::mat4(1.f), (float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
-				break;
-			case GLFW_KEY_RIGHT:
-				model *= glm::rotate(glm::mat4(1.f), -(float)M_PI / 6.f, glm::vec3(0.f, 1.f, 0.f));
-				break;
-			default:
-				break;
 			}
 		}
 	}
@@ -164,12 +149,15 @@ namespace cgbv
 
 		// Matrices 
 		{
-			//observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, 200.f);
-			observer_projection = glm::perspective(glm::pi<float>() / 5.f, float(window_width) / float(window_height), .1f, 20.f);
+			
+			observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, parameter.observerprojection_far);
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			observer_camera.moveTo(0.f, 2.5f, parameter.distanceCamera); // here changes happend 5.f --> 10.f
 
-			lightsource_projection = glm::ortho(-8.f, 8.f, -8.f, 8.f, 1.f, 80.f);
+			lightsource_projection = glm::ortho(-parameter.lightprojection_xy, parameter.lightprojection_xy,
+				-parameter.lightprojection_xy, parameter.lightprojection_xy,
+				parameter.lightprojection_zfrom, parameter.lightprojection_zto);
+
 			lightsource_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			lightsource_camera.moveTo(parameter.lightPos);
 
@@ -388,7 +376,8 @@ namespace cgbv
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		// model = glm::mat4_cast(parameter.globalRotation);
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(.35f));
+		//model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(.35f));
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.model_scalation));
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
 
 		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
@@ -425,7 +414,8 @@ namespace cgbv
 		//model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
 
 		// Scaling the object
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(.35f));
+		//model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(.35f));
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.model_scalation));
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
 
 		shader->use();
