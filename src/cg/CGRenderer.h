@@ -32,6 +32,8 @@ namespace cgbv
 
 		unsigned int shadowmap;
 
+		unsigned int imagemap;
+
 		// new 
 		unsigned int lightPhong;
 
@@ -103,6 +105,7 @@ namespace cgbv
 	{
 		unsigned int shadowmap_buffer;
 		unsigned int default_buffer = 0;
+		unsigned int imagemap_buffer;
 	};
 
 	struct ModelFBX
@@ -166,6 +169,9 @@ namespace cgbv
 		std::unique_ptr<cgbv::textures::Texture> shadowmap;
 		unsigned int shadowmap_sampler;
 		int shadowmap_width = 4096, shadowmap_height = 4096;
+		std::unique_ptr<cgbv::textures::Texture> imagemap;
+		unsigned int imagemap_sampler;
+
 
 		cgbv::Camera observer_camera, lightsource_camera;
 

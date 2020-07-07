@@ -57,6 +57,10 @@ namespace cgbv
 
 		glDeleteFramebuffers(1, &framebuffers.shadowmap_buffer);
 		glDeleteSamplers(1, &shadowmap_sampler);
+
+		glDeleteFramebuffers(1, &framebuffers.imagemap_buffer);
+		glDeleteSamplers(1, &imagemap_sampler);
+
 	}
 
 
@@ -147,7 +151,7 @@ namespace cgbv
 
 		// Matrices 
 		{
-			
+
 			observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, parameter.observerprojection_far);
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			observer_camera.moveTo(0.f, 2.5f, parameter.distanceCamera); // here changes happend 5.f --> 10.f
@@ -327,7 +331,7 @@ namespace cgbv
 
 
 
-		// Framebuffer
+		// Framebuffer shadowmap 
 		{
 			shadowmap = std::make_unique<cgbv::textures::Texture>();
 
@@ -345,6 +349,35 @@ namespace cgbv
 			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowmap->getTextureID(), 0);
+			glDrawBuffer(GL_NONE);
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+				std::cout << "Shadowmap Framebuffer failed" << std::endl;
+		}
+
+		// Framebuffer imagemap
+		{
+			imagemap = std::make_unique<cgbv::textures::Texture>();
+
+			glGenFramebuffers(1, &framebuffers.imagemap_buffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.imagemap_buffer);
+
+			// activate and gen texture
+			//glActiveTexture(GL_TEXTURE27);
+			//glGenTextures(1, &imagemap);
+			glBindTexture(GL_TEXTURE_2D, imagemap->getTextureID());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, window_width, window_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+			glGenSamplers(1, &imagemap_sampler);
+			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, imagemap->getTextureID(), 0);
 			glDrawBuffer(GL_NONE);
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 				std::cout << "Shadowmap Framebuffer failed" << std::endl;
@@ -457,13 +490,30 @@ namespace cgbv
 		//{
 		//	std::cout << "Storing Shadowmap to Disk...";
 		//	std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
-		//	//glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, pixel.get());
-		//	glGetTexImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
+		//	glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, pixel.get());
+		//	//glGetTexImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
 
-		//	cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.imageName, pixel.get(), shadowmap_width, shadowmap_height, 0);
+		//	cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotName, pixel.get(), shadowmap_width, shadowmap_height, 0);
 		//	std::cout << "done" << std::endl;
 		//	screenshot.reset();
 		//}
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, imagemap->getTextureID());
+		glBindSampler(0, imagemap_sampler);
+		glUniform1i(locs.imagemap, 0);
+
+		if (screenshot[0])
+		{
+			std::cout << "Storing Image to Disk...";
+			std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(window_width * window_height);
+			glGetTextureImage(imagemap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, window_width * window_height, pixel.get());
+			glGetTexImage(imagemap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
+
+			cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotName, pixel.get(), window_width, window_height, 1);
+			std::cout << "done" << std::endl;
+			screenshot.reset();
+		}
+
 
 		TwDraw();
 	}
@@ -474,7 +524,7 @@ namespace cgbv
 		returnValues = autopilot.getValues();
 		// Light
 		lightsource_camera.moveTo(returnValues.getLightPos());
-		parameter.lightPos = glm::vec4(returnValues.getLightPos(),0); 
+		parameter.lightPos = glm::vec4(returnValues.getLightPos(), 0);
 		// Camera view on the model
 		observer_camera.moveTo(returnValues.getCameraPos());
 		parameter.modelRotation = returnValues.getModelRotation();
@@ -485,7 +535,7 @@ namespace cgbv
 			loadFBX(modelfbx.modelSelection);
 		}
 		parameter.screenShotName = returnValues.getImageName();
-		//screenshot.set();
+		screenshot.set();
 		autopilot.step();
 	}
 
