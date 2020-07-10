@@ -32,6 +32,8 @@ struct VertexOutput
 	vec3 viewDir;
 
     vec4 shadow_coordinates;
+
+    vec2 TexCoords;
 };
 // =============================================================================================================
 
@@ -96,5 +98,11 @@ subroutine (VertexProgram) void verts_and_normals()
 subroutine (VertexProgram) void simple_placement()
 {
     gl_Position = matrices.mvp * vertex;
+}
+
+subroutine (VertexProgram) void canvas_placement() 
+{
+    gl_Position = vec4(vertex.x, vertex.y, 0.0, 1.0); 
+    Output.TexCoords = vertex.xy / 2 + 0.5;
 }
 // =============================================================================================================

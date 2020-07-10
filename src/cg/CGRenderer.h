@@ -26,7 +26,7 @@ namespace cgbv
 
 		unsigned int modelViewProjection, normalmatrix, modelview, biasedModelViewProjection;
 
-		unsigned int placementVS, lightingVS, lambertFS, depthmapFS;
+		unsigned int placementVS, lightingVS, lambertFS, depthmapFS, canvasPlacementVS, canvasDisplayFS;
 
 		unsigned int lightPos;
 
@@ -151,7 +151,7 @@ namespace cgbv
 
 		ShaderLocations locs;
 
-		BufferCombo basesurface, object;
+		BufferCombo basesurface, object, canvas;
 
 		glm::mat4 observer_projection, lightsource_projection, model, bias;
 
@@ -172,6 +172,8 @@ namespace cgbv
 		std::unique_ptr<cgbv::textures::Texture> imagemap;
 		unsigned int imagemap_sampler;
 
+		unsigned int depth_rbo;
+
 
 		cgbv::Camera observer_camera, lightsource_camera;
 
@@ -179,6 +181,7 @@ namespace cgbv
 
 		void shadowmap_pass();
 		void final_pass();
+		void canvas_pass();
 
 	public:
 

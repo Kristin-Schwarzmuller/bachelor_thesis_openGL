@@ -41,6 +41,8 @@ struct FragmentInput
 	vec3 viewDir;
 
     vec4 shadow_coordinates;
+
+    vec2 TexCoords;
 };
 
 struct Normalized
@@ -53,6 +55,7 @@ struct Normalized
 struct Textures
 {
     sampler2DShadow shadowmap;
+    sampler2D canvas;
 };
 // =============================================================================================================
 
@@ -193,6 +196,11 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     out_color = light.brightnessFactor * (shadowsample * intensity * 1.3f * (specular + diffus) + ambient);
     out_color.w = 1.f;
+}
+
+layout (index = 4) subroutine (FragmentProgram) void canvas_display()
+{
+    out_color = texture(tex.canvas, Input.TexCoords);
 }
 
 // =============================================================================================================

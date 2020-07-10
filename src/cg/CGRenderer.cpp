@@ -187,10 +187,13 @@ namespace cgbv
 			locs.biasedModelViewProjection = shader->getUniformLocation("matrices.bmvp");
 			locs.lightPos = shader->getUniformLocation("light.lightPos");
 			locs.shadowmap = shader->getUniformLocation("tex.shadowmap");
+			locs.imagemap = shader->getUniformLocation("tex.canvas");
 			locs.lambertFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "lambert");
 			locs.depthmapFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "depthmap");
 			locs.lightingVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "verts_and_normals");
 			locs.placementVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "simple_placement");
+			locs.canvasPlacementVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "canvas_placement");
+			locs.canvasDisplayFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "canvas_display");
 			// new 
 			locs.lightPhong = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "phongWithLambert");
 			locs.ambientLight = shader->getUniformLocation("light.ambient");
@@ -202,6 +205,7 @@ namespace cgbv
 			locs.spekularMaterial = shader->getUniformLocation("material.spekular");
 			locs.shininessMaterial = shader->getUniformLocation("material.shininess");
 			locs.brightnessFactor = shader->getUniformLocation("light.brightnessFactor");
+
 		}
 
 
@@ -237,27 +241,6 @@ namespace cgbv
 				data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
 				basesurface.vertsToDraw++;
 			}
-			// ============= wall for testing 
-			//glm::vec3 e(-10.f, 0.f, 10.f);
-			//glm::vec3 f(-10.f, 0.f, -10.f);
-			//glm::vec3 g(-10.f, 10.f, 10.f);
-			//glm::vec3 h(-10.f, 10.f, -10.f);
-			///*glm::vec3 a(-5000.f, 0.f, -5000.f);
-			//glm::vec3 b(5000.f, 0.f, -5000.f);
-			//glm::vec3 c(5000.f, 0.f, 5000.f);
-			//glm::vec3 d(-5000.f, 0.f, 5000.f);*/
-
-			//vertices.push_back(h); vertices.push_back(g); vertices.push_back(e);
-			//vertices.push_back(e); vertices.push_back(g); vertices.push_back(f);
-
-			//for (auto v : vertices)
-			//{
-			//	data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
-			//	data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
-			//	basesurface.vertsToDraw++;
-			//}
-
-			//  ========== wall for testing end 
 
 			glGenVertexArrays(1, &basesurface.vao);
 			glBindVertexArray(basesurface.vao);
@@ -275,8 +258,42 @@ namespace cgbv
 			data.clear();
 			vertices.clear();
 
+			// Canvas 
+			a = glm::vec3(-1.f, 0.f, 0.f);
+			b = glm::vec3(1.f, 0.f, 0.f);
+			c = glm::vec3(-1.f, 1.f, 0.f);
+			d = glm::vec3(1.f, 1.f, 0.f);
 
+			n = glm::vec3(0.f, 0.f, 1.f);
+
+			vertices.push_back(d); vertices.push_back(c); vertices.push_back(a);
+			vertices.push_back(a); vertices.push_back(c); vertices.push_back(b);
+
+			for (auto v : vertices)
+			{
+				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+				data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
+				canvas.vertsToDraw++;
+			}
+
+			glGenVertexArrays(1, &canvas.vao);
+			glBindVertexArray(canvas.vao);
+
+			glGenBuffers(1, &canvas.vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, canvas.vbo);
+			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+
+			glEnableVertexAttribArray(locs.vertex);
+			glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+			glEnableVertexAttribArray(locs.normal);
+			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
+
+
+			data.clear();
+			vertices.clear();
 		}
+
+		
 		loadFBX(modelfbx.modelSelection);
 
 
@@ -330,62 +347,59 @@ namespace cgbv
 
 
 
+		// Framebuffer shadowmap 
+		{
+			shadowmap = std::make_unique<cgbv::textures::Texture>();
 
-		//// Framebuffer shadowmap 
-		//{
-		//	shadowmap = std::make_unique<cgbv::textures::Texture>();
+			glGenFramebuffers(1, &framebuffers.shadowmap_buffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.shadowmap_buffer);
 
-		//	glGenFramebuffers(1, &framebuffers.shadowmap_buffer);
-		//	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.shadowmap_buffer);
+			glBindTexture(GL_TEXTURE_2D, shadowmap->getTextureID());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, shadowmap_width, shadowmap_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
-		//	glBindTexture(GL_TEXTURE_2D, shadowmap->getTextureID());
-		//	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, shadowmap_width, shadowmap_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+			glGenSamplers(1, &shadowmap_sampler);
+			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
-		//	glGenSamplers(1, &shadowmap_sampler);
-		//	glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		//	glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//	glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//	glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		//	glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-
-		//	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowmap->getTextureID(), 0);
-		//	glDrawBuffer(GL_NONE);
-		//	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		//		std::cout << "Shadowmap Framebuffer failed" << std::endl;
-		//}
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowmap->getTextureID(), 0);
+			glDrawBuffer(GL_NONE);
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+				std::cout << "Shadowmap Framebuffer failed" << std::endl;
+		}
 
 		// Framebuffer imagemap
 		{
 			imagemap = std::make_unique<cgbv::textures::Texture>();
 
-			// activate and gen texture
-			glActiveTexture(GL_TEXTURE);
-			//glGenTextures(1, &imagemap->getTextureID);
-
 			glGenFramebuffers(1, &framebuffers.imagemap_buffer);
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.imagemap_buffer);
 
-
 			glBindTexture(GL_TEXTURE_2D, imagemap->getTextureID());
-			// todo hier GL_RGB --> Error
-			//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			// to do evtl shadowmap_sampler umbenennen 
 
-			glGenSamplers(1, &imagemap_sampler);
-			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, imagemap->getTextureID(), 0);
-			glDrawBuffer(GL_NONE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, imagemap->getTextureID(), 0);
+			
+			glGenRenderbuffers(1, &depth_rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, depth_rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, window_width, window_height);
+			glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_rbo);
+
+			glDrawBuffer(GL_FRONT_AND_BACK);
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-				std::cout << "Shadowmap Framebuffer failed" << std::endl;
+				std::cout << "Color Framebuffer failed" << std::endl;
+			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.default_buffer);
 		}
+
 
 
 
@@ -399,6 +413,8 @@ namespace cgbv
 		glPolygonOffset(parameter.offsetFactor, parameter.offsetUnits);
 		shadowmap_pass();
 		final_pass();
+		canvas_pass();
+		//glBlitNamedFramebuffer(framebuffers.default_buffer, framebuffers.imagemap_buffer, 0,0, window_width, window_height, 0, 0, window_width, window_height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	}
 
 	// Erstellt die Tiefenkarte / Tiefentextur 
@@ -437,7 +453,7 @@ namespace cgbv
 		glViewport(0, 0, window_width, window_height);
 
 
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.default_buffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.imagemap_buffer);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -501,26 +517,46 @@ namespace cgbv
 		//	std::cout << "done" << std::endl;
 		//	screenshot.reset();
 		//}
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, imagemap->getTextureID());
-		glBindSampler(0, imagemap_sampler);
-		glUniform1i(locs.imagemap, 0);
 
 		if (screenshot[0])
 		{
 			std::cout << "Storing Image to Disk...";
-			std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(window_width * window_height);
+			std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(3 * window_width * window_height);
 			glGetTextureImage(imagemap->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, 3 * window_width * window_height, pixel.get());
 			//glGetTextureImage(imagemap->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height, pixel.get());
 			//glGetTexImage(imagemap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
 
-			cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotName, pixel.get(), window_width, window_height, 1);
+			cgbv::textures::Texture2DStorage::Store(parameter.screenShotName, pixel.get(), window_width, window_height, 1);
 			std::cout << "done" << std::endl;
 			screenshot.reset();
 		}
 
 
 		TwDraw();
+	}
+
+	void CGRenderer::canvas_pass()
+	{
+		glDisable(GL_DEPTH_TEST);
+		glViewport(0, 0, window_width, window_height);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.default_buffer);
+
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		shader->use();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, imagemap->getTextureID());
+		//glBindSampler(0, shadowmap_sampler);
+		glUniform1i(locs.imagemap, 0); 
+
+		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.canvasPlacementVS);
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.canvasDisplayFS);
+
+		glBindVertexArray(canvas.vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, canvas.vertsToDraw);
+		glEnable(GL_DEPTH_TEST);
 	}
 
 
@@ -540,7 +576,7 @@ namespace cgbv
 			loadFBX(modelfbx.modelSelection);
 		}
 		parameter.screenShotName = returnValues.getImageName();
-		screenshot.set();
+		//screenshot.set();
 		autopilot.step();
 	}
 
