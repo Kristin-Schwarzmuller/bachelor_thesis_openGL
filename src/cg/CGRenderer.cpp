@@ -331,41 +331,45 @@ namespace cgbv
 
 
 
-		// Framebuffer shadowmap 
-		{
-			shadowmap = std::make_unique<cgbv::textures::Texture>();
+		//// Framebuffer shadowmap 
+		//{
+		//	shadowmap = std::make_unique<cgbv::textures::Texture>();
 
-			glGenFramebuffers(1, &framebuffers.shadowmap_buffer);
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.shadowmap_buffer);
+		//	glGenFramebuffers(1, &framebuffers.shadowmap_buffer);
+		//	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.shadowmap_buffer);
 
-			glBindTexture(GL_TEXTURE_2D, shadowmap->getTextureID());
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, shadowmap_width, shadowmap_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		//	glBindTexture(GL_TEXTURE_2D, shadowmap->getTextureID());
+		//	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, shadowmap_width, shadowmap_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
-			glGenSamplers(1, &shadowmap_sampler);
-			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+		//	glGenSamplers(1, &shadowmap_sampler);
+		//	glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//	glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//	glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		//	glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		//	glSamplerParameteri(shadowmap_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowmap->getTextureID(), 0);
-			glDrawBuffer(GL_NONE);
-			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-				std::cout << "Shadowmap Framebuffer failed" << std::endl;
-		}
+		//	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowmap->getTextureID(), 0);
+		//	glDrawBuffer(GL_NONE);
+		//	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		//		std::cout << "Shadowmap Framebuffer failed" << std::endl;
+		//}
 
 		// Framebuffer imagemap
 		{
 			imagemap = std::make_unique<cgbv::textures::Texture>();
 
+			// activate and gen texture
+			glActiveTexture(GL_TEXTURE);
+			//glGenTextures(1, &imagemap->getTextureID);
+
 			glGenFramebuffers(1, &framebuffers.imagemap_buffer);
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.imagemap_buffer);
 
-			// activate and gen texture
-			//glActiveTexture(GL_TEXTURE27);
-			//glGenTextures(1, &imagemap);
+
 			glBindTexture(GL_TEXTURE_2D, imagemap->getTextureID());
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, window_width, window_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+			// todo hier GL_RGB --> Error
+			//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -377,7 +381,7 @@ namespace cgbv
 			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glSamplerParameteri(imagemap_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, imagemap->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, imagemap->getTextureID(), 0);
 			glDrawBuffer(GL_NONE);
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 				std::cout << "Shadowmap Framebuffer failed" << std::endl;
@@ -397,7 +401,7 @@ namespace cgbv
 		final_pass();
 	}
 
-	// ERstellt die Tiefenkarte / Tiefentextur 
+	// Erstellt die Tiefenkarte / Tiefentextur 
 	void CGRenderer::shadowmap_pass()
 	{
 		glViewport(0, 0, shadowmap_width, shadowmap_height);
@@ -506,8 +510,9 @@ namespace cgbv
 		{
 			std::cout << "Storing Image to Disk...";
 			std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(window_width * window_height);
-			glGetTextureImage(imagemap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, window_width * window_height, pixel.get());
-			glGetTexImage(imagemap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
+			glGetTextureImage(imagemap->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, 3 * window_width * window_height, pixel.get());
+			//glGetTextureImage(imagemap->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height, pixel.get());
+			//glGetTexImage(imagemap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
 
 			cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotName, pixel.get(), window_width, window_height, 1);
 			std::cout << "done" << std::endl;
