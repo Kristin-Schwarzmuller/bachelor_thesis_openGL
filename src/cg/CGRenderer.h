@@ -105,7 +105,6 @@ namespace cgbv
 		unsigned int shadowmap_buffer;
 		unsigned int default_buffer = 0;
 		unsigned int imagemap_buffer;
-		unsigned int textureColorMSAA_buffer;
 	};
 
 	struct ModelFBX
