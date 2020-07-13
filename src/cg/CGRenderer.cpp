@@ -259,15 +259,15 @@ namespace cgbv
 			vertices.clear();
 
 			// Canvas 
-			a = glm::vec3(-1.f, 0.f, 0.f);
-			b = glm::vec3(1.f, 0.f, 0.f);
+			a = glm::vec3(-1.f, -1.f, 0.f);
+			b = glm::vec3(1.f, -1.f, 0.f);
 			c = glm::vec3(-1.f, 1.f, 0.f);
 			d = glm::vec3(1.f, 1.f, 0.f);
 
 			n = glm::vec3(0.f, 0.f, 1.f);
 
-			vertices.push_back(d); vertices.push_back(c); vertices.push_back(a);
-			vertices.push_back(a); vertices.push_back(c); vertices.push_back(b);
+			vertices.push_back(a); vertices.push_back(b); vertices.push_back(c); vertices.push_back(d);
+			
 
 			for (auto v : vertices)
 			{
