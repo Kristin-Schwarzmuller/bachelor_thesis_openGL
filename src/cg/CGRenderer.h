@@ -34,7 +34,6 @@ namespace cgbv
 
 		unsigned int imagemap;
 
-		// new 
 		unsigned int lightPhong;
 
 		unsigned int ambientLight;
@@ -106,6 +105,7 @@ namespace cgbv
 		unsigned int shadowmap_buffer;
 		unsigned int default_buffer = 0;
 		unsigned int imagemap_buffer;
+		unsigned int textureColorMSAA_buffer;
 	};
 
 	struct ModelFBX

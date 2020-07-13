@@ -55,7 +55,8 @@ struct Normalized
 struct Textures
 {
     sampler2DShadow shadowmap;
-    sampler2D canvas;
+    //sampler2D canvas;
+    sampler2DMS canvas; 
 };
 // =============================================================================================================
 
@@ -200,7 +201,13 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
 layout (index = 4) subroutine (FragmentProgram) void canvas_display()
 {
-    out_color = texture(tex.canvas, Input.TexCoords);
+      ivec2 st = ivec2(Input.TexCoords * vec2(1280, 720));
+
+     out_color = texelFetch(tex.canvas,st,gl_SampleID);
+
+    
+    //out_color = texelFetch(tex.canvas, ivec2(Input.TexCoords), 3);  // 4th subsample
+    //out_color = texture(tex.canvas, Input.TexCoords);
 }
 
 // =============================================================================================================
