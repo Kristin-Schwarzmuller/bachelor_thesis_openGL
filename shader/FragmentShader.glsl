@@ -216,11 +216,12 @@ layout (index = 4) subroutine (FragmentProgram) void canvas_display()
     //vpCoords = ivec2(Input.TexCoords);
 
 	//do a simple average since this is just a demo
-	vec4 sample1 = texelFetch(tex.canvas, vpCoords, 0);
-	vec4 sample2 = texelFetch(tex.canvas, vpCoords, 1);
-	vec4 sample3 = texelFetch(tex.canvas, vpCoords, 2);
-	vec4 sample4 = texelFetch(tex.canvas, vpCoords, 3);
-	out_color = (sample1);//+ sample2 + sample3 + sample4) / 4.0f;
+    vec4 sampleSum = vec4(0);
+    for( int i = 0; i < 8; ++i) 
+    {
+    sampleSum += texelFetch(tex.canvas, vpCoords, i);
+    }
+	out_color = out_color / 8.0f;
 }
 
 // =============================================================================================================

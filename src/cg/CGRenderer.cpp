@@ -623,22 +623,22 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		returnValues = autopilot.getValues();
-		// Light
-		lightsource_camera.moveTo(returnValues.getLightPos());
-		parameter.lightPos = glm::vec4(returnValues.getLightPos(), 0);
-		// Camera view on the model
-		observer_camera.moveTo(returnValues.getCameraPos());
-		parameter.modelRotation = returnValues.getModelRotation();
-		// Model
-		if (returnValues.getModelID() != modelfbx.modelSelection)
-		{
-			modelfbx.modelSelection = returnValues.getModelID();
-			loadFBX(modelfbx.modelSelection);
-		}
-		parameter.screenShotName = returnValues.getImageName();
-		//screenshot.set();
-		autopilot.step();
+		//returnValues = autopilot.getValues();
+		//// Light
+		//lightsource_camera.moveTo(returnValues.getLightPos());
+		//parameter.lightPos = glm::vec4(returnValues.getLightPos(), 0);
+		//// Camera view on the model
+		//observer_camera.moveTo(returnValues.getCameraPos());
+		//parameter.modelRotation = returnValues.getModelRotation();
+		//// Model
+		//if (returnValues.getModelID() != modelfbx.modelSelection)
+		//{
+		//	modelfbx.modelSelection = returnValues.getModelID();
+		//	loadFBX(modelfbx.modelSelection);
+		//}
+		//parameter.screenShotName = returnValues.getImageName();
+		////screenshot.set();
+		//autopilot.step();
 	}
 
 	void CGRenderer::loadFBX(int currentMod)

@@ -95,7 +95,7 @@ namespace cgbv
 		float f;
 		// Model parameters 
 		float modelRotation;
-		std::string screenShotName;
+		std::string screenShotName = "hello.png";
 
 
 	};
