@@ -201,13 +201,26 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
 layout (index = 4) subroutine (FragmentProgram) void canvas_display()
 {
-      ivec2 st = ivec2(Input.TexCoords * vec2(1280, 720));
+      //out_color = texture(tex.canvas, Input.TexCoords);
 
-     out_color = texelFetch(tex.canvas,st,gl_SampleID);
+      //ivec2 st = ivec2(Input.TexCoords * vec2(1280, 720));
+     //out_color = texelFetch(tex.canvas,st,gl_SampleID);
 
-    
-    //out_color = texelFetch(tex.canvas, ivec2(Input.TexCoords), 3);  // 4th subsample
-    //out_color = texture(tex.canvas, Input.TexCoords);
+
+    //texelFetch requires a vec of ints for indexing (since we're indexing pixel locations)
+	//texture coords is range [0, 1], we need range [0, viewport_dim].
+	//texture coords are essentially a percentage, so we can multiply text coords by total size 
+	ivec2 vpCoords = ivec2(1280, 720);
+	vpCoords.x = int(vpCoords.x * Input.TexCoords.x); 
+	vpCoords.y = int(vpCoords.y * Input.TexCoords.y);
+    //vpCoords = ivec2(Input.TexCoords);
+
+	//do a simple average since this is just a demo
+	vec4 sample1 = texelFetch(tex.canvas, vpCoords, 0);
+	vec4 sample2 = texelFetch(tex.canvas, vpCoords, 1);
+	vec4 sample3 = texelFetch(tex.canvas, vpCoords, 2);
+	vec4 sample4 = texelFetch(tex.canvas, vpCoords, 3);
+	out_color = (sample1);//+ sample2 + sample3 + sample4) / 4.0f;
 }
 
 // =============================================================================================================

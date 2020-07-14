@@ -147,7 +147,7 @@ namespace cgbv
 
 		glEnable(GL_ALPHA_TEST);
 		glEnable(GL_DEPTH_TEST);
-
+		glEnable(GL_MULTISAMPLE);
 
 		// Matrices 
 		{
@@ -404,34 +404,60 @@ namespace cgbv
 			glGenFramebuffers(1, &framebuffers.imagemap_buffer);
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.imagemap_buffer);
 
-			// creeate a multisampled color attachment texture
 			glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, imagemap->getTextureID());
-			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, window_width, window_height, GL_TRUE);
-			glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, framebuffers.default_buffer);
+			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGB, window_width, window_height, GL_TRUE);
 
-			// to do evtl shadowmap_sampler umbenennen 
+			// to do evtl shadowmap_sampler wiederverwenden 
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			//glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			//glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, framebuffers.textureColorMSAA_buffer, 0);
-
-			// create a multisampled render buffer object for depth and stencil attechments 
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, imagemap->getTextureID(), 0);
+			
 			glGenRenderbuffers(1, &depth_rbo);
 			glBindRenderbuffer(GL_RENDERBUFFER, depth_rbo);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, window_width, window_height);
+			glRenderbufferStorageMultisample(GL_RENDERBUFFER, 8, GL_DEPTH24_STENCIL8, window_width, window_height);
+			//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, window_width, window_height);
 			glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_rbo);
-
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers.imagemap_buffer);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.default_buffer);
-			glBlitFramebuffer(0, 0, window_width, window_height, 0, 0, window_width, window_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 			glDrawBuffer(GL_FRONT_AND_BACK);
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 				std::cout << "Color Framebuffer failed" << std::endl;
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.default_buffer);
+
+			//imagemap = std::make_unique<cgbv::textures::Texture>();
+
+			//glGenFramebuffers(1, &framebuffers.imagemap_buffer);
+			//glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.imagemap_buffer);
+
+			//// creeate a multisampled color attachment texture
+			//glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, imagemap->getTextureID());
+			//glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, window_width, window_height, GL_TRUE);
+			//// to do evtl shadowmap_sampler wiederverwenden 
+			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			//glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+
+			//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, imagemap->getTextureID(), 0);
+
+			//// create a multisampled render buffer object for depth and stencil attechments 
+			//glGenRenderbuffers(1, &depth_rbo);
+			//glBindRenderbuffer(GL_RENDERBUFFER, depth_rbo);
+			//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, window_width, window_height);
+			//glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_rbo);
+
+			////glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers.imagemap_buffer);
+			////glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.default_buffer);
+			////glBlitFramebuffer(0, 0, window_width, window_height, 0, 0, window_width, window_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+			////glDrawBuffer(GL_FRONT_AND_BACK);
+			//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			//	std::cout << "Color Framebuffer failed" << std::endl;
+			//glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.default_buffer);
 		}
 
 
@@ -581,8 +607,9 @@ namespace cgbv
 		shader->use();
 
 		glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, imagemap->getTextureID());
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, imagemap->getTextureID());
-		//glBindSampler(0, shadowmap_sampler);
+		glBindSampler(0, shadowmap_sampler);
 		glUniform1i(locs.imagemap, 0); 
 
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.canvasPlacementVS);
