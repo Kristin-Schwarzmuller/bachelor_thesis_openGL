@@ -250,7 +250,8 @@ namespace cgbv
 
 		char nameBuffer[50];
 		sprintf_s(nameBuffer, "%02d", newtime.tm_mon + 1);
-		dateFolder = "..\\..\\ImageData\\" + std::to_string(newtime.tm_year - 100) + nameBuffer;
+		//dateFolder = "..\\..\\ImageData\\" + std::to_string(newtime.tm_year - 100) + nameBuffer;
+		dateFolder = "../bin/ImageData/" + std::to_string(newtime.tm_year - 100) + nameBuffer;
 		sprintf_s(nameBuffer, "%02d", newtime.tm_mday);
 		dateFolder += nameBuffer;
 		sprintf_s(nameBuffer, "%02d", newtime.tm_hour);

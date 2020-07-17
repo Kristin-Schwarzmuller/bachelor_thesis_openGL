@@ -150,6 +150,7 @@
     <ClInclude Include="..\src\GLSLShader.h" />
     <ClInclude Include="..\src\khr\khrplatform.h" />
     <ClInclude Include="..\src\OBJModel.h" />
+    <ClInclude Include="..\src\OpenGLDebugger.h" />
     <ClInclude Include="..\src\Renderer.h" />
     <ClInclude Include="..\src\Texture.h" />
   </ItemGroup>
@@ -163,6 +164,7 @@
     <ClCompile Include="..\src\glad.cpp" />
     <ClCompile Include="..\src\GLSLShader.cpp" />
     <ClCompile Include="..\src\OBJModel.cpp" />
+    <ClCompile Include="..\src\OpenGLDebugger.cpp" />
     <ClCompile Include="..\src\Renderer.cpp" />
     <ClCompile Include="..\src\Texture.cpp" />
   </ItemGroup>

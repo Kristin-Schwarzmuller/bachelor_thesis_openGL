@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <AntTweakBar.h>
+#include <OpenGLDebugger.h>
 
 namespace cgbv
 {
@@ -148,6 +149,8 @@ namespace cgbv
 		glEnable(GL_ALPHA_TEST);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
+		
+		OpenGLDebugger debugger;
 
 		// Matrices 
 		{

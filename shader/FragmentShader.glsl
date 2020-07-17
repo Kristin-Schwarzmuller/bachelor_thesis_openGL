@@ -219,9 +219,9 @@ layout (index = 4) subroutine (FragmentProgram) void canvas_display()
     vec4 sampleSum = vec4(0);
     for( int i = 0; i < 8; ++i) 
     {
-    sampleSum += texelFetch(tex.canvas, vpCoords, i);
+        sampleSum += texelFetch(tex.canvas, vpCoords, i);
     }
-	out_color = out_color / 8.0f;
+	out_color = sampleSum / 8.0f;
 }
 
 // =============================================================================================================
