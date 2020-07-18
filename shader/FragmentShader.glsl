@@ -201,7 +201,7 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
 layout (index = 4) subroutine (FragmentProgram) void canvas_display()
 {
-      out_color = texture(tex.canvas, Input.TexCoords);
+    out_color = texture(tex.canvas, Input.TexCoords);
 
      //ivec2 st = ivec2(Input.TexCoords * vec2(1280, 720));
      //out_color = texelFetch(tex.canvas,st,gl_SampleID);

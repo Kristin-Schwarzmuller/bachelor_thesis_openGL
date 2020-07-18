@@ -25,6 +25,11 @@ namespace cgbv
 		Viewer,
 		Light
 	};
+	enum class PostProcessing
+	{
+		Direct_Output,
+		Post_Processing
+	};
 
 	struct ShaderLocations
 	{
@@ -38,7 +43,7 @@ namespace cgbv
 
 		unsigned int shadowmap;
 
-		unsigned int imagemap;
+		unsigned int rgb_tex;
 
 		unsigned int lightPhong;
 
@@ -53,8 +58,6 @@ namespace cgbv
 		unsigned int diffusMaterial;
 
 		unsigned int spekularMaterial;
-
-		//unsigned int emissivMaterial;
 
 		unsigned int shininessMaterial;
 
@@ -110,7 +113,7 @@ namespace cgbv
 	{
 		unsigned int shadowmap_buffer;
 		unsigned int default_buffer = 0;
-		unsigned int imagemap_buffer;
+		unsigned int image_buffer;
 	};
 
 	struct ModelFBX
@@ -174,20 +177,23 @@ namespace cgbv
 		std::unique_ptr<cgbv::textures::Texture> shadowmap;
 		unsigned int shadowmap_sampler;
 		int shadowmap_width = 4096, shadowmap_height = 4096;
-		std::unique_ptr<cgbv::textures::Texture> imagemap;
-		unsigned int imagemap_sampler;
 
-		unsigned int depth_rbo;
+		std::unique_ptr<cgbv::textures::Texture> rgb;
+		unsigned int rgb_sampler;
+		unsigned int rgb_depth_rbo;
 
 		cgbv::Camera observer_camera, lightsource_camera;
 
 		std::bitset<1> screenshot;
 
 		ObserverSelection viewpoint = ObserverSelection::Viewer;
+		PostProcessing post_processing_pass = PostProcessing::Direct_Output;
 
 		void shadowmap_pass();
 		void final_pass();
 		void canvas_pass();
+
+		void create_image_framebuffer();
 
 	public:
 
