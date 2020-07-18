@@ -55,8 +55,8 @@ struct Normalized
 struct Textures
 {
     sampler2DShadow shadowmap;
-    //sampler2D canvas;
-    sampler2DMS canvas; 
+    sampler2D canvas;
+    //sampler2DMS canvas; 
 };
 // =============================================================================================================
 
@@ -201,27 +201,28 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
 layout (index = 4) subroutine (FragmentProgram) void canvas_display()
 {
-      //out_color = texture(tex.canvas, Input.TexCoords);
+      out_color = texture(tex.canvas, Input.TexCoords);
 
-      //ivec2 st = ivec2(Input.TexCoords * vec2(1280, 720));
+     //ivec2 st = ivec2(Input.TexCoords * vec2(1280, 720));
      //out_color = texelFetch(tex.canvas,st,gl_SampleID);
 
 
     //texelFetch requires a vec of ints for indexing (since we're indexing pixel locations)
 	//texture coords is range [0, 1], we need range [0, viewport_dim].
 	//texture coords are essentially a percentage, so we can multiply text coords by total size 
-	ivec2 vpCoords = ivec2(1280, 720);
-	vpCoords.x = int(vpCoords.x * Input.TexCoords.x); 
-	vpCoords.y = int(vpCoords.y * Input.TexCoords.y);
-    //vpCoords = ivec2(Input.TexCoords);
 
-	//do a simple average since this is just a demo
-    vec4 sampleSum = vec4(0);
-    for( int i = 0; i < 8; ++i) 
-    {
-        sampleSum += texelFetch(tex.canvas, vpCoords, i);
-    }
-	out_color = sampleSum / 8.0f;
+	//ivec2 vpCoords = ivec2(1280, 720);
+	//vpCoords.x = int(vpCoords.x * Input.TexCoords.x); 
+	//vpCoords.y = int(vpCoords.y * Input.TexCoords.y);
+ //   //vpCoords = ivec2(Input.TexCoords);
+
+	////do a simple average since this is just a demo
+ //   vec4 sampleSum = vec4(0);
+ //   for( int i = 0; i < 8; ++i) 
+ //   {
+ //       sampleSum += texelFetch(tex.canvas, vpCoords, i);
+ //   }
+	//out_color = sampleSum / 8.0f;
 }
 
 // =============================================================================================================

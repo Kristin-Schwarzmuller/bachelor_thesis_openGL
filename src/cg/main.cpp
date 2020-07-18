@@ -45,13 +45,6 @@ int main()
 
     glfwMakeContextCurrent(window);
 
-    renderer = std::make_unique<cgbv::CGRenderer>(window);
-    if(!renderer->setup())
-    {
-        return -1;
-    }
-
-
     glfwSetWindowCloseCallback(window, destroy);
     glfwSetKeyCallback(window, input);
     glfwSetFramebufferSizeCallback(window, resize);
@@ -65,6 +58,12 @@ int main()
     // Disable vertical sync (faster image generation) 
     glfwSwapInterval(1);
 
+
+    renderer = std::make_unique<cgbv::CGRenderer>(window);
+    if (!renderer->setup())
+    {
+        return -1;
+    }
 
     do
     {
