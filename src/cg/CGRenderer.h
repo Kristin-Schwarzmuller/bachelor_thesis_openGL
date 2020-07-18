@@ -20,6 +20,12 @@
 
 namespace cgbv
 {
+	enum class ObserverSelection
+	{
+		Viewer,
+		Light
+	};
+
 	struct ShaderLocations
 	{
 		unsigned int vertex, normal;
@@ -173,10 +179,11 @@ namespace cgbv
 
 		unsigned int depth_rbo;
 
-
 		cgbv::Camera observer_camera, lightsource_camera;
 
 		std::bitset<1> screenshot;
+
+		ObserverSelection viewpoint = ObserverSelection::Viewer;
 
 		void shadowmap_pass();
 		void final_pass();

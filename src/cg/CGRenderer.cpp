@@ -218,10 +218,6 @@ namespace cgbv
 			// Base
 			std::vector<glm::vec3> vertices;
 
-			//glm::vec3 a(-750.f, 0.f, -750.f);
-			//glm::vec3 b(750.f, 0.f, -750.f);
-			//glm::vec3 c(750.f, 0.f, 750.f);
-			//glm::vec3 d(-750.f, 0.f, 750.f);
 			glm::vec3 a(-50.f, 0.f, -50.f);
 			glm::vec3 b(50.f, 0.f, -50.f);
 			glm::vec3 c(50.f, 0.f, 50.f);
@@ -521,9 +517,17 @@ namespace cgbv
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-		glm::mat4 view = observer_camera.getViewMatrix();
-		//glm::mat4 view = lightsource_camera.getViewMatrix();
+		glm::mat4 view;
+		
+		switch (viewpoint)
+		{
+		case ObserverSelection::Viewer:
+			view = observer_camera.getViewMatrix();
+			break;
+		case ObserverSelection::Light:
+			view = lightsource_camera.getViewMatrix();
+			break;
+		}
 
 		//model = glm::mat4_cast(parameter.globalRotation);
 		//model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
@@ -546,8 +550,17 @@ namespace cgbv
 		glUniform1f(locs.brightnessFactor, parameter.brightnessFactor);
 
 		normal = glm::transpose(glm::inverse(view * model));
-		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(observer_projection * view * model));
-		//glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * view * model));
+
+		switch (viewpoint)
+		{
+		case ObserverSelection::Viewer:
+			glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(observer_projection * view * model));
+			break;
+		case ObserverSelection::Light:
+			glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * view * model));
+			break;
+		}
+		
 		glUniformMatrix4fv(locs.modelview, 1, GL_FALSE, glm::value_ptr(view * model));
 		glUniformMatrix3fv(locs.normalmatrix, 1, GL_FALSE, glm::value_ptr(normal));
 
@@ -575,7 +588,6 @@ namespace cgbv
 			std::cout << "Storing Shadowmap to Disk...";
 			std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
 			glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, pixel.get());
-			//glGetTexImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixel.get());
 
 			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", pixel.get(), shadowmap_width, shadowmap_height, 0);
 			std::cout << "done" << std::endl;
@@ -611,7 +623,6 @@ namespace cgbv
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, imagemap->getTextureID());
-		//glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, imagemap->getTextureID());
 		glBindSampler(0, shadowmap_sampler);
 		glUniform1i(locs.imagemap, 0); 
 
