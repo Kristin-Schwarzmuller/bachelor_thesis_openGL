@@ -28,6 +28,20 @@ namespace cgbv
 		auto model = static_cast<ModelFBX*>(package->object1);
 		*(unsigned int*)value = model->modelSelection;
 	}
+
+	void TW_CALL pp_SetCallback(const void* value, void* clientData)
+	{
+		auto post_processing_pass = static_cast<PostProcessing*>(clientData);
+		*post_processing_pass = (*(PostProcessing*)value);
+		std::cout << "Set Value" << std::endl;
+	}
+
+	void TW_CALL pp_GetCallback(void* value, void* clientData)
+	{
+		auto post_processing_pass = static_cast<PostProcessing*>(clientData);
+		*(PostProcessing*)value = *post_processing_pass;
+		std::cout << "Got Value" << std::endl;
+	}
 	// ==========================================================
 
 	CGRenderer::CGRenderer(GLFWwindow* window) : Renderer(window)
@@ -133,43 +147,6 @@ namespace cgbv
 				break;
 			case GLFW_KEY_O:
 				modelfbx.modelSelection = 6;
-				break;
-
-				// Create toggle for Canvas_Pass
-			case GLFW_KEY_HOME:
-				switch (post_processing_pass)
-				{
-				case cgbv::PostProcessing::Direct_Output:
-					post_processing_pass = PostProcessing::Post_Processing;
-					std::cout << "=============================================================" << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << "POST PROCESSING" << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << "=============================================================" << std::endl;
-					break;
-				case cgbv::PostProcessing::Post_Processing:
-					post_processing_pass = PostProcessing::Direct_Output;
-					std::cout << "=============================================================" << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << "PASS THROUGH" << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << std::endl;
-					std::cout << "=============================================================" << std::endl;
-					break;
-				default:
-					break;
-				}
 				break;
 			}
 		}
@@ -378,6 +355,11 @@ namespace cgbv
 			modelSelectionPackage.object1 = &modelfbx;
 			modelSelectionPackage.object2 = this;
 			TwAddVarCB(tweakbar, "Model", meshType, modelSetCallback, modelGetCallback, &modelSelectionPackage, "");// min = 0 max = 6");
+
+			std::string post_processing_types = "Direct_Output, Post_Processing";
+			TwType pp_type = TwDefineEnumFromString("pp_type", post_processing_types.c_str());
+
+			TwAddVarCB(tweakbar, "Post Processing", pp_type, pp_SetCallback, pp_GetCallback, &post_processing_pass, "");
 		}
 
 
@@ -583,12 +565,22 @@ namespace cgbv
 
 		if (screenshot[0])
 		{
-			std::cout << "Storing Shadowmap to Disk...";
-			std::unique_ptr<GLubyte[]> pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
-			glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, pixel.get());
+			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.default_buffer);
 
-			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", pixel.get(), shadowmap_width, shadowmap_height, 0);
+			std::cout << "Storing Shadowmap to Disk...";
+			std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
+			glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, shadowmap_pixel.get());
+
+			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
 			std::cout << "done" << std::endl;
+
+			std::cout << "Storing RGB Image to Disk...";
+			std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(rgb->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height, rgb_pixel.get());
+
+			cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
+			std::cout << "done" << std::endl;
+
 			screenshot.reset();
 		}
 
