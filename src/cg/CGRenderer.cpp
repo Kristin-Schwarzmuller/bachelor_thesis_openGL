@@ -565,8 +565,6 @@ namespace cgbv
 
 		if (screenshot[0])
 		{
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.default_buffer);
-
 			std::cout << "Storing Shadowmap to Disk...";
 			std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
 			glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, shadowmap_pixel.get());
@@ -574,9 +572,10 @@ namespace cgbv
 			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
 			std::cout << "done" << std::endl;
 
+
 			std::cout << "Storing RGB Image to Disk...";
 			std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(rgb->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height, rgb_pixel.get());
+			glGetTextureImage(rgb->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
 
 			cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
 			std::cout << "done" << std::endl;
