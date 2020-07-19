@@ -178,7 +178,9 @@ namespace cgbv
 		unsigned int shadowmap_sampler;
 		int shadowmap_width = 4096, shadowmap_height = 4096;
 
-		std::unique_ptr<cgbv::textures::Texture> rgb;
+		std::unique_ptr<cgbv::textures::Texture> rgb_output;
+		std::unique_ptr<cgbv::textures::Texture> normal_output;
+		std::unique_ptr<cgbv::textures::Texture> sc_output;
 		unsigned int rgb_sampler;
 		unsigned int rgb_depth_rbo;
 

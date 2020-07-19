@@ -85,6 +85,8 @@ uniform Textures tex;
 subroutine uniform FragmentProgram fragmentprogram;
 
 layout(location = 0) out vec4 out_color;
+layout(location = 1) out vec3 out_normal;
+layout(location = 2) out vec4 out_sc;
 // =============================================================================================================
 
 
@@ -114,12 +116,9 @@ layout (index = 0) subroutine (FragmentProgram) void lambert()
 
 
     vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
-//    shadow_coordinates.z -= (.0001f + (1.f - intensity) * .005f); // Needs to be adjusted
-
     float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), .35f, 1.f);
 
 
-    //out_color = vec4(1); // just white
     out_color = shadowsample * intensity * vec4(.7f);
     out_color.w = 1.f;
 }
@@ -129,6 +128,7 @@ layout (index = 1) subroutine (FragmentProgram) void depthmap()
 {
     out_color = vec4(gl_FragCoord.z);
 }
+
 
 layout (index = 2) subroutine (FragmentProgram) void phong()
 {
@@ -155,6 +155,7 @@ layout (index = 2) subroutine (FragmentProgram) void phong()
 	out_color = ambient  + specular + diffus;
 }
 
+
 layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 {
   
@@ -179,25 +180,27 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 		specular = pow(max(dot(normalize (r), n.normal), 0), material.shininess) * light.specular * material.spekular;
 	}
 	
-	//vec4 out_phong = ambient  + specular + diffus;
-
     // --------- Shadows ---------
-    
-    float intensity = dot(n.lightDir, n.normal);
 
     vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
-//    shadow_coordinates.z -= (.0001f + (1.f - intensity) * .005f); // Needs to be adjusted
-
-    float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), .35f, 1.f);
+    float min_shadow_darkness = 1.f, max_shadow_darkness = .35f;
+    float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), max_shadow_darkness, min_shadow_darkness);
     
-    //vec4 out_shadow = shadowsample * intensity * vec4(.7f);
-    //out_shadow.w = 1.f;
 
     // --------- Result --------- 
 
-    out_color = light.brightnessFactor * (shadowsample * intensity * 1.3f * (specular + diffus) + ambient);
-    out_color.w = 1.f;
+    //out_color = light.brightnessFactor * (shadowsample * intensity * 1.3f * (specular + diffus) + ambient);
+    out_color = (shadowsample * (specular + diffus) + ambient);
+    out_color.a = 1.f;
+
+    out_normal = n.normal * .5f + .5f;
+
+    if (shadowsample <= .5f)
+        out_sc = vec4(1.f);
+    else
+        out_sc = vec4(0.f);
 }
+
 
 layout (index = 4) subroutine (FragmentProgram) void canvas_display()
 {

@@ -164,7 +164,7 @@ namespace cgbv
 			return false;
 
 		// GL States
-		glClearColor(0.4f, 0.4f, 0.4f, 1.f);
+		glClearColor(0.f, 0.f, 0.f, 1.f);
 
 		glEnable(GL_ALPHA_TEST);
 		glEnable(GL_DEPTH_TEST);
@@ -399,9 +399,10 @@ namespace cgbv
 
 	void CGRenderer::create_image_framebuffer()
 	{
-		if (rgb)
+		if (rgb_output)
 		{
-			rgb.reset();
+			rgb_output.reset();
+			normal_output.reset();
 			glDeleteFramebuffers(1, &framebuffers.image_buffer);
 			glDeleteSamplers(1, &rgb_sampler);
 			glDeleteRenderbuffers(1, &rgb_depth_rbo);
@@ -412,10 +413,18 @@ namespace cgbv
 			glGenFramebuffers(1, &framebuffers.image_buffer);
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.image_buffer);
 
-			rgb = std::make_unique<textures::Texture>();
+			rgb_output = std::make_unique<textures::Texture>();
+			normal_output = std::make_unique<textures::Texture>();
+			sc_output = std::make_unique<textures::Texture>();
 
-			glBindTexture(GL_TEXTURE_2D, rgb->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, rgb_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+			glBindTexture(GL_TEXTURE_2D, normal_output->getTextureID());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
+
+			glBindTexture(GL_TEXTURE_2D, sc_output->getTextureID());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
 			glGenSamplers(1, &rgb_sampler);
 			glSamplerParameteri(rgb_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -428,10 +437,12 @@ namespace cgbv
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, window_width, window_height);
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rgb_depth_rbo);
 
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rgb->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rgb_output->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_output->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, sc_output->getTextureID(), 0);
 
-			GLenum draw_buffers[1] = { GL_COLOR_ATTACHMENT0 };
-			glDrawBuffers(1, draw_buffers);
+			GLenum draw_buffers[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+			glDrawBuffers(3, draw_buffers);
 
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			{
@@ -575,9 +586,25 @@ namespace cgbv
 
 			std::cout << "Storing RGB Image to Disk...";
 			std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(rgb->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
+			glGetTextureImage(rgb_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
 
 			cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
+			std::cout << "done" << std::endl;
+
+
+			std::cout << "Storing Normal Image to Disk...";
+			std::unique_ptr<GLubyte[]> normal_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(normal_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, normal_pixel.get());
+
+			cgbv::textures::Texture2DStorage::Store("../normal.png", normal_pixel.get(), window_width, window_height, 0);
+			std::cout << "done" << std::endl;
+
+
+			std::cout << "Storing Shadow Candidate Image to Disk...";
+			std::unique_ptr<GLubyte[]> sc_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(sc_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, sc_pixel.get());
+
+			cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
 			std::cout << "done" << std::endl;
 
 			screenshot.reset();
@@ -599,7 +626,7 @@ namespace cgbv
 		shader->use();
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, rgb->getTextureID());
+		glBindTexture(GL_TEXTURE_2D, rgb_output->getTextureID());
 		glBindSampler(0, rgb_sampler);
 		glUniform1i(locs.rgb_tex, 0); 
 
