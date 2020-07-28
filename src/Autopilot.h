@@ -19,7 +19,7 @@ namespace cgbv
 		unsigned int counter = 0;
 		char nameBuffer[50];
 		// name of the currently drawn iamge
-		std::string currentImageName;
+		std::vector<std::string> currentImageNames;
 
 		float stepSizeElevationLight = 5;
 		float stepSizeElevationCamera = 30;
@@ -57,11 +57,12 @@ namespace cgbv
 		// Used to write the CSV 
 	   // create an ofstream for the file output (see the link on streams for
 	   // more info
+		std::string newFolderLocation = "..\\..\\ImageData\\";
 		std::string dateFolder;
 		std::string csvName = "labels_ks.csv";
 		std::string u = ";";
 		std::string n = "\n";
-		const std::vector<std::string> colname{ "Filename", "Azimuth", "Elevation", "C_A", "C_E"};
+		const std::vector<std::string> colname{ "Filename Shadow Map", "Filename RGB", "Filename Normals", "Filename Shadow Candidate", "Azimuth", "Elevation", "C_A", "C_E"};
 		std::ofstream csvFile;
 		// ========================================================================================================================
 		// set up the vectors to iterate over them 
@@ -74,7 +75,7 @@ namespace cgbv
 		bool tickCamera();
 
 
-		void defImageName();
+		void defImageNames();
 		bool writeDataCSV();
 		glm::vec3 calPos(float azimuthPtr, float elevationPtr, float distance);
 		bool createFolders();
@@ -89,16 +90,16 @@ namespace cgbv
 			glm::vec3 cameraPos;
 			float modelRotation;
 			unsigned int modelID;
-			std::string imageName;
+			std::vector<std::string> imageNames;
 
 		public:
 			ReturnValues();
-			ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, float modelRotation, unsigned int modelID, std::string imageName);
+			ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, float modelRotation, unsigned int modelID, std::vector<std::string> imageNames);
 			glm::vec3 getLightPos();
 			glm::vec3 getCameraPos();
 			float getModelRotation();
 			unsigned int getModelID();
-			std::string getImageName();
+			std::vector<std::string> getImageNames();
 		};
 		// ========================================================================================================================
 		Autopilot();

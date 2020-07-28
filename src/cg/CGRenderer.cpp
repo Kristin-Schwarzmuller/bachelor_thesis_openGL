@@ -325,7 +325,6 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "diffuse Light", TW_TYPE_COLOR4F, &parameter.diffusLight, " group=Light alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Specular  Light", TW_TYPE_COLOR4F, &parameter.specularLight, " group=Light alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Brightness", TW_TYPE_FLOAT, &parameter.brightnessFactor, " group= 'Light' min = 0.0f max = 5.0f step = 0.1f");
-			//TwAddVarRW(tweakbar, "Emissives Material", TW_TYPE_COLOR4F, &parameter.emissivMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "Shininess", TW_TYPE_FLOAT, &parameter.shininessMaterial, " group=Material");
 			TwAddVarRW(tweakbar, "Ambient Material", TW_TYPE_COLOR4F, &parameter.ambientMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 			TwAddVarRW(tweakbar, "diffuse Material", TW_TYPE_COLOR4F, &parameter.diffusMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
@@ -336,29 +335,15 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "Shadowmap Offset Units", TW_TYPE_FLOAT, &parameter.offsetUnits, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
 
 			// ====== Modelauswahl ======
-			// Create an internal enum to name the meshes
-			//typedef enum { BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT } MESH_TYPE;
 			std::string meshtypes = "BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT";
 			TwType meshType = TwDefineEnumFromString("vertexType", meshtypes.c_str());
-
-			// A variable for the current selection - will be updated by ATB -- mm: was ist der ATB?
-			//MESH_TYPE m_currentMesh = BUDDHA;
-
-			// Array of drop down items - mm: self documenting code, please ;-) 
-			//TwEnumVal Meshes[] = { {BUDDHA, "Buddha"}, {BUNNY, "Bunny"}, {BOX, "Box"},  };
-
-			// ATB identifier for the array
-			//TwType MeshTwType = TwDefineEnum("MeshType", Meshes, 3);
-
-			// Link it to the tweak bar
-			//TwAddVarRW(tweakbar, "Mesh", meshType, &cgbv::ModelFBX::modelSelection, NULL);
 			modelSelectionPackage.object1 = &modelfbx;
 			modelSelectionPackage.object2 = this;
 			TwAddVarCB(tweakbar, "Model", meshType, modelSetCallback, modelGetCallback, &modelSelectionPackage, "");// min = 0 max = 6");
 
+			// ====== Direct output ======
 			std::string post_processing_types = "Direct_Output, Post_Processing";
 			TwType pp_type = TwDefineEnumFromString("pp_type", post_processing_types.c_str());
-
 			TwAddVarCB(tweakbar, "Post Processing", pp_type, pp_SetCallback, pp_GetCallback, &post_processing_pass, "");
 		}
 
@@ -580,7 +565,8 @@ namespace cgbv
 			std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
 			glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, shadowmap_pixel.get());
 
-			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
+			//cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
+			cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotNames[0], shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
 			std::cout << "done" << std::endl;
 
 
@@ -588,7 +574,8 @@ namespace cgbv
 			std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
 			glGetTextureImage(rgb_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
 
-			cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
+			//cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
+			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[1], rgb_pixel.get(), window_width, window_height, 0);
 			std::cout << "done" << std::endl;
 
 
@@ -596,7 +583,8 @@ namespace cgbv
 			std::unique_ptr<GLubyte[]> normal_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
 			glGetTextureImage(normal_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, normal_pixel.get());
 
-			cgbv::textures::Texture2DStorage::Store("../normal.png", normal_pixel.get(), window_width, window_height, 0);
+			//cgbv::textures::Texture2DStorage::Store("../normal.png", normal_pixel.get(), window_width, window_height, 0);
+			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[2], normal_pixel.get(), window_width, window_height, 0);
 			std::cout << "done" << std::endl;
 
 
@@ -604,7 +592,8 @@ namespace cgbv
 			std::unique_ptr<GLubyte[]> sc_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
 			glGetTextureImage(sc_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, sc_pixel.get());
 
-			cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
+			//cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
+			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[3], sc_pixel.get(), window_width, window_height, 0);
 			std::cout << "done" << std::endl;
 
 			screenshot.reset();
@@ -641,23 +630,23 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		//returnValues = autopilot.getValues();
+		returnValues = autopilot.getValues();
 		// Light
-		//lightsource_camera.moveTo(returnValues.getLightPos());
-		//parameter.lightPos = glm::vec4(returnValues.getLightPos(), 0);
+		lightsource_camera.moveTo(returnValues.getLightPos());
+		parameter.lightPos = glm::vec4(returnValues.getLightPos(), 0);
 
-		//// Camera view on the model
-		//observer_camera.moveTo(returnValues.getCameraPos());
-		//parameter.modelRotation = returnValues.getModelRotation();
-		//// Model
-		//if (returnValues.getModelID() != modelfbx.modelSelection)
-		//{
-		//	modelfbx.modelSelection = returnValues.getModelID();
-		//	loadFBX(modelfbx.modelSelection);
-		//}
-		//parameter.screenShotName = returnValues.getImageName();
-		////screenshot.set();
-		//autopilot.step();
+		// Camera view on the model
+		observer_camera.moveTo(returnValues.getCameraPos());
+		parameter.modelRotation = returnValues.getModelRotation();
+		// Model
+		if (returnValues.getModelID() != modelfbx.modelSelection)
+		{
+			modelfbx.modelSelection = returnValues.getModelID();
+			loadFBX(modelfbx.modelSelection);
+		}
+		parameter.screenShotNames = returnValues.getImageNames();
+		screenshot.set();
+		autopilot.step();
 
 		lightsource_camera.moveTo(parameter.lightPos);
 	}

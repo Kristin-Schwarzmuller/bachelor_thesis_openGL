@@ -1,5 +1,6 @@
-#include "Autopilot.h"
+#include <Autopilot.h>
 #include <cg\CGRenderer.h>
+#include <windows.h>
 #include <iostream>
 #include <iomanip>
 #include <cmath>
@@ -15,13 +16,13 @@ namespace cgbv
 	{
 	}
 
-	Autopilot::ReturnValues::ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, float modelRotation, unsigned int modelID, std::string imageName)
+	Autopilot::ReturnValues::ReturnValues(glm::vec3 lightPos, glm::vec3 cameraPos, float modelRotation, unsigned int modelID, std::vector<std::string> imageNames)
 	{
 		this->lightPos = lightPos;
 		this->cameraPos = cameraPos;
 		this->modelRotation = (float)modelRotation;
 		this->modelID = modelID;
-		this->imageName = imageName;
+		this->imageNames = imageNames;
 	}
 
 	glm::vec3 Autopilot::ReturnValues::getLightPos()
@@ -43,9 +44,9 @@ namespace cgbv
 	{
 		return modelID;
 	}
-	std::string Autopilot::ReturnValues::getImageName()
+	std::vector<std::string> Autopilot::ReturnValues::getImageNames()
 	{
-		return imageName;
+		return imageNames;
 	}
 	// ===========================================================================================
 	// class Autopilot 
@@ -92,7 +93,7 @@ namespace cgbv
 		}
 		csvFile << n;
 		csvFile.flush();
-		defImageName();
+		defImageNames();
 		return true;
 	}
 
@@ -103,7 +104,7 @@ namespace cgbv
 			calPos(0.f, *elevationCameraPtr, distanceCamera),
 			-(*azimuthCameraPtr),
 			currentModel,
-			currentImageName);
+			currentImageNames);
 	}
 
 	void Autopilot::step()
@@ -111,7 +112,7 @@ namespace cgbv
 		writeDataCSV();
 		if (tick())
 		{
-			defImageName();
+			defImageNames();
 		}
 	}
 
@@ -210,17 +211,25 @@ namespace cgbv
 	}
 
 
-	void Autopilot::defImageName()
+	void Autopilot::defImageNames()
 	{
 		sprintf_s(nameBuffer, "%08d", counter++);
 		// todo here exeption bei current Model = 7 weil es das nicht mehr gibt 
-		currentImageName = dateFolder + "\\" + modelNames.at(currentModel) + "\\" + std::string(nameBuffer) + modelNames.at(currentModel) + ".png";
-	}
+		currentImageNames.clear(); 
+		currentImageNames.insert(currentImageNames.begin(), dateFolder + "\\" + modelNames.at(currentModel) + "\\" + "shadowmap\\" + std::string(nameBuffer) + modelNames.at(currentModel) + "SM" + ".png");
+		currentImageNames.push_back(dateFolder + "\\" + modelNames.at(currentModel) + "\\" + "rgb\\" + std::string(nameBuffer) + modelNames.at(currentModel) + "RGB" + ".png");
+		currentImageNames.push_back(dateFolder + "\\" + modelNames.at(currentModel) + "\\" + "normal\\" + std::string(nameBuffer) + modelNames.at(currentModel) + "NORM" +".png");
+		currentImageNames.push_back(dateFolder + "\\" + modelNames.at(currentModel) + "\\" + "shadow_candidate\\" + std::string(nameBuffer) + modelNames.at(currentModel) + "SC" + ".png");
+	}					
 
 	bool Autopilot::writeDataCSV()
 	{
 		//Filename Azimuth	Elevation S_x S_y C_A C_E
-		csvFile << currentImageName << u;
+		csvFile << currentImageNames[0] << u;
+		csvFile << currentImageNames[1] << u;
+		csvFile << currentImageNames[2] << u;
+		csvFile << currentImageNames[3] << u;
+
 		csvFile << *azimuthLightPtr << u;
 		csvFile << *elevationLightPtr << u;
 		//csvFile << sx << u;
@@ -250,8 +259,8 @@ namespace cgbv
 
 		char nameBuffer[50];
 		sprintf_s(nameBuffer, "%02d", newtime.tm_mon + 1);
-		//dateFolder = "..\\..\\ImageData\\" + std::to_string(newtime.tm_year - 100) + nameBuffer;
-		dateFolder = "../bin/ImageData/" + std::to_string(newtime.tm_year - 100) + nameBuffer;
+		dateFolder = newFolderLocation + std::to_string(newtime.tm_year - 100) + nameBuffer;
+		//dateFolder = "../bin/ImageData/" + std::to_string(newtime.tm_year - 100) + nameBuffer;
 		sprintf_s(nameBuffer, "%02d", newtime.tm_mday);
 		dateFolder += nameBuffer;
 		sprintf_s(nameBuffer, "%02d", newtime.tm_hour);
@@ -260,12 +269,21 @@ namespace cgbv
 		sprintf_s(nameBuffer, "%02d", newtime.tm_min);
 		dateFolder += nameBuffer;
 
+		DWORD ftyp = GetFileAttributesA("newFolderLocation");
+		if (ftyp == INVALID_FILE_ATTRIBUTES)
+			std::filesystem::create_directory(newFolderLocation.c_str());  //path does not exist --> create it! 
+
 		std::filesystem::create_directory(dateFolder.c_str());
 		std::cout << "Folder: " << dateFolder << " created" << std::endl;
 
 		for (std::string modelName : modelNames)
 		{
 			std::filesystem::create_directory((dateFolder + "\\" + modelName).c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\shadowmap").c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\rgb").c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\normal").c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\shadow_candidate").c_str());
+
 		}
 
 		return true;

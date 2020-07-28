@@ -75,9 +75,9 @@ namespace cgbv
 		float distanceLight = 80.f;// 200.f;
 		float distanceCamera = 10.f; // 150.f;
 		float observerprojection_far = 20.f;
-		float lightprojection_xy = 8.f;
-		float lightprojection_zfrom = 1.f;
-		float lightprojection_zto = 85.f;
+		float lightprojection_xy = 15.f;
+		float lightprojection_zfrom = .1f;
+		float lightprojection_zto = 100.f;
 		float model_scalation = .35f;
 
 
@@ -90,7 +90,6 @@ namespace cgbv
 		glm::vec4 ambientMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
 		glm::vec4 diffusMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
 		glm::vec4 spekularMaterial = glm::vec4(1.f, 1.f, 1.f, 1.f);
-		glm::vec4 emissivMaterial = glm::vec4(0.f, 0.f, 0.f, 0.f);
 		float shininessMaterial = 20.f;
 
 		float brightnessFactor = 1.0f;
@@ -104,7 +103,7 @@ namespace cgbv
 		float f;
 		// Model parameters 
 		float modelRotation;
-		std::string screenShotName = "hello.png";
+		std::vector<std::string> screenShotNames;
 
 
 	};
