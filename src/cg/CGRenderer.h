@@ -143,6 +143,8 @@ namespace cgbv
 		// global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
 		unsigned int modelSelection;
 		unsigned int lastDrawnFBX = modelSelection;
+		//Returns them in the order{ x_min, x_max, y_min, y_max, z_min, z_max } */
+		std::vector<float> boundingBoxEdges;
 	};
 
 	struct TweakbarPackage
@@ -188,13 +190,16 @@ namespace cgbv
 		std::bitset<1> screenshot;
 
 		ObserverSelection viewpoint = ObserverSelection::Viewer;
-		PostProcessing post_processing_pass = PostProcessing::Direct_Output;
+		PostProcessing post_processing_pass = PostProcessing::Post_Processing;
 
 		void shadowmap_pass();
 		void final_pass();
 		void canvas_pass();
 
 		void create_image_framebuffer();
+		/*Finds the minimal and maximal values for x,y and z in an vector full of float values for vertices. 
+		  Returns them in the order {x_min, x_max, y_min, y_max, z_min, z_max} */
+		std::vector<float> findMinMaxXYZ(std::vector<float>);
 
 	public:
 
@@ -210,8 +215,6 @@ namespace cgbv
 		virtual void render();
 		virtual void update();
 		void capture();
-		//void loadFBX();
-		void loadFBX(int currentMod);
-		//void loadFBX(std::string path);    
+		void loadFBX(int currentMod); 
 	};
 }

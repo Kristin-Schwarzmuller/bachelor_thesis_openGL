@@ -3,6 +3,7 @@
 #include <iostream>
 #include <AntTweakBar.h>
 #include <OpenGLDebugger.h>
+#include <algorithm>
 
 namespace cgbv
 {
@@ -179,8 +180,10 @@ namespace cgbv
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			observer_camera.moveTo(0.f, 2.5f, parameter.distanceCamera); // here changes happend 5.f --> 10.f
 
-			//lightsource_projection = glm::ortho(-parameter.lightprojection_xy, parameter.lightprojection_xy, -parameter.lightprojection_xy, parameter.lightprojection_xy, parameter.lightprojection_zfrom, parameter.lightprojection_zto);
-			lightsource_projection = glm::ortho(-15.f, 15.f, -15.f, 15.f, .1f, 100.f);
+			lightsource_projection = glm::ortho(-parameter.lightprojection_xy, parameter.lightprojection_xy,
+												-parameter.lightprojection_xy, parameter.lightprojection_xy, 
+												parameter.lightprojection_zfrom, parameter.lightprojection_zto);
+			//lightsource_projection = glm::ortho(-15.f, 15.f, -15.f, 15.f, .1f, 100.f);
 
 			lightsource_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			lightsource_camera.moveTo(parameter.lightPos);
@@ -437,7 +440,6 @@ namespace cgbv
 		}
 	}
 
-
 	void CGRenderer::render()
 	{
 		glEnable(GL_POLYGON_OFFSET_FILL);
@@ -559,45 +561,45 @@ namespace cgbv
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
-		if (screenshot[0])
-		{
-			std::cout << "Storing Shadowmap to Disk...";
-			std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
-			glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, shadowmap_pixel.get());
+		//if (screenshot[0])
+		//{
+		//	std::cout << "Storing Shadowmap to Disk...";
+		//	std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
+		//	glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, shadowmap_pixel.get());
 
-			//cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
-			cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotNames[0], shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
-			std::cout << "done" << std::endl;
-
-
-			std::cout << "Storing RGB Image to Disk...";
-			std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(rgb_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
-
-			//cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
-			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[1], rgb_pixel.get(), window_width, window_height, 0);
-			std::cout << "done" << std::endl;
+		//	//cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
+		//	cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotNames[0], shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
+		//	std::cout << "done" << std::endl;
 
 
-			std::cout << "Storing Normal Image to Disk...";
-			std::unique_ptr<GLubyte[]> normal_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(normal_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, normal_pixel.get());
+		//	std::cout << "Storing RGB Image to Disk...";
+		//	std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+		//	glGetTextureImage(rgb_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
 
-			//cgbv::textures::Texture2DStorage::Store("../normal.png", normal_pixel.get(), window_width, window_height, 0);
-			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[2], normal_pixel.get(), window_width, window_height, 0);
-			std::cout << "done" << std::endl;
+		//	//cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
+		//	cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[1], rgb_pixel.get(), window_width, window_height, 0);
+		//	std::cout << "done" << std::endl;
 
 
-			std::cout << "Storing Shadow Candidate Image to Disk...";
-			std::unique_ptr<GLubyte[]> sc_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(sc_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, sc_pixel.get());
+		//	std::cout << "Storing Normal Image to Disk...";
+		//	std::unique_ptr<GLubyte[]> normal_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+		//	glGetTextureImage(normal_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, normal_pixel.get());
 
-			//cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
-			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[3], sc_pixel.get(), window_width, window_height, 0);
-			std::cout << "done" << std::endl;
+		//	//cgbv::textures::Texture2DStorage::Store("../normal.png", normal_pixel.get(), window_width, window_height, 0);
+		//	cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[2], normal_pixel.get(), window_width, window_height, 0);
+		//	std::cout << "done" << std::endl;
 
-			screenshot.reset();
-		}
+
+		//	std::cout << "Storing Shadow Candidate Image to Disk...";
+		//	std::unique_ptr<GLubyte[]> sc_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+		//	glGetTextureImage(sc_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, sc_pixel.get());
+
+		//	//cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
+		//	cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[3], sc_pixel.get(), window_width, window_height, 0);
+		//	std::cout << "done" << std::endl;
+
+		//	screenshot.reset();
+		//}
 
 		TwDraw();
 	}
@@ -665,7 +667,9 @@ namespace cgbv
 			glBufferData(GL_ARRAY_BUFFER, (3 * mesh.VertexCount() + 3 * mesh.NormalCount()) * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
 
 			// Buffer Vetex Data
-			glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), mesh.VertexData().data());
+			std::vector<float> vertexData = mesh.VertexData();
+			glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), vertexData.data());
+			modelfbx.boundingBoxEdges = CGRenderer::findMinMaxXYZ(vertexData);
 			// Buffer Normal Data
 			glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
 
@@ -681,5 +685,35 @@ namespace cgbv
 
 			object.vertsToDraw = mesh.VertexCount();
 		}
+	}
+
+	std::vector<float> CGRenderer::findMinMaxXYZ(std::vector<float> vertices)
+	{
+		std::vector<float> results =  {0,0, 0,0, 0,0} ;
+		std::vector<float> x, y, z;
+
+		for (int i = 0; i < vertices.size(); i++)
+		{
+			switch (i % 3)
+			{
+			case 0:
+				x.push_back(vertices.at(i));
+				break;
+			case 1:
+				y.push_back(vertices.at(i));
+				break;
+			case 2:
+				z.push_back(vertices.at(i));
+				break;
+			}
+		}
+		results.push_back(*std::max_element(z.begin(), z.end()));
+		results.push_back(*std::min_element(z.begin(), z.end()));
+		results.push_back(*std::max_element(y.begin(), y.end()));
+		results.push_back(*std::min_element(y.begin(), y.end()));
+		results.push_back(*std::max_element(x.begin(), x.end()));
+		results.push_back(*std::min_element(x.begin(), x.end()));
+
+		return results ;
 	}
 }
