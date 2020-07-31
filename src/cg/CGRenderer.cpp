@@ -73,6 +73,9 @@ namespace cgbv
 
 		glDeleteVertexArrays(1, &canvas.vao);
 		glDeleteBuffers(1, &canvas.vbo);
+		
+		glDeleteVertexArrays(1, &boundingBox.vao);
+		glDeleteBuffers(1, &boundingBox.vbo);
 
 		glDeleteFramebuffers(1, &framebuffers.shadowmap_buffer);
 		glDeleteSamplers(1, &shadowmap_sampler);
@@ -306,10 +309,63 @@ namespace cgbv
 
 			data.clear();
 			vertices.clear();
+
+			loadFBX(modelfbx.modelSelection);
+
+			// Bounding Box
+			a = glm::vec3(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_min);
+			b = glm::vec3(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_min);
+			c = glm::vec3(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_max);
+			d = glm::vec3(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_max);
+			glm::vec3 e(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_min);
+			glm::vec3 f(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_min);
+			glm::vec3 g(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_max);
+			glm::vec3 h(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_max);
+
+			glm::vec3 color(0.f, 1.f, 0.f);
+
+			// floor 
+			vertices.push_back(a); vertices.push_back(b); 
+			vertices.push_back(c); vertices.push_back(d);
+			vertices.push_back(a); vertices.push_back(c);
+			vertices.push_back(b); vertices.push_back(d);
+			// roof
+			vertices.push_back(e); vertices.push_back(f);
+			vertices.push_back(g); vertices.push_back(h);
+			vertices.push_back(e); vertices.push_back(g);
+			vertices.push_back(f); vertices.push_back(h);
+			// edges
+			vertices.push_back(a); vertices.push_back(e);
+			vertices.push_back(b); vertices.push_back(f);
+			vertices.push_back(c); vertices.push_back(g);
+			vertices.push_back(d); vertices.push_back(h);
+
+			for (auto v : vertices)
+			{
+				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+				data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
+				boundingBox.vertsToDraw++;
+			}
+
+			glGenVertexArrays(1, &boundingBox.vao);
+			glBindVertexArray(boundingBox.vao);
+
+			glGenBuffers(1, &boundingBox.vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, boundingBox.vbo);
+			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+
+			glEnableVertexAttribArray(locs.vertex);
+			glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+			glEnableVertexAttribArray(locs.normal);
+			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
+
+
+			data.clear();
+			vertices.clear();
 		}
 
 		
-		loadFBX(modelfbx.modelSelection);
+		
 
 
 		// GUI
@@ -557,9 +613,13 @@ namespace cgbv
 
 		glBindVertexArray(basesurface.vao);
 		glDrawArrays(GL_TRIANGLES, 0, basesurface.vertsToDraw);
-
+		
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
+
+		glColor3f(1.f, 1.f, 0.f);
+		glBindVertexArray(boundingBox.vao);
+		glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
 
 		//if (screenshot[0])
 		//{
@@ -632,23 +692,23 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		returnValues = autopilot.getValues();
-		// Light
-		lightsource_camera.moveTo(returnValues.getLightPos());
-		parameter.lightPos = glm::vec4(returnValues.getLightPos(), 0);
+		//returnValues = autopilot.getValues();
+		//// Light
+		//lightsource_camera.moveTo(returnValues.getLightPos());
+		//parameter.lightPos = glm::vec4(returnValues.getLightPos(), 0);
 
-		// Camera view on the model
-		observer_camera.moveTo(returnValues.getCameraPos());
-		parameter.modelRotation = returnValues.getModelRotation();
-		// Model
-		if (returnValues.getModelID() != modelfbx.modelSelection)
-		{
-			modelfbx.modelSelection = returnValues.getModelID();
-			loadFBX(modelfbx.modelSelection);
-		}
-		parameter.screenShotNames = returnValues.getImageNames();
-		screenshot.set();
-		autopilot.step();
+		//// Camera view on the model
+		//observer_camera.moveTo(returnValues.getCameraPos());
+		//parameter.modelRotation = returnValues.getModelRotation();
+		//// Model
+		//if (returnValues.getModelID() != modelfbx.modelSelection)
+		//{
+		//	modelfbx.modelSelection = returnValues.getModelID();
+		//	loadFBX(modelfbx.modelSelection);
+		//}
+		//parameter.screenShotNames = returnValues.getImageNames();
+		//screenshot.set();
+		//autopilot.step();
 
 		lightsource_camera.moveTo(parameter.lightPos);
 	}
@@ -669,7 +729,7 @@ namespace cgbv
 			// Buffer Vetex Data
 			std::vector<float> vertexData = mesh.VertexData();
 			glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), vertexData.data());
-			modelfbx.boundingBoxEdges = CGRenderer::findMinMaxXYZ(vertexData);
+			modelfbx.boundingBoxVals = CGRenderer::findMinMaxXYZ(vertexData);
 			// Buffer Normal Data
 			glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
 
@@ -687,9 +747,9 @@ namespace cgbv
 		}
 	}
 
-	std::vector<float> CGRenderer::findMinMaxXYZ(std::vector<float> vertices)
+	boundingBoxValues CGRenderer::findMinMaxXYZ(std::vector<float> vertices)
 	{
-		std::vector<float> results =  {0,0, 0,0, 0,0} ;
+		boundingBoxValues results;
 		std::vector<float> x, y, z;
 
 		for (int i = 0; i < vertices.size(); i++)
@@ -707,12 +767,12 @@ namespace cgbv
 				break;
 			}
 		}
-		results.push_back(*std::max_element(z.begin(), z.end()));
-		results.push_back(*std::min_element(z.begin(), z.end()));
-		results.push_back(*std::max_element(y.begin(), y.end()));
-		results.push_back(*std::min_element(y.begin(), y.end()));
-		results.push_back(*std::max_element(x.begin(), x.end()));
-		results.push_back(*std::min_element(x.begin(), x.end()));
+		results.z_max = (*std::max_element(z.begin(), z.end()));
+		results.z_min =(*std::min_element(z.begin(), z.end()));
+		results.y_max =(*std::max_element(y.begin(), y.end()));
+		results.y_min =(*std::min_element(y.begin(), y.end()));
+		results.x_max =(*std::max_element(x.begin(), x.end()));
+		results.x_min =(*std::min_element(x.begin(), x.end()));
 
 		return results ;
 	}

@@ -115,6 +115,16 @@ namespace cgbv
 		unsigned int image_buffer;
 	};
 
+	struct boundingBoxValues
+	{
+		float x_min;
+		float x_max;
+		float y_min;
+		float y_max;
+		float z_min;
+		float z_max;
+	};
+
 	struct ModelFBX
 	{
 		const   std::string buddha = "../modelsScaled/budda.fbx";
@@ -143,8 +153,7 @@ namespace cgbv
 		// global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
 		unsigned int modelSelection;
 		unsigned int lastDrawnFBX = modelSelection;
-		//Returns them in the order{ x_min, x_max, y_min, y_max, z_min, z_max } */
-		std::vector<float> boundingBoxEdges;
+		boundingBoxValues boundingBoxVals;
 	};
 
 	struct TweakbarPackage
@@ -160,7 +169,7 @@ namespace cgbv
 
 		ShaderLocations locs;
 
-		BufferCombo basesurface, object, canvas;
+		BufferCombo basesurface, object, canvas, boundingBox;
 
 		glm::mat4 observer_projection, lightsource_projection, model, bias;
 
@@ -197,9 +206,7 @@ namespace cgbv
 		void canvas_pass();
 
 		void create_image_framebuffer();
-		/*Finds the minimal and maximal values for x,y and z in an vector full of float values for vertices. 
-		  Returns them in the order {x_min, x_max, y_min, y_max, z_min, z_max} */
-		std::vector<float> findMinMaxXYZ(std::vector<float>);
+		boundingBoxValues findMinMaxXYZ(std::vector<float>);
 
 	public:
 
