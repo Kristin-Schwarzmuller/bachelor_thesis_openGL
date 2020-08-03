@@ -94,7 +94,7 @@ namespace cgbv
 
 		glViewport(0, 0, width, height);
 
-		observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), .1f, 200.f);
+		observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), parameter.observerprojection_near, parameter.observerprojection_far);
 
 		create_image_framebuffer();
 
@@ -179,9 +179,9 @@ namespace cgbv
 		// Matrices 
 		{
 
-			observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), .1f, parameter.observerprojection_far);
+			observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), parameter.observerprojection_near, parameter.observerprojection_far);
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
-			observer_camera.moveTo(0.f, 2.5f, parameter.distanceCamera); // here changes happend 5.f --> 10.f
+			observer_camera.moveTo(0.f, 2.5f, parameter.distanceCamera);
 
 			lightsource_projection = glm::ortho(-parameter.lightprojection_xy, parameter.lightprojection_xy,
 												-parameter.lightprojection_xy, parameter.lightprojection_xy, 
@@ -311,57 +311,6 @@ namespace cgbv
 			vertices.clear();
 
 			loadFBX(modelfbx.modelSelection);
-
-			// Bounding Box
-			a = glm::vec3(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_min);
-			b = glm::vec3(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_min);
-			c = glm::vec3(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_max);
-			d = glm::vec3(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_max);
-			glm::vec3 e(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_min);
-			glm::vec3 f(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_min);
-			glm::vec3 g(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_max);
-			glm::vec3 h(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_max);
-
-			glm::vec3 color(0.f, 1.f, 0.f);
-
-			// floor 
-			vertices.push_back(a); vertices.push_back(b); 
-			vertices.push_back(c); vertices.push_back(d);
-			vertices.push_back(a); vertices.push_back(c);
-			vertices.push_back(b); vertices.push_back(d);
-			// roof
-			vertices.push_back(e); vertices.push_back(f);
-			vertices.push_back(g); vertices.push_back(h);
-			vertices.push_back(e); vertices.push_back(g);
-			vertices.push_back(f); vertices.push_back(h);
-			// edges
-			vertices.push_back(a); vertices.push_back(e);
-			vertices.push_back(b); vertices.push_back(f);
-			vertices.push_back(c); vertices.push_back(g);
-			vertices.push_back(d); vertices.push_back(h);
-
-			for (auto v : vertices)
-			{
-				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
-				data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
-				boundingBox.vertsToDraw++;
-			}
-
-			glGenVertexArrays(1, &boundingBox.vao);
-			glBindVertexArray(boundingBox.vao);
-
-			glGenBuffers(1, &boundingBox.vbo);
-			glBindBuffer(GL_ARRAY_BUFFER, boundingBox.vbo);
-			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
-
-			glEnableVertexAttribArray(locs.vertex);
-			glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
-			glEnableVertexAttribArray(locs.normal);
-			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
-
-
-			data.clear();
-			vertices.clear();
 		}
 
 		
@@ -516,7 +465,8 @@ namespace cgbv
 	void CGRenderer::shadowmap_pass()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.shadowmap_buffer);
-
+		//observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), parameter.observerprojection_near-1.0f, parameter.observerprojection_far+1.0f);
+		
 		glViewport(0, 0, shadowmap_width, shadowmap_height);
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -551,6 +501,7 @@ namespace cgbv
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.image_buffer);
 			break;
 		}	
+		//observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), parameter.observerprojection_near - 1.0f, parameter.observerprojection_far + 1.0f);
 
 		glViewport(0, 0, window_width, window_height);
 
@@ -617,7 +568,8 @@ namespace cgbv
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
-		glColor3f(1.f, 1.f, 0.f);
+		glLineWidth(5.f);
+		glColor3f(1.0f, 0.0f, 0.0f);
 		glBindVertexArray(boundingBox.vao);
 		glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
 
@@ -730,6 +682,8 @@ namespace cgbv
 			std::vector<float> vertexData = mesh.VertexData();
 			glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), vertexData.data());
 			modelfbx.boundingBoxVals = CGRenderer::findMinMaxXYZ(vertexData);
+			parameter.observerprojection_near = modelfbx.boundingBoxVals.z_min;
+			parameter.observerprojection_far = modelfbx.boundingBoxVals.z_max;
 			// Buffer Normal Data
 			glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
 
@@ -744,6 +698,7 @@ namespace cgbv
 			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 0, (const void*)(3 * mesh.VertexCount() * sizeof(GLfloat)));
 
 			object.vertsToDraw = mesh.VertexCount();
+			drawBoundingBox();
 		}
 	}
 
@@ -775,5 +730,60 @@ namespace cgbv
 		results.x_min =(*std::min_element(x.begin(), x.end()));
 
 		return results ;
+	}
+
+	void CGRenderer::drawBoundingBox()
+	{
+		std::vector<glm::vec3> vertices;
+		std::vector<float> data;
+		// Bounding Box
+		glm::vec3 a(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_min);
+		glm::vec3 b(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_min);
+		glm::vec3 c(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_max);
+		glm::vec3 d(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_max);
+		glm::vec3 e(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_min);
+		glm::vec3 f(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_min);
+		glm::vec3 g(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_max);
+		glm::vec3 h(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_max);
+
+		glm::vec3 n(0.f, 1.f, 0.f);
+
+		// floor 
+		vertices.push_back(a); vertices.push_back(b);
+		vertices.push_back(c); vertices.push_back(d);
+		vertices.push_back(a); vertices.push_back(c);
+		vertices.push_back(b); vertices.push_back(d);
+		// roof
+		vertices.push_back(e); vertices.push_back(f);
+		vertices.push_back(g); vertices.push_back(h);
+		vertices.push_back(e); vertices.push_back(g);
+		vertices.push_back(f); vertices.push_back(h);
+		// edges
+		vertices.push_back(a); vertices.push_back(e);
+		vertices.push_back(b); vertices.push_back(f);
+		vertices.push_back(c); vertices.push_back(g);
+		vertices.push_back(d); vertices.push_back(h);
+
+		for (auto v : vertices)
+		{
+			data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+			data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
+			boundingBox.vertsToDraw++;
+		}
+
+		glGenVertexArrays(1, &boundingBox.vao);
+		glBindVertexArray(boundingBox.vao);
+
+		glGenBuffers(1, &boundingBox.vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, boundingBox.vbo);
+		glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(locs.vertex);
+		glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+		glEnableVertexAttribArray(locs.normal);
+		glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
+
+		data.clear();
+		vertices.clear();
 	}
 }

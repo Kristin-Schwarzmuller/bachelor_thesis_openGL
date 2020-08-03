@@ -74,6 +74,7 @@ namespace cgbv
 		glm::quat globalRotation;
 		float distanceLight = 80.f;// 200.f;
 		float distanceCamera = 10.f; // 150.f;
+		float observerprojection_near = .1f;
 		float observerprojection_far = 20.f;
 		float lightprojection_xy = 15.f;
 		float lightprojection_zfrom = .1f;
@@ -207,6 +208,7 @@ namespace cgbv
 
 		void create_image_framebuffer();
 		boundingBoxValues findMinMaxXYZ(std::vector<float>);
+		void drawBoundingBox();
 
 	public:
 
