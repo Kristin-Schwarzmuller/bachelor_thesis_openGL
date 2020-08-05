@@ -161,6 +161,23 @@ glm::mat4 cgbv::Camera::getViewMatrix()
 	return m;
 }
 
+glm::vec3 cgbv::Camera::getUp()
+{
+	return up;
+}
+
+glm::vec3 cgbv::Camera::getForward()
+{
+	return glm::normalize(target - position); 
+}
+
+glm::vec3 cgbv::Camera::getRight()
+{
+	return glm::cross(getForward(), up);
+}
+
+
+
 
 void cgbv::Camera::setUpOrientation(float orientation)
 {

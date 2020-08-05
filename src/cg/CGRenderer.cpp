@@ -73,7 +73,7 @@ namespace cgbv
 
 		glDeleteVertexArrays(1, &canvas.vao);
 		glDeleteBuffers(1, &canvas.vbo);
-		
+
 		glDeleteVertexArrays(1, &boundingBox.vao);
 		glDeleteBuffers(1, &boundingBox.vbo);
 
@@ -173,7 +173,7 @@ namespace cgbv
 		glEnable(GL_ALPHA_TEST);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
-		
+
 		OpenGLDebugger debugger;
 
 		// Matrices 
@@ -183,10 +183,9 @@ namespace cgbv
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			observer_camera.moveTo(0.f, 2.5f, parameter.distanceCamera);
 
-			lightsource_projection = glm::ortho(-parameter.lightprojection_xy, parameter.lightprojection_xy,
-												-parameter.lightprojection_xy, parameter.lightprojection_xy, 
-												parameter.lightprojection_zfrom, parameter.lightprojection_zto);
-			//lightsource_projection = glm::ortho(-15.f, 15.f, -15.f, 15.f, .1f, 100.f);
+			lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
+				parameter.lightprojection_y_min, parameter.lightprojection_y_max,
+				parameter.lightprojection_z_min, parameter.lightprojection_z_max);
 
 			lightsource_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			lightsource_camera.moveTo(parameter.lightPos);
@@ -285,7 +284,7 @@ namespace cgbv
 			n = glm::vec3(0.f, 0.f, 1.f);
 
 			vertices.push_back(a); vertices.push_back(b); vertices.push_back(c); vertices.push_back(d);
-			
+
 
 			for (auto v : vertices)
 			{
@@ -311,10 +310,12 @@ namespace cgbv
 			vertices.clear();
 
 			loadFBX(modelfbx.modelSelection);
+
+			adjustLight();
 		}
 
-		
-		
+
+
 
 
 		// GUI
@@ -466,7 +467,7 @@ namespace cgbv
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.shadowmap_buffer);
 		//observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), parameter.observerprojection_near-1.0f, parameter.observerprojection_far+1.0f);
-		
+
 		glViewport(0, 0, shadowmap_width, shadowmap_height);
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -500,7 +501,7 @@ namespace cgbv
 		case cgbv::PostProcessing::Post_Processing:
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.image_buffer);
 			break;
-		}	
+		}
 		//observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), parameter.observerprojection_near - 1.0f, parameter.observerprojection_far + 1.0f);
 
 		glViewport(0, 0, window_width, window_height);
@@ -508,7 +509,7 @@ namespace cgbv
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glm::mat4 view;
-		
+
 		switch (viewpoint)
 		{
 		case ObserverSelection::Viewer:
@@ -545,7 +546,7 @@ namespace cgbv
 			glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * view * model));
 			break;
 		}
-		
+
 		glUniformMatrix4fv(locs.modelview, 1, GL_FALSE, glm::value_ptr(view * model));
 		glUniformMatrix3fv(locs.normalmatrix, 1, GL_FALSE, glm::value_ptr(normal));
 
@@ -564,7 +565,7 @@ namespace cgbv
 
 		glBindVertexArray(basesurface.vao);
 		glDrawArrays(GL_TRIANGLES, 0, basesurface.vertsToDraw);
-		
+
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
@@ -631,7 +632,7 @@ namespace cgbv
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, rgb_output->getTextureID());
 		glBindSampler(0, rgb_sampler);
-		glUniform1i(locs.rgb_tex, 0); 
+		glUniform1i(locs.rgb_tex, 0);
 
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.canvasPlacementVS);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.canvasDisplayFS);
@@ -663,6 +664,7 @@ namespace cgbv
 		//autopilot.step();
 
 		lightsource_camera.moveTo(parameter.lightPos);
+		adjustLight();
 	}
 
 	void CGRenderer::loadFBX(int currentMod)
@@ -707,7 +709,7 @@ namespace cgbv
 		boundingBoxValues results;
 		std::vector<float> x, y, z;
 
-		for (int i = 0; i < vertices.size(); i++)
+		for (unsigned int i = 0; i < vertices.size(); i++)
 		{
 			switch (i % 3)
 			{
@@ -723,13 +725,13 @@ namespace cgbv
 			}
 		}
 		results.z_max = (*std::max_element(z.begin(), z.end()));
-		results.z_min =(*std::min_element(z.begin(), z.end()));
-		results.y_max =(*std::max_element(y.begin(), y.end()));
-		results.y_min =(*std::min_element(y.begin(), y.end()));
-		results.x_max =(*std::max_element(x.begin(), x.end()));
-		results.x_min =(*std::min_element(x.begin(), x.end()));
+		results.z_min = (*std::min_element(z.begin(), z.end()));
+		results.y_max = (*std::max_element(y.begin(), y.end()));
+		results.y_min = (*std::min_element(y.begin(), y.end()));
+		results.x_max = (*std::max_element(x.begin(), x.end()));
+		results.x_min = (*std::min_element(x.begin(), x.end()));
 
-		return results ;
+		return results;
 	}
 
 	void CGRenderer::drawBoundingBox()
@@ -786,4 +788,29 @@ namespace cgbv
 		data.clear();
 		vertices.clear();
 	}
+	void CGRenderer::adjustLight()
+	{
+		glm::mat2x3 A(9.0f);
+		A[0] = lightsource_camera.getUp();
+		A[1] = lightsource_camera.getRight();
+		 
+		//DieProjektionsmatrixistP = A(ATA)^-1 AT.
+		glm::mat3 P = A * glm::inverse(glm::transpose(A) * A) * glm::transpose(A);
+		glm::vec3 p_min = P * glm::vec3(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_min, 0);
+		glm::vec3 p_max = P * glm::vec3(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_max, 0);
+
+		glm::vec3 minVec = glm::min(p_min, p_max); // p_min_boden, p_max_boden);
+		glm::vec3 maxVec = glm::max(p_min, p_max);
+
+		parameter.lightprojection_x_min = minVec.x;
+		parameter.lightprojection_x_max = maxVec.x;
+		parameter.lightprojection_y_min = minVec.y;
+		parameter.lightprojection_y_max = maxVec.y;
+
+		lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
+			parameter.lightprojection_y_min, parameter.lightprojection_y_max,
+			parameter.lightprojection_z_min, parameter.lightprojection_z_max);
+
+	}
 }
+

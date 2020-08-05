@@ -44,6 +44,9 @@ namespace cgbv
 		void setUpOrientation(float orientation);
 
 		glm::mat4 getViewMatrix();
+		glm::vec3 getUp();
+		glm::vec3 getForward();
+		glm::vec3 getRight();
 
 		void reset();
 	};

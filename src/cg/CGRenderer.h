@@ -76,9 +76,12 @@ namespace cgbv
 		float distanceCamera = 10.f; // 150.f;
 		float observerprojection_near = .1f;
 		float observerprojection_far = 20.f;
-		float lightprojection_xy = 15.f;
-		float lightprojection_zfrom = .1f;
-		float lightprojection_zto = 100.f;
+		float lightprojection_x_min = -15.f;
+		float lightprojection_x_max = 15.f;
+		float lightprojection_y_min = -15.f;
+		float lightprojection_y_max = 15.f;
+		float lightprojection_z_min = .1f;
+		float lightprojection_z_max = 100.f;
 		float model_scalation = .35f;
 
 
@@ -209,6 +212,7 @@ namespace cgbv
 		void create_image_framebuffer();
 		boundingBoxValues findMinMaxXYZ(std::vector<float>);
 		void drawBoundingBox();
+		void adjustLight();
 
 	public:
 
