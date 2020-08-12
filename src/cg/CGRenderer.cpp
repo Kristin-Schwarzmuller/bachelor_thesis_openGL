@@ -43,6 +43,20 @@ namespace cgbv
 		*(PostProcessing*)value = *post_processing_pass;
 		std::cout << "Got Value" << std::endl;
 	}
+
+	void TW_CALL o_SetCallback(const void* value, void* clientData)
+	{
+		auto viewpoint = static_cast<ObserverSelection*>(clientData);
+		*viewpoint = (*(ObserverSelection*)value);
+		std::cout << "Set Value" << std::endl;
+	}
+
+	void TW_CALL o_GetCallback(void* value, void* clientData)
+	{
+		auto viewpoint = static_cast<ObserverSelection*>(clientData);
+		*(ObserverSelection*)value = *viewpoint;
+		std::cout << "Got Value" << std::endl;
+	}
 	// ==========================================================
 
 	CGRenderer::CGRenderer(GLFWwindow* window) : Renderer(window)
@@ -183,9 +197,11 @@ namespace cgbv
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			observer_camera.moveTo(0.f, 2.5f, parameter.distanceCamera);
 
-			lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
-				parameter.lightprojection_y_min, parameter.lightprojection_y_max,
-				parameter.lightprojection_z_min, parameter.lightprojection_z_max);
+			/*lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
+				parameter.lightprojection_y_min, parameter.lightprojection_[1][1],
+				parameter.lightprojection_z_min, parameter.lightprojection_z_max);*/
+
+			lightsource_projection = glm::ortho(-1.0f, 1.0f, 0.0f, 5.f, .1f, 100.f);
 
 			lightsource_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			lightsource_camera.moveTo(parameter.lightPos);
@@ -252,6 +268,17 @@ namespace cgbv
 			vertices.push_back(a); vertices.push_back(c); vertices.push_back(b);
 
 			std::vector<float> data;
+
+			// First fill the date just with the vertices to find to bounding box for the floor 
+			for (auto v : vertices)
+			{
+				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+			}
+
+			basesurface.boundingBoxVals = findMinMaxXYZ(data);
+			data.clear();
+			// later fill the date with the vertices and the normales to draw them 
+
 			for (auto v : vertices)
 			{
 				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
@@ -310,8 +337,6 @@ namespace cgbv
 			vertices.clear();
 
 			loadFBX(modelfbx.modelSelection);
-
-			adjustLight();
 		}
 
 
@@ -323,7 +348,7 @@ namespace cgbv
 			TwInit(TW_OPENGL_CORE, nullptr);
 			TwWindowSize(1280, 720);
 			TwBar* tweakbar = TwNewBar("TweakBar");
-			TwDefine(" TweakBar size='300 500'");
+			TwDefine(" TweakBar size='300 600'");
 
 			TwAddVarRW(tweakbar, "Global Rotation", TW_TYPE_QUAT4F, &parameter.globalRotation, "showval=false opened=true");
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
@@ -354,6 +379,14 @@ namespace cgbv
 			std::string post_processing_types = "Direct_Output, Post_Processing";
 			TwType pp_type = TwDefineEnumFromString("pp_type", post_processing_types.c_str());
 			TwAddVarCB(tweakbar, "Post Processing", pp_type, pp_SetCallback, pp_GetCallback, &post_processing_pass, "");
+			TwAddVarRW(tweakbar, "Dynamik Light Adjustment", TW_TYPE_BOOL8, &parameter.enabledLightAdjustment, " true=Enabled false=Disabled ");
+
+			std::string observer_types = "Viewer, Light";
+			TwType o_type = TwDefineEnumFromString("o_type", observer_types.c_str());
+			TwAddVarCB(tweakbar, "Switch View", o_type, o_SetCallback, o_GetCallback, &viewpoint, "");
+
+			TwAddVarRW(tweakbar, "Shadowmap Scalation", TW_TYPE_FLOAT, &parameter.shadowModelScalation, " min = -3.0f max = 4.0f step = 0.1f");
+
 		}
 
 
@@ -472,13 +505,29 @@ namespace cgbv
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.model_scalation));
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation));
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
 
 		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 
+		glm::mat4 shadow_model_view = shadow_view * model; 
+
+		//glm::vec4 vals = glm::vec4(object.boundingBoxVals[0][0], object.boundingBoxVals[0][1], object.boundingBoxVals[1][0], object.boundingBoxVals[1][1]);
+		object.boundingBoxViewSpace = shadow_model_view * object.boundingBoxVals;
+		basesurface.boundingBoxViewSpace = shadow_model_view * basesurface.boundingBoxVals;
+
+		if (parameter.enabledLightAdjustment)
+		{
+			adjustLight();
+		}
+		else
+		{
+			//lightsource_projection = glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, 0.1f, 100.f);
+			lightsource_projection = glm::ortho(-1.0f, 1.0f, 0.0f, 2.5f, .1f, 100.f);
+		}
+
 		shader->use();
-		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * shadow_view * model));
+		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * shadow_model_view));
 
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.placementVS);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.depthmapFS);
@@ -521,7 +570,7 @@ namespace cgbv
 		}
 
 		// Scaling the object
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.model_scalation));
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation));
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
 
 		shader->use();
@@ -570,49 +619,48 @@ namespace cgbv
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
 		glLineWidth(5.f);
-		glColor3f(1.0f, 0.0f, 0.0f);
 		glBindVertexArray(boundingBox.vao);
 		glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
 
-		//if (screenshot[0])
-		//{
-		//	std::cout << "Storing Shadowmap to Disk...";
-		//	std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
-		//	glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, shadowmap_pixel.get());
+		if (screenshot[0])
+		{
+			std::cout << "Storing Shadowmap to Disk...";
+			std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
+			glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, shadowmap_pixel.get());
 
-		//	//cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
-		//	cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotNames[0], shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
-		//	std::cout << "done" << std::endl;
-
-
-		//	std::cout << "Storing RGB Image to Disk...";
-		//	std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-		//	glGetTextureImage(rgb_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
-
-		//	//cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
-		//	cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[1], rgb_pixel.get(), window_width, window_height, 0);
-		//	std::cout << "done" << std::endl;
+			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
+			//cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotNames[0], shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
+			std::cout << "done" << std::endl;
 
 
-		//	std::cout << "Storing Normal Image to Disk...";
-		//	std::unique_ptr<GLubyte[]> normal_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-		//	glGetTextureImage(normal_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, normal_pixel.get());
+			std::cout << "Storing RGB Image to Disk...";
+			std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(rgb_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
 
-		//	//cgbv::textures::Texture2DStorage::Store("../normal.png", normal_pixel.get(), window_width, window_height, 0);
-		//	cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[2], normal_pixel.get(), window_width, window_height, 0);
-		//	std::cout << "done" << std::endl;
+			cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
+			//cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[1], rgb_pixel.get(), window_width, window_height, 0);
+			std::cout << "done" << std::endl;
 
 
-		//	std::cout << "Storing Shadow Candidate Image to Disk...";
-		//	std::unique_ptr<GLubyte[]> sc_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-		//	glGetTextureImage(sc_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, sc_pixel.get());
+			std::cout << "Storing Normal Image to Disk...";
+			std::unique_ptr<GLubyte[]> normal_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(normal_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, normal_pixel.get());
 
-		//	//cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
-		//	cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[3], sc_pixel.get(), window_width, window_height, 0);
-		//	std::cout << "done" << std::endl;
+			cgbv::textures::Texture2DStorage::Store("../normal.png", normal_pixel.get(), window_width, window_height, 0);
+			//cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[2], normal_pixel.get(), window_width, window_height, 0);
+			std::cout << "done" << std::endl;
 
-		//	screenshot.reset();
-		//}
+
+			std::cout << "Storing Shadow Candidate Image to Disk...";
+			std::unique_ptr<GLubyte[]> sc_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(sc_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, sc_pixel.get());
+
+			cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
+			//cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[3], sc_pixel.get(), window_width, window_height, 0);
+			std::cout << "done" << std::endl;
+
+			screenshot.reset();
+		}
 
 		TwDraw();
 	}
@@ -662,9 +710,8 @@ namespace cgbv
 		//parameter.screenShotNames = returnValues.getImageNames();
 		//screenshot.set();
 		//autopilot.step();
-
 		lightsource_camera.moveTo(parameter.lightPos);
-		adjustLight();
+		lightsource_camera.setTarget(0.f, 0.f, 0.f);
 	}
 
 	void CGRenderer::loadFBX(int currentMod)
@@ -683,9 +730,9 @@ namespace cgbv
 			// Buffer Vetex Data
 			std::vector<float> vertexData = mesh.VertexData();
 			glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), vertexData.data());
-			modelfbx.boundingBoxVals = CGRenderer::findMinMaxXYZ(vertexData);
-			parameter.observerprojection_near = modelfbx.boundingBoxVals.z_min;
-			parameter.observerprojection_far = modelfbx.boundingBoxVals.z_max;
+			object.boundingBoxVals = CGRenderer::findMinMaxXYZ(vertexData);
+			//parameter.observerprojection_near = modelfbx.boundingBoxVals.z_min;
+			//parameter.observerprojection_far = modelfbx.boundingBoxVals.z_max;
 			// Buffer Normal Data
 			glBufferSubData(GL_ARRAY_BUFFER, mesh.VertexCount() * 3 * sizeof(GLfloat), 3 * mesh.NormalCount() * sizeof(GLfloat), mesh.NormalData().data());
 
@@ -704,9 +751,9 @@ namespace cgbv
 		}
 	}
 
-	boundingBoxValues CGRenderer::findMinMaxXYZ(std::vector<float> vertices)
+	glm::mat2x4 CGRenderer::findMinMaxXYZ(std::vector<float> vertices)
 	{
-		boundingBoxValues results;
+		glm::mat2x4 results;
 		std::vector<float> x, y, z;
 
 		for (unsigned int i = 0; i < vertices.size(); i++)
@@ -724,12 +771,15 @@ namespace cgbv
 				break;
 			}
 		}
-		results.z_max = (*std::max_element(z.begin(), z.end()));
-		results.z_min = (*std::min_element(z.begin(), z.end()));
-		results.y_max = (*std::max_element(y.begin(), y.end()));
-		results.y_min = (*std::min_element(y.begin(), y.end()));
-		results.x_max = (*std::max_element(x.begin(), x.end()));
-		results.x_min = (*std::min_element(x.begin(), x.end()));
+		results[0][0] = (*std::min_element(x.begin(), x.end()));
+		results[0][1] = (*std::min_element(y.begin(), y.end()));
+		results[0][2] = (*std::min_element(z.begin(), z.end()));
+		results[0][3] = 1.0f;
+
+		results[1][0] = (*std::max_element(x.begin(), x.end()));
+		results[1][1] = (*std::max_element(y.begin(), y.end()));
+		results[1][2] = (*std::max_element(z.begin(), z.end()));
+		results[1][3] = 1.0f;
 
 		return results;
 	}
@@ -739,14 +789,14 @@ namespace cgbv
 		std::vector<glm::vec3> vertices;
 		std::vector<float> data;
 		// Bounding Box
-		glm::vec3 a(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_min);
-		glm::vec3 b(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_min);
-		glm::vec3 c(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_max);
-		glm::vec3 d(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_min, modelfbx.boundingBoxVals.z_max);
-		glm::vec3 e(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_min);
-		glm::vec3 f(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_min);
-		glm::vec3 g(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_max);
-		glm::vec3 h(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_max, modelfbx.boundingBoxVals.z_max);
+		glm::vec3 a(object.boundingBoxVals[0][0], object.boundingBoxVals[0][1], object.boundingBoxVals[0][2]);
+		glm::vec3 b(object.boundingBoxVals[1][0], object.boundingBoxVals[0][1], object.boundingBoxVals[0][2]);
+		glm::vec3 c(object.boundingBoxVals[0][0], object.boundingBoxVals[0][1], object.boundingBoxVals[1][2]);
+		glm::vec3 d(object.boundingBoxVals[1][0], object.boundingBoxVals[0][1], object.boundingBoxVals[1][2]);
+		glm::vec3 e(object.boundingBoxVals[0][0], object.boundingBoxVals[1][1], object.boundingBoxVals[0][2]);
+		glm::vec3 f(object.boundingBoxVals[1][0], object.boundingBoxVals[1][1], object.boundingBoxVals[0][2]);
+		glm::vec3 g(object.boundingBoxVals[0][0], object.boundingBoxVals[1][1], object.boundingBoxVals[1][2]);
+		glm::vec3 h(object.boundingBoxVals[1][0], object.boundingBoxVals[1][1], object.boundingBoxVals[1][2]);
 
 		glm::vec3 n(0.f, 1.f, 0.f);
 
@@ -790,27 +840,93 @@ namespace cgbv
 	}
 	void CGRenderer::adjustLight()
 	{
-		glm::mat2x3 A(9.0f);
-		A[0] = lightsource_camera.getUp();
-		A[1] = lightsource_camera.getRight();
-		 
-		//DieProjektionsmatrixistP = A(ATA)^-1 AT.
-		glm::mat3 P = A * glm::inverse(glm::transpose(A) * A) * glm::transpose(A);
-		glm::vec3 p_min = P * glm::vec3(modelfbx.boundingBoxVals.x_min, modelfbx.boundingBoxVals.y_min, 0);
-		glm::vec3 p_max = P * glm::vec3(modelfbx.boundingBoxVals.x_max, modelfbx.boundingBoxVals.y_max, 0);
+		//glm::mat2x3 A(9.0f);
+		//A[1] = lightsource_camera.getUp();
+		//A[0] = lightsource_camera.getRight();
 
-		glm::vec3 minVec = glm::min(p_min, p_max); // p_min_boden, p_max_boden);
-		glm::vec3 maxVec = glm::max(p_min, p_max);
+		////DieProjektionsmatrixistP = A(ATA)^-1 AT.
+		//glm::mat3 P = A * glm::inverse(glm::transpose(A) * A) * glm::transpose(A);
 
-		parameter.lightprojection_x_min = minVec.x;
-		parameter.lightprojection_x_max = maxVec.x;
-		parameter.lightprojection_y_min = minVec.y;
-		parameter.lightprojection_y_max = maxVec.y;
+		// Bounding Box
+		//glm::vec3 a(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[0][2]);
+		//glm::vec3 b(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[0][2]);
+		//glm::vec3 c(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[1][2]);
+		//glm::vec3 d(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[1][2]);
+		//glm::vec3 e(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[0][2]);
+		//glm::vec3 f(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[0][2]);
+		//glm::vec3 g(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[1][2]);
+		//glm::vec3 h(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[1][2]);
+		
+		////glm::vec3 p1 = P * glm::vec3(object.boungBoxViewSpace[0][0], object.boungBoxViewSpace[0][1], object.boungBoxViewSpace[0][2]);
+		////glm::vec3 p2 = P * glm::vec3(object.boungBoxViewSpace[1][0], object.boungBoxViewSpace[1][1], object.boungBoxViewSpace[1][2]);
+		////glm::vec3 p3 = P * glm::vec3(basesurface.boungBoxViewSpace[0][0], basesurface.boungBoxViewSpace[0][1], 0);
+		////glm::vec3 p4 = P * glm::vec3(basesurface.boungBoxViewSpace[1][0], basesurface.boungBoxViewSpace[1][1], 0);
+
+		//glm::vec3 pa = P * a;
+		//glm::vec3 pb = P * b;
+		//glm::vec3 pc = P * c;
+		//glm::vec3 pd = P * d;
+		//glm::vec3 pe = P * e;
+		//glm::vec3 pf = P * f;
+		//glm::vec3 pg = P * g;
+		//glm::vec3 ph = P * h;
+
+
+		//glm::vec3 minVec = glm::min(p1, p2);
+		//glm::vec3 maxVec = glm::max(p1, p2);
+		//glm::vec3 minVec = glm::min(glm::min(p1,p2), glm::min(p3,p4));
+		//glm::vec3 maxVec = glm::max(glm::max(p1,p2), glm::max(p3,p4));
+		//glm::vec3 minVec = glm::min(glm::min(glm::min(pa, pb), glm::min(pc, pd)), glm::min(glm::min(pe, pf), glm::min(pg, ph)));
+		//glm::vec3 maxVec = glm::max(glm::max(glm::max(pa, pb), glm::max(pc, pd)), glm::max(glm::max(pe, pf), glm::max(pg, ph)));
+
+		//parameter.lightprojection_x_min = minVec.x;
+		//parameter.lightprojection_x_max = maxVec.x;
+		//parameter.lightprojection_y_min = minVec.y;
+		//parameter.lightprojection_y_max = maxVec.y;
+
+		// https://stackoverflow.com/questions/9605556/how-to-project-a-point-onto-a-plane-in-3d 
+		glm::vec3 n(0.f, 0.f, 1.f);
+		float d = -80;
+
+		std::vector<glm::vec3> bbPoints;
+		std::vector<glm::vec3> bbPointsProj;
+		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[0][2]));
+		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[0][2]));
+		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[1][2]));
+		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[1][2]));
+		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[0][2]));
+		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[0][2]));
+		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[1][2]));
+		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[1][2]));
+
+		float dist;
+		glm::vec3 tmp;
+		float x_min = 0;
+		float x_max = 0;
+		float y_min = 0;
+		float y_max = 0;
+		for (glm::vec3 vec : bbPoints)
+		{
+			dist = glm::dot(n, vec) - d;
+			tmp = glm::vec3(vec - dist * n);
+			if (tmp.x < x_min)
+				x_min = tmp.x;		
+			if (tmp.x > x_max)
+				x_max = tmp.x;
+			if (tmp.y < y_min)
+				y_min = tmp.y;		
+			if (tmp.y > y_max)
+				y_max = tmp.y;
+		}
+
+		parameter.lightprojection_x_min = x_min;
+		parameter.lightprojection_x_max = x_max;
+		parameter.lightprojection_y_min = y_min;
+		parameter.lightprojection_y_max = y_max;
 
 		lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
 			parameter.lightprojection_y_min, parameter.lightprojection_y_max,
 			parameter.lightprojection_z_min, parameter.lightprojection_z_max);
-
 	}
 }
 

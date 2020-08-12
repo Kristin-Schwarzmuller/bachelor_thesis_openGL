@@ -67,6 +67,8 @@ namespace cgbv
 	struct BufferCombo
 	{
 		unsigned int vao, vbo, vertsToDraw;
+
+		glm::mat2x4 boundingBoxVals, boundingBoxViewSpace;
 	};
 
 	struct UIParameter
@@ -82,7 +84,9 @@ namespace cgbv
 		float lightprojection_y_max = 15.f;
 		float lightprojection_z_min = .1f;
 		float lightprojection_z_max = 100.f;
-		float model_scalation = .35f;
+		float modelScalation = .35f;
+		float shadowModelScalation = .35f;
+
 
 
 		glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
@@ -109,7 +113,7 @@ namespace cgbv
 		float modelRotation;
 		std::vector<std::string> screenShotNames;
 
-
+		bool enabledLightAdjustment = true;
 	};
 
 	struct Framebuffers
@@ -119,15 +123,6 @@ namespace cgbv
 		unsigned int image_buffer;
 	};
 
-	struct boundingBoxValues
-	{
-		float x_min;
-		float x_max;
-		float y_min;
-		float y_max;
-		float z_min;
-		float z_max;
-	};
 
 	struct ModelFBX
 	{
@@ -157,7 +152,6 @@ namespace cgbv
 		// global path variable that defines the fbx Model that is going to be drawn (inizializted with buddha) 
 		unsigned int modelSelection;
 		unsigned int lastDrawnFBX = modelSelection;
-		boundingBoxValues boundingBoxVals;
 	};
 
 	struct TweakbarPackage
@@ -210,7 +204,7 @@ namespace cgbv
 		void canvas_pass();
 
 		void create_image_framebuffer();
-		boundingBoxValues findMinMaxXYZ(std::vector<float>);
+		glm::mat2x4 findMinMaxXYZ(std::vector<float>);
 		void drawBoundingBox();
 		void adjustLight();
 

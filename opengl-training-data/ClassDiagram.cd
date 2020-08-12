@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="cgbv::Autopilot">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <NestedTypes>
+      <Class Name="cgbv::Autopilot::ReturnValues" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>F:\development\opengl-training-data\src\Autopilot.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AABgAQFEQjQJQCAAAAGgQAA2AAAhAiMCeCtgAUQAAAA=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\Autopilot.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="cgbv::Camera">
+    <Position X="3" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>IAAGAgAEgAAAAAAgYAAAMQAAAACAAAAgiAAAAkAAAAA=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\Camera.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="cgbv::CGRenderer">
+    <Position X="6" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAABICAQiCEEJkIkEQAAMiCAoGBUDgoEQAFAUAcADQ=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\cg\CGRenderer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="cgbv::ShaderLocations" Collapsed="true">
+    <Position X="10" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAiAAAQAACAgAEAQBAAAgKCEkQABAAIBAkAAQAAAA=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\cg\CGRenderer.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="cgbv::BufferCombo" Collapsed="true">
+    <Position X="10" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAEAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\cg\CGRenderer.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="cgbv::UIParameter" Collapsed="true">
+    <Position X="8.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAgJEAAAAAgAAACAAEAIICAsQAhCSBLAAAAAAICA=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\cg\CGRenderer.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="cgbv::Framebuffers" Collapsed="true">
+    <Position X="11.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAABAEAAAA=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\cg\CGRenderer.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="cgbv::ModelFBX" Collapsed="true">
+    <Position X="8.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAQAAIAABAAAABgAgAEIAAgBEAAAAAAAEgIAAA=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\cg\CGRenderer.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="cgbv::TweakbarPackage" Collapsed="true">
+    <Position X="11.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGAAAAAAA=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\cg\CGRenderer.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Enum Name="cgbv::ObserverSelection" Collapsed="true">
+    <Position X="8.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAgAAAAAAgAAAAAAAAAAAAAA=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\cg\CGRenderer.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="cgbv::PostProcessing" Collapsed="true">
+    <Position X="10" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>F:\development\opengl-training-data\src\cg\CGRenderer.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

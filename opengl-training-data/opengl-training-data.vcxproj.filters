@@ -103,5 +103,6 @@
     <None Include="..\shader\VertexShader.glsl">
       <Filter>shader</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>
