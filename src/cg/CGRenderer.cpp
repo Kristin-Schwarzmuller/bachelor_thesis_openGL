@@ -510,7 +510,7 @@ namespace cgbv
 
 		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 
-		glm::mat4 shadow_model_view = shadow_view * model; 
+		glm::mat4 shadow_model_view = shadow_view * model;
 
 		//glm::vec4 vals = glm::vec4(object.boundingBoxVals[0][0], object.boundingBoxVals[0][1], object.boundingBoxVals[1][0], object.boundingBoxVals[1][1]);
 		object.boundingBoxViewSpace = shadow_model_view * object.boundingBoxVals;
@@ -856,7 +856,7 @@ namespace cgbv
 		//glm::vec3 f(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[0][2]);
 		//glm::vec3 g(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[1][2]);
 		//glm::vec3 h(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[1][2]);
-		
+
 		////glm::vec3 p1 = P * glm::vec3(object.boungBoxViewSpace[0][0], object.boungBoxViewSpace[0][1], object.boungBoxViewSpace[0][2]);
 		////glm::vec3 p2 = P * glm::vec3(object.boungBoxViewSpace[1][0], object.boungBoxViewSpace[1][1], object.boungBoxViewSpace[1][2]);
 		////glm::vec3 p3 = P * glm::vec3(basesurface.boungBoxViewSpace[0][0], basesurface.boungBoxViewSpace[0][1], 0);
@@ -886,7 +886,9 @@ namespace cgbv
 
 		// https://stackoverflow.com/questions/9605556/how-to-project-a-point-onto-a-plane-in-3d 
 		glm::vec3 n(0.f, 0.f, 1.f);
-		float d = -80;
+		glm::vec3 o(0.f, 0.f, 80.f);
+
+		float d = 80.f;
 
 		std::vector<glm::vec3> bbPoints;
 		std::vector<glm::vec3> bbPointsProj;
@@ -901,14 +903,25 @@ namespace cgbv
 
 		float dist;
 		glm::vec3 tmp;
+		float x, y; 
 		float x_min = 0;
 		float x_max = 0;
 		float y_min = 0;
 		float y_max = 0;
-		for (glm::vec3 vec : bbPoints)
+		for (glm::vec3 v : bbPoints)
 		{
-			dist = glm::dot(n, vec) - d;
-			tmp = glm::vec3(vec - dist * n);
+			dist = glm::dot(n, v)-d;
+			tmp = v - dist * n;
+
+			// 2) p' = p - (n * (p - o)) * n
+			//tmp = v - glm::dot(n, (v - o)) * n;
+
+			// 3) p' = p - (n * p + d) * n
+			//tmp = v - (glm::dot(n, v) + d) * n;
+
+			// 4) p' = p - (n * p - n * o) * n
+			//tmp = v - (glm::dot(n, v) - glm::dot(n, o)) * n;
+
 			if (tmp.x < x_min)
 				x_min = tmp.x;		
 			if (tmp.x > x_max)
@@ -917,6 +930,20 @@ namespace cgbv
 				y_min = tmp.y;		
 			if (tmp.y > y_max)
 				y_max = tmp.y;
+
+			// 5) x = (p - O) dot x
+			//    y = (p - O) dot(n cross x)
+			//y = glm::dot((v), lightsource_camera.getUp());
+			//x = glm::dot((v), glm::cross(n, lightsource_camera.getUp()));
+
+			//if (x < x_min)
+			//	x_min = x;		
+			//if (x > x_max)
+			//	x_max = x;
+			//if (y < y_min)
+			//	y_min = y;		
+			//if (y > y_max)
+			//	y_max = y;
 		}
 
 		parameter.lightprojection_x_min = x_min;
@@ -929,4 +956,5 @@ namespace cgbv
 			parameter.lightprojection_z_min, parameter.lightprojection_z_max);
 	}
 }
+
 
