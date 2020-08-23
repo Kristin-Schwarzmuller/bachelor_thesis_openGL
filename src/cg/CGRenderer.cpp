@@ -7,7 +7,7 @@
 
 namespace cgbv
 {
-	// ======= Callbach funktions ===============================
+	// ======= Callback funktions ===============================
 	void TW_CALL handleScreenshot(void* data)
 	{
 		CGRenderer* renderer = reinterpret_cast<CGRenderer*>(data);
@@ -275,7 +275,7 @@ namespace cgbv
 				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
 			}
 
-			basesurface.boundingBoxVals = findMinMaxXYZ(data);
+			basesurface.boundingVertices = findBoundingVertices(data);
 			data.clear();
 			// later fill the date with the vertices and the normales to draw them 
 
@@ -512,10 +512,6 @@ namespace cgbv
 
 		glm::mat4 shadow_model_view = shadow_view * model;
 
-		//glm::vec4 vals = glm::vec4(object.boundingBoxVals[0][0], object.boundingBoxVals[0][1], object.boundingBoxVals[1][0], object.boundingBoxVals[1][1]);
-		object.boundingBoxViewSpace = shadow_model_view * object.boundingBoxVals;
-		basesurface.boundingBoxViewSpace = shadow_model_view * basesurface.boundingBoxVals;
-
 		if (parameter.enabledLightAdjustment)
 		{
 			adjustLight();
@@ -730,7 +726,7 @@ namespace cgbv
 			// Buffer Vetex Data
 			std::vector<float> vertexData = mesh.VertexData();
 			glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), vertexData.data());
-			object.boundingBoxVals = CGRenderer::findMinMaxXYZ(vertexData);
+			object.boundingVertices = CGRenderer::findBoundingVertices(vertexData);
 			//parameter.observerprojection_near = modelfbx.boundingBoxVals.z_min;
 			//parameter.observerprojection_far = modelfbx.boundingBoxVals.z_max;
 			// Buffer Normal Data
@@ -751,9 +747,10 @@ namespace cgbv
 		}
 	}
 
-	glm::mat2x4 CGRenderer::findMinMaxXYZ(std::vector<float> vertices)
+	std::vector<glm::vec3> CGRenderer::findBoundingVertices(std::vector<float> vertices)
 	{
-		glm::mat2x4 results;
+		std::vector<glm::vec3> verts;
+		glm::mat2x3 minMaxMat;
 		std::vector<float> x, y, z;
 
 		for (unsigned int i = 0; i < vertices.size(); i++)
@@ -771,17 +768,25 @@ namespace cgbv
 				break;
 			}
 		}
-		results[0][0] = (*std::min_element(x.begin(), x.end()));
-		results[0][1] = (*std::min_element(y.begin(), y.end()));
-		results[0][2] = (*std::min_element(z.begin(), z.end()));
-		results[0][3] = 1.0f;
+		minMaxMat[0][0] = (*std::min_element(x.begin(), x.end()));
+		minMaxMat[0][1] = (*std::min_element(y.begin(), y.end()));
+		minMaxMat[0][2] = (*std::min_element(z.begin(), z.end()));
 
-		results[1][0] = (*std::max_element(x.begin(), x.end()));
-		results[1][1] = (*std::max_element(y.begin(), y.end()));
-		results[1][2] = (*std::max_element(z.begin(), z.end()));
-		results[1][3] = 1.0f;
+		minMaxMat[1][0] = (*std::max_element(x.begin(), x.end()));
+		minMaxMat[1][1] = (*std::max_element(y.begin(), y.end()));
+		minMaxMat[1][2] = (*std::max_element(z.begin(), z.end()));
 
-		return results;
+
+		verts.push_back(glm::vec3(minMaxMat[0][0], minMaxMat[0][1], minMaxMat[0][2]));
+		verts.push_back(glm::vec3(minMaxMat[1][0], minMaxMat[0][1], minMaxMat[0][2]));
+		verts.push_back(glm::vec3(minMaxMat[0][0], minMaxMat[0][1], minMaxMat[1][2]));
+		verts.push_back(glm::vec3(minMaxMat[1][0], minMaxMat[0][1], minMaxMat[1][2]));
+		verts.push_back(glm::vec3(minMaxMat[0][0], minMaxMat[1][1], minMaxMat[0][2]));
+		verts.push_back(glm::vec3(minMaxMat[1][0], minMaxMat[1][1], minMaxMat[0][2]));
+		verts.push_back(glm::vec3(minMaxMat[0][0], minMaxMat[1][1], minMaxMat[1][2]));
+		verts.push_back(glm::vec3(minMaxMat[1][0], minMaxMat[1][1], minMaxMat[1][2]));
+																																 
+		return verts;
 	}
 
 	void CGRenderer::drawBoundingBox()
@@ -789,32 +794,25 @@ namespace cgbv
 		std::vector<glm::vec3> vertices;
 		std::vector<float> data;
 		// Bounding Box
-		glm::vec3 a(object.boundingBoxVals[0][0], object.boundingBoxVals[0][1], object.boundingBoxVals[0][2]);
-		glm::vec3 b(object.boundingBoxVals[1][0], object.boundingBoxVals[0][1], object.boundingBoxVals[0][2]);
-		glm::vec3 c(object.boundingBoxVals[0][0], object.boundingBoxVals[0][1], object.boundingBoxVals[1][2]);
-		glm::vec3 d(object.boundingBoxVals[1][0], object.boundingBoxVals[0][1], object.boundingBoxVals[1][2]);
-		glm::vec3 e(object.boundingBoxVals[0][0], object.boundingBoxVals[1][1], object.boundingBoxVals[0][2]);
-		glm::vec3 f(object.boundingBoxVals[1][0], object.boundingBoxVals[1][1], object.boundingBoxVals[0][2]);
-		glm::vec3 g(object.boundingBoxVals[0][0], object.boundingBoxVals[1][1], object.boundingBoxVals[1][2]);
-		glm::vec3 h(object.boundingBoxVals[1][0], object.boundingBoxVals[1][1], object.boundingBoxVals[1][2]);
+
 
 		glm::vec3 n(0.f, 1.f, 0.f);
 
 		// floor 
-		vertices.push_back(a); vertices.push_back(b);
-		vertices.push_back(c); vertices.push_back(d);
-		vertices.push_back(a); vertices.push_back(c);
-		vertices.push_back(b); vertices.push_back(d);
+		vertices.push_back(object.boundingVertices[0]); vertices.push_back(object.boundingVertices[1]);
+		vertices.push_back(object.boundingVertices[2]); vertices.push_back(object.boundingVertices[3]);
+		vertices.push_back(object.boundingVertices[0]); vertices.push_back(object.boundingVertices[2]);
+		vertices.push_back(object.boundingVertices[1]); vertices.push_back(object.boundingVertices[3]);
 		// roof
-		vertices.push_back(e); vertices.push_back(f);
-		vertices.push_back(g); vertices.push_back(h);
-		vertices.push_back(e); vertices.push_back(g);
-		vertices.push_back(f); vertices.push_back(h);
+		vertices.push_back(object.boundingVertices[4]); vertices.push_back(object.boundingVertices[5]);
+		vertices.push_back(object.boundingVertices[6]); vertices.push_back(object.boundingVertices[7]);
+		vertices.push_back(object.boundingVertices[4]); vertices.push_back(object.boundingVertices[6]);
+		vertices.push_back(object.boundingVertices[5]); vertices.push_back(object.boundingVertices[7]);
 		// edges
-		vertices.push_back(a); vertices.push_back(e);
-		vertices.push_back(b); vertices.push_back(f);
-		vertices.push_back(c); vertices.push_back(g);
-		vertices.push_back(d); vertices.push_back(h);
+		vertices.push_back(object.boundingVertices[0]); vertices.push_back(object.boundingVertices[4]);
+		vertices.push_back(object.boundingVertices[1]); vertices.push_back(object.boundingVertices[5]);
+		vertices.push_back(object.boundingVertices[2]); vertices.push_back(object.boundingVertices[6]);
+		vertices.push_back(object.boundingVertices[3]); vertices.push_back(object.boundingVertices[7]);
 
 		for (auto v : vertices)
 		{
@@ -840,12 +838,13 @@ namespace cgbv
 	}
 	void CGRenderer::adjustLight()
 	{
-		//glm::mat2x3 A(9.0f);
-		//A[1] = lightsource_camera.getUp();
-		//A[0] = lightsource_camera.getRight();
+		glm::mat3 A(9.0f);
+		A[1] = lightsource_camera.getUp();
+		A[0] = lightsource_camera.getRight();
+		A[2] = lightsource_camera.getPosition();
 
-		////DieProjektionsmatrixistP = A(ATA)^-1 AT.
-		//glm::mat3 P = A * glm::inverse(glm::transpose(A) * A) * glm::transpose(A);
+		//projection matrix = A(ATA)^-1 AT.
+		glm::mat3 P = A * glm::inverse(glm::transpose(A) * A) * glm::transpose(A);
 
 		// Bounding Box
 		//glm::vec3 a(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[0][2]);
@@ -879,71 +878,24 @@ namespace cgbv
 		//glm::vec3 minVec = glm::min(glm::min(glm::min(pa, pb), glm::min(pc, pd)), glm::min(glm::min(pe, pf), glm::min(pg, ph)));
 		//glm::vec3 maxVec = glm::max(glm::max(glm::max(pa, pb), glm::max(pc, pd)), glm::max(glm::max(pe, pf), glm::max(pg, ph)));
 
-		//parameter.lightprojection_x_min = minVec.x;
-		//parameter.lightprojection_x_max = maxVec.x;
-		//parameter.lightprojection_y_min = minVec.y;
-		//parameter.lightprojection_y_max = maxVec.y;
-
-		// https://stackoverflow.com/questions/9605556/how-to-project-a-point-onto-a-plane-in-3d 
-		glm::vec3 n(0.f, 0.f, 1.f);
-		glm::vec3 o(0.f, 0.f, 80.f);
-
-		float d = 80.f;
-
-		std::vector<glm::vec3> bbPoints;
-		std::vector<glm::vec3> bbPointsProj;
-		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[0][2]));
-		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[0][2]));
-		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[1][2]));
-		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[1][2]));
-		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[0][2]));
-		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[0][2]));
-		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[1][2]));
-		bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[1][2]));
-
-		float dist;
 		glm::vec3 tmp;
-		float x, y; 
-		float x_min = 0;
-		float x_max = 0;
-		float y_min = 0;
-		float y_max = 0;
-		for (glm::vec3 v : bbPoints)
+		float x_min = 0.f;
+		float x_max = 0.f;
+		float y_min = 0.f;
+		float y_max = 0.f;
+		for (glm::vec3 v : object.boundingVertices)
 		{
-			dist = glm::dot(n, v)-d;
-			tmp = v - dist * n;
-
-			// 2) p' = p - (n * (p - o)) * n
-			//tmp = v - glm::dot(n, (v - o)) * n;
-
-			// 3) p' = p - (n * p + d) * n
-			//tmp = v - (glm::dot(n, v) + d) * n;
-
-			// 4) p' = p - (n * p - n * o) * n
-			//tmp = v - (glm::dot(n, v) - glm::dot(n, o)) * n;
+			//tmp = glm::transpose(A) * v;
+			tmp = P * v;
 
 			if (tmp.x < x_min)
-				x_min = tmp.x;		
+				x_min = tmp.x;
 			if (tmp.x > x_max)
 				x_max = tmp.x;
 			if (tmp.y < y_min)
-				y_min = tmp.y;		
+				y_min = tmp.y;
 			if (tmp.y > y_max)
 				y_max = tmp.y;
-
-			// 5) x = (p - O) dot x
-			//    y = (p - O) dot(n cross x)
-			//y = glm::dot((v), lightsource_camera.getUp());
-			//x = glm::dot((v), glm::cross(n, lightsource_camera.getUp()));
-
-			//if (x < x_min)
-			//	x_min = x;		
-			//if (x > x_max)
-			//	x_max = x;
-			//if (y < y_min)
-			//	y_min = y;		
-			//if (y > y_max)
-			//	y_max = y;
 		}
 
 		parameter.lightprojection_x_min = x_min;
@@ -954,6 +906,79 @@ namespace cgbv
 		lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
 			parameter.lightprojection_y_min, parameter.lightprojection_y_max,
 			parameter.lightprojection_z_min, parameter.lightprojection_z_max);
+
+
+		// ===============================================================================================================================================
+		//// https://stackoverflow.com/questions/9605556/how-to-project-a-point-onto-a-plane-in-3d 
+		//glm::vec3 n(0.f, 0.f, 1.f);
+		//glm::vec3 o(0.f, 0.f, 80.f);
+
+		//float d = 80.f;
+
+		//std::vector<glm::vec3> bbPoints;
+		//bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[0][2]));
+		//bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[0][2]));
+		//bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[1][2]));
+		//bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[0][1], object.boundingBoxViewSpace[1][2]));
+		//bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[0][2]));
+		//bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[0][2]));
+		//bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[0][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[1][2]));
+		//bbPoints.push_back(glm::vec3(object.boundingBoxViewSpace[1][0], object.boundingBoxViewSpace[1][1], object.boundingBoxViewSpace[1][2]));
+
+		//float dist;
+		//glm::vec3 tmp;
+		//float x, y; 
+		//float x_min = 0;
+		//float x_max = 0;
+		//float y_min = 0;
+		//float y_max = 0;
+		//for (glm::vec3 v : bbPoints)
+		//{
+		//	// camera movment 
+		//	dist = glm::dot(n, v)-d;
+		//	tmp = v - dist * n;
+
+		//	// 2) p' = p - (n * (p - o)) * n
+		//	//tmp = v - glm::dot(n, (v - o)) * n;
+
+		//	// 3) p' = p - (n * p + d) * n
+		//	//tmp = v - (glm::dot(n, v) + d) * n;
+
+		//	// 4) p' = p - (n * p - n * o) * n
+		//	//tmp = v - (glm::dot(n, v) - glm::dot(n, o)) * n;
+
+		//	if (tmp.x < x_min)
+		//		x_min = tmp.x;		
+		//	if (tmp.x > x_max)
+		//		x_max = tmp.x;
+		//	if (tmp.y < y_min)
+		//		y_min = tmp.y;		
+		//	if (tmp.y > y_max)
+		//		y_max = tmp.y;
+
+		//	// 5) x = (p - O) dot x
+		//	//    y = (p - O) dot(n cross x)
+		//	//y = glm::dot((v), lightsource_camera.getUp());
+		//	//x = glm::dot((v), glm::cross(n, lightsource_camera.getUp()));
+
+		//	//if (x < x_min)
+		//	//	x_min = x;		
+		//	//if (x > x_max)
+		//	//	x_max = x;
+		//	//if (y < y_min)
+		//	//	y_min = y;		
+		//	//if (y > y_max)
+		//	//	y_max = y;
+		//}
+
+		//parameter.lightprojection_x_min = x_min;
+		//parameter.lightprojection_x_max = x_max;
+		//parameter.lightprojection_y_min = y_min;
+		//parameter.lightprojection_y_max = y_max;
+
+		//lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
+		//	parameter.lightprojection_y_min, parameter.lightprojection_y_max,
+		//	parameter.lightprojection_z_min, parameter.lightprojection_z_max);
 	}
 }
 

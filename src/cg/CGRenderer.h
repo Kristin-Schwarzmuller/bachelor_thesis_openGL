@@ -68,7 +68,7 @@ namespace cgbv
 	{
 		unsigned int vao, vbo, vertsToDraw;
 
-		glm::mat2x4 boundingBoxVals, boundingBoxViewSpace;
+		std::vector<glm::vec3> boundingVertices, boundingBoxViewSpace;
 	};
 
 	struct UIParameter
@@ -204,7 +204,7 @@ namespace cgbv
 		void canvas_pass();
 
 		void create_image_framebuffer();
-		glm::mat2x4 findMinMaxXYZ(std::vector<float>);
+		std::vector<glm::vec3> findBoundingVertices(std::vector<float> vertices);
 		void drawBoundingBox();
 		void adjustLight();
 

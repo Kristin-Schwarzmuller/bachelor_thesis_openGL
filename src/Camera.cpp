@@ -1,6 +1,7 @@
 // Includes																																														 Includes
 //	===========================================================================================================================================================================================		#####
 #include <Camera.h>
+#include <iostream>
 //	===========================================================================================================================================================================================		#####
 
 
@@ -49,10 +50,10 @@ void cgbv::Camera::adjustUp()
 	delta = glm::normalize(delta);
 
 	// Kreuzprodukt == (0, 0, 0) verhindern
-	if(delta == yVec)
+	if(delta.x == yVec.x && delta.y == yVec.y && delta.z == yVec.z)
 		up = glm::vec3(0.f, 0.f, 1.f);
 
-	else if(delta == -yVec)
+	else if (delta.x == -yVec.x && delta.y == -yVec.y && delta.z == -yVec.z)
 		up = -glm::vec3(0.f, 0.f, 1.f);
 
 	else
@@ -177,6 +178,10 @@ glm::vec3 cgbv::Camera::getRight()
 }
 
 
+glm::vec3 cgbv::Camera::getPosition()
+{
+	return position;
+}
 
 
 void cgbv::Camera::setUpOrientation(float orientation)

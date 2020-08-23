@@ -47,6 +47,7 @@ namespace cgbv
 		glm::vec3 getUp();
 		glm::vec3 getForward();
 		glm::vec3 getRight();
+		glm::vec3 getPosition();
 
 		void reset();
 	};
