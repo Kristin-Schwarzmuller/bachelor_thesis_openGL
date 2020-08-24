@@ -34,28 +34,28 @@ namespace cgbv
 	{
 		auto post_processing_pass = static_cast<PostProcessing*>(clientData);
 		*post_processing_pass = (*(PostProcessing*)value);
-		std::cout << "Set Value" << std::endl;
+		//std::cout << "Set Value" << std::endl;
 	}
 
 	void TW_CALL pp_GetCallback(void* value, void* clientData)
 	{
 		auto post_processing_pass = static_cast<PostProcessing*>(clientData);
 		*(PostProcessing*)value = *post_processing_pass;
-		std::cout << "Got Value" << std::endl;
+		//std::cout << "Got Value" << std::endl;
 	}
 
 	void TW_CALL o_SetCallback(const void* value, void* clientData)
 	{
 		auto viewpoint = static_cast<ObserverSelection*>(clientData);
 		*viewpoint = (*(ObserverSelection*)value);
-		std::cout << "Set Value" << std::endl;
+		//std::cout << "Set Value" << std::endl;
 	}
 
 	void TW_CALL o_GetCallback(void* value, void* clientData)
 	{
 		auto viewpoint = static_cast<ObserverSelection*>(clientData);
 		*(ObserverSelection*)value = *viewpoint;
-		std::cout << "Got Value" << std::endl;
+		//std::cout << "Got Value" << std::endl;
 	}
 	// ==========================================================
 
@@ -689,13 +689,14 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		// 	lightsource_camera.moveTo(parameter.lightPos);
+		//lightsource_camera.moveTo(parameter.lightPos);
+
+
 		returnValues = autopilot.getValues();
 		// Light
-		lightsource_camera.moveTo(returnValues.getLightPos());
 		parameter.lightPos = glm::vec4(returnValues.getLightPos(), 0);
-
-		// Camera view on the model
+		lightsource_camera.moveTo(returnValues.getLightPos());
+		// Camera 
 		observer_camera.moveTo(returnValues.getCameraPos());
 		parameter.modelRotation = returnValues.getModelRotation();
 		// Model
@@ -704,6 +705,7 @@ namespace cgbv
 			modelfbx.modelSelection = returnValues.getModelID();
 			loadFBX(modelfbx.modelSelection);
 		}
+		// Screenshot 
 		parameter.screenShotNames = returnValues.getImageNames();
 		screenshot.set();
 		autopilot.step();		

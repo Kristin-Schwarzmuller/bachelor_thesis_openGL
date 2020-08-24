@@ -21,6 +21,7 @@ namespace cgbv
 		// name of the currently drawn iamge
 		std::vector<std::string> currentImageNames;
 		std::vector<std::string> currentImagePaths;
+		std::string imageName;
 
 		float stepSizeElevationLight = 5;
 		float stepSizeElevationCamera = 30;

@@ -70,7 +70,7 @@ namespace cgbv
 
 		// Write the values into the vectors to iterate over it later 
 		setupAzimuthCamera();
-		elevationLight = setupVector(0, 90, stepSizeElevationLight, false);
+		elevationLight = setupVector(0, 90, stepSizeElevationLight, true);
 		elevationCamera = setupVector(0, 90, stepSizeElevationCamera, true);
 		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight, false);
 
@@ -216,10 +216,12 @@ namespace cgbv
 		sprintf_s(nameBuffer, "%08d", counter++);
 
 		currentImageNames.clear();
-		currentImageNames.insert(currentImageNames.begin(), modelNames.at(currentModel) + "\\" + "shadowmap\\" + std::string(nameBuffer) + modelNames.at(currentModel) + ".png");
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgb\\" + std::string(nameBuffer) + modelNames.at(currentModel) + ".png");
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normal\\" + std::string(nameBuffer) + modelNames.at(currentModel) + ".png");
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" + std::string(nameBuffer) + modelNames.at(currentModel) + ".png");
+		// Camera Azimuth-Elevation - Light Azimuth-Elevation
+		imageName = modelNames.at(currentModel) + std::string(nameBuffer) + "-" + std::to_string(static_cast<int>(*azimuthCameraPtr)) + "-" + std::to_string(static_cast<int>(*elevationCameraPtr)) + "-" + std::to_string(static_cast<int>(*azimuthLightPtr)) + "-" + std::to_string(static_cast<int>(*elevationLightPtr)) + ".png";
+		currentImageNames.insert(currentImageNames.begin(), modelNames.at(currentModel) + "\\" + "shadowmap\\" + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgb\\" + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normal\\" + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" + imageName);
 		
 		// todo here exeption bei current Model = 7 weil es das nicht mehr gibt 
 		currentImagePaths.clear(); 
