@@ -104,7 +104,7 @@ namespace cgbv
 			calPos(0.f, *elevationCameraPtr, distanceCamera),
 			-(*azimuthCameraPtr),
 			currentModel,
-			currentImageNames);
+			currentImagePaths);
 	}
 
 	void Autopilot::step()
@@ -214,12 +214,19 @@ namespace cgbv
 	void Autopilot::defImageNames()
 	{
 		sprintf_s(nameBuffer, "%08d", counter++);
+
+		currentImageNames.clear();
+		currentImageNames.insert(currentImageNames.begin(), modelNames.at(currentModel) + "\\" + "shadowmap\\" + std::string(nameBuffer) + modelNames.at(currentModel) + ".png");
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgb\\" + std::string(nameBuffer) + modelNames.at(currentModel) + ".png");
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normal\\" + std::string(nameBuffer) + modelNames.at(currentModel) + ".png");
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" + std::string(nameBuffer) + modelNames.at(currentModel) + ".png");
+		
 		// todo here exeption bei current Model = 7 weil es das nicht mehr gibt 
-		currentImageNames.clear(); 
-		currentImageNames.insert(currentImageNames.begin(), dateFolder + "\\" + modelNames.at(currentModel) + "\\" + "shadowmap\\" + std::string(nameBuffer) + modelNames.at(currentModel) + "SM" + ".png");
-		currentImageNames.push_back(dateFolder + "\\" + modelNames.at(currentModel) + "\\" + "rgb\\" + std::string(nameBuffer) + modelNames.at(currentModel) + "RGB" + ".png");
-		currentImageNames.push_back(dateFolder + "\\" + modelNames.at(currentModel) + "\\" + "normal\\" + std::string(nameBuffer) + modelNames.at(currentModel) + "NORM" +".png");
-		currentImageNames.push_back(dateFolder + "\\" + modelNames.at(currentModel) + "\\" + "shadow_candidate\\" + std::string(nameBuffer) + modelNames.at(currentModel) + "SC" + ".png");
+		currentImagePaths.clear(); 
+		currentImagePaths.insert(currentImagePaths.begin(), dateFolder + "\\" + currentImageNames[0]);
+		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[1]);
+		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[2]);
+		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[3]);
 	}					
 
 	bool Autopilot::writeDataCSV()

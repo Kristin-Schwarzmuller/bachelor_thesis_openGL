@@ -77,8 +77,6 @@ namespace cgbv
 		default:
 			msg_severity = "Unknown";
 		}
-
-		//printf("\nGL DEBUG: %s, source = %, severity = 0x%x, message = %s\n", msg_type, msg_source, msg_severity, message);
 		printf("\nGL DEBUG: %s, source = %s, severity = %s, message = %s\n", msg_type, msg_source, msg_severity, message);
 	}
 }

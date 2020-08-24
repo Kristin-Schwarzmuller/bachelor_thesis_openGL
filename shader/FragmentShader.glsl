@@ -184,12 +184,12 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
     float min_shadow_darkness = 1.f, max_shadow_darkness = .35f;
+
     float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), max_shadow_darkness, min_shadow_darkness);
-    
+
 
     // --------- Result --------- 
 
-    //out_color = light.brightnessFactor * (shadowsample * intensity * 1.3f * (specular + diffus) + ambient);
     out_color = (shadowsample * (specular + diffus) + ambient);
     out_color.a = 1.f;
 

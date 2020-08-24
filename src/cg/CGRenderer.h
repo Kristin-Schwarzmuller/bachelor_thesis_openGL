@@ -85,7 +85,6 @@ namespace cgbv
 		float lightprojection_z_min = .1f;
 		float lightprojection_z_max = 100.f;
 		float modelScalation = .35f;
-		float shadowModelScalation = .35f;
 
 
 
@@ -206,7 +205,7 @@ namespace cgbv
 		void create_image_framebuffer();
 		std::vector<glm::vec3> findBoundingVertices(std::vector<float> vertices);
 		void drawBoundingBox();
-		void adjustLight();
+		void adjustLight(glm::mat4 shadow_view);
 
 	public:
 

@@ -57,6 +57,9 @@
     <ClInclude Include="..\src\OpenGLDebugger.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="QCamera.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\cg\CGRenderer.cpp">
@@ -93,6 +96,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="..\src\glad.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="QCamera.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

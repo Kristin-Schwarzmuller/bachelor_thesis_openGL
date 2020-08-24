@@ -154,6 +154,7 @@
     <ClInclude Include="..\src\OpenGLDebugger.h" />
     <ClInclude Include="..\src\Renderer.h" />
     <ClInclude Include="..\src\Texture.h" />
+    <ClInclude Include="QCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Autopilot.cpp" />
@@ -168,6 +169,7 @@
     <ClCompile Include="..\src\OpenGLDebugger.cpp" />
     <ClCompile Include="..\src\Renderer.cpp" />
     <ClCompile Include="..\src\Texture.cpp" />
+    <ClCompile Include="QCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shader\FragmentShader.glsl" />
