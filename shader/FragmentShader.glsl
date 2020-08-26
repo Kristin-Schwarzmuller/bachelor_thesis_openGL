@@ -183,7 +183,7 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
     // --------- Shadows ---------
 
     vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
-    float min_shadow_darkness = 1.f, max_shadow_darkness = 0.f; // .35f;
+    float min_shadow_darkness = 1.f, max_shadow_darkness = .35f;
 
     float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), max_shadow_darkness, min_shadow_darkness);
 

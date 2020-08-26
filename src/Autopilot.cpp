@@ -2,8 +2,6 @@
 #include <cg\CGRenderer.h>
 #include <windows.h>
 #include <iostream>
-#include <iomanip>
-#include <cmath>
 #include <filesystem>
 
 
@@ -20,7 +18,7 @@ namespace cgbv
 	{
 		this->lightPos = lightPos;
 		this->cameraPos = cameraPos;
-		this->modelRotation = (float)modelRotation;
+		this->modelRotation = modelRotation;
 		this->modelID = modelID;
 		this->imageNames = imageNames;
 	}
@@ -251,12 +249,15 @@ namespace cgbv
 
 	glm::vec3 Autopilot::calPos(float azimuthPtr, float elevationPtr, float distance)
 	{
-		// https://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
+		// https://www.mathworks.com/help/matlab/ref/sph2cart.html
 		x = distance * cosf(glm::radians(elevationPtr)) * cosf(glm::radians(azimuthPtr));
-		y = distance * cosf(glm::radians(elevationPtr)) * sinf(glm::radians(azimuthPtr));
-		z = distance * sinf(glm::radians(elevationPtr));
+		z = distance * cosf(glm::radians(elevationPtr)) * sinf(glm::radians(azimuthPtr));
+		y = distance * sinf(glm::radians(elevationPtr));
 
-		return glm::vec3(y, z, x);
+		if (y < 0)
+			std::cout << "stop" + std::to_string(x) + " - " + std::to_string(y) + " - " + std::to_string(z) << std::endl;
+
+		return glm::vec3(x, y, z);
 		//return glm::vec3(x, y, z);
 	}
 

@@ -197,11 +197,11 @@ namespace cgbv
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			observer_camera.moveTo(0.f, 2.5f, parameter.distanceCamera);
 
-			/*lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
-				parameter.lightprojection_y_min, parameter.lightprojection_[1][1],
-				parameter.lightprojection_z_min, parameter.lightprojection_z_max);*/
+			lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
+				parameter.lightprojection_y_min, parameter.lightprojection_y_max,
+				parameter.lightprojection_z_min, parameter.lightprojection_z_max);
 
-			lightsource_projection = glm::ortho(-1.0f, 1.0f, 0.0f, 5.f, .1f, 100.f);
+			//lightsource_projection = glm::ortho(-1.0f, 1.0f, 0.0f, 5.f, .1f, 100.f);
 
 			lightsource_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
 			lightsource_camera.moveTo(parameter.lightPos);
@@ -565,9 +565,8 @@ namespace cgbv
 			break;
 		}
 
-		// Scaling the object
 		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation));
-		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
+		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model; 
 
 		shader->use();
 		//new 
@@ -618,6 +617,7 @@ namespace cgbv
 		glBindVertexArray(boundingBox.vao);
 		glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
 
+		//screenshot.set();
 		if (screenshot[0])
 		{
 			//std::cout << "Storing Shadowmap to Disk...";
@@ -693,9 +693,9 @@ namespace cgbv
 
 
 		returnValues = autopilot.getValues();
-		// Light
-		parameter.lightPos = glm::vec4(returnValues.getLightPos(), 0);
-		lightsource_camera.moveTo(returnValues.getLightPos());
+		 //Light
+		parameter.lightPos = glm::vec4(returnValues.getLightPos(), 1.f);
+		lightsource_camera.moveTo(parameter.lightPos);
 		// Camera 
 		observer_camera.moveTo(returnValues.getCameraPos());
 		parameter.modelRotation = returnValues.getModelRotation();
