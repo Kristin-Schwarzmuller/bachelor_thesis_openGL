@@ -35,6 +35,7 @@ struct VertexOutput
 
     vec2 TexCoords;
 };
+
 // =============================================================================================================
 
 
@@ -89,7 +90,8 @@ subroutine (VertexProgram) void verts_and_normals()
     vec3 mvPos = h.xyz / h.w;
 
     // Here define if light is directional or point 
-    Output.lightDir = light.lightPos - mvPos;
+    Output.lightDir = normalize(light.lightPos - mvPos ); 
+    //Output.lightDir = light.lightPos;
     Output.viewDir = -mvPos;
 
     Output.shadow_coordinates = matrices.bmvp * vertex;

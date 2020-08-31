@@ -57,6 +57,23 @@ namespace cgbv
 		*(ObserverSelection*)value = *viewpoint;
 		//std::cout << "Got Value" << std::endl;
 	}
+
+	//void TW_CALL lightSetCallback(const void* value, void* clientData)
+	//{
+	//	auto package = static_cast<TweakbarPackage*>(clientData);
+	//	auto lightDir = static_cast<glm::vec4*>(package->object1);
+	//	auto lightsource_camera = static_cast<Camera*>(package->object2);
+	//	lightDir = ((glm::vec4*)value);
+	//	lightsource_camera->moveTo(*lightDir);
+	//}
+
+	//void TW_CALL lightGetCallback(void* value, void* clientData)
+	//{
+	//	auto package = static_cast<TweakbarPackage*>(clientData);
+	//	auto lightDir = static_cast<glm::vec4*>(package->object1);
+	//	auto lightsource_camera = static_cast<Camera*>(package->object2);
+	//	*(glm::vec4*)value = *lightDir;
+	//}
 	// ==========================================================
 
 	CGRenderer::CGRenderer(GLFWwindow* window) : Renderer(window)
@@ -90,6 +107,9 @@ namespace cgbv
 
 		glDeleteVertexArrays(1, &boundingBox.vao);
 		glDeleteBuffers(1, &boundingBox.vbo);
+
+		glDeleteVertexArrays(1, &lightDot.vao);
+		glDeleteBuffers(1, &lightDot.vbo);
 
 		glDeleteFramebuffers(1, &framebuffers.shadowmap_buffer);
 		glDeleteSamplers(1, &shadowmap_sampler);
@@ -195,16 +215,23 @@ namespace cgbv
 
 			observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), parameter.observerprojection_near, parameter.observerprojection_far);
 			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
-			observer_camera.moveTo(0.f, 2.5f, parameter.distanceCamera);
 
 			lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
 				parameter.lightprojection_y_min, parameter.lightprojection_y_max,
 				parameter.lightprojection_z_min, parameter.lightprojection_z_max);
 
-			//lightsource_projection = glm::ortho(-1.0f, 1.0f, 0.0f, 5.f, .1f, 100.f);
-
-			lightsource_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
+			returnValues = autopilot.getValues();
+			// Camera 
+			observer_camera.moveTo(returnValues.getCameraPos());
+			parameter.modelRotation = returnValues.getModelRotation();
+			//Light
+			parameter.lightPos = glm::vec4(returnValues.getLightPos(), 1.f);
 			lightsource_camera.moveTo(parameter.lightPos);
+			lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
+
+			// Screenshot 
+			parameter.screenShotNames = returnValues.getImageNames();
+			screenshot.set();
 
 			bias = glm::mat4
 			(
@@ -238,6 +265,8 @@ namespace cgbv
 			locs.canvasPlacementVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "canvas_placement");
 			locs.canvasDisplayFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "canvas_display");
 			locs.lightPhong = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "phongWithLambert");
+			locs.red = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "red");
+			
 			locs.ambientLight = shader->getUniformLocation("light.ambient");
 			locs.ambientMaterial = shader->getUniformLocation("material.ambient");
 			locs.diffusLight = shader->getUniformLocation("light.diffus");
@@ -270,13 +299,15 @@ namespace cgbv
 			std::vector<float> data;
 
 			// First fill the date just with the vertices to find to bounding box for the floor 
-			for (auto v : vertices)
-			{
-				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
-			}
+			//for (auto v : vertices)
+			//{
+			//	data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+			//}
 
-			basesurface.boundingVertices = findBoundingVertices(data);
-			data.clear();
+			//basesurface.boundingVertices = findBoundingVertices(data);
+			//data.clear();
+
+
 			// later fill the date with the vertices and the normales to draw them 
 
 			for (auto v : vertices)
@@ -337,6 +368,8 @@ namespace cgbv
 			vertices.clear();
 
 			loadFBX(modelfbx.modelSelection);
+			// drawBoundingBox();
+			drawLightDot(returnValues.getLightPos());
 		}
 
 
@@ -353,6 +386,9 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "Global Rotation", TW_TYPE_QUAT4F, &parameter.globalRotation, "showval=false opened=true");
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
 			TwAddVarRW(tweakbar, "Light direction", TW_TYPE_DIR3F, &parameter.lightPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
+			//lightPosPackage.object1 = &parameter.lightPos;
+			//lightPosPackage.object2 = &lightsource_camera;
+			//TwAddVarCB(tweakbar, "Light direction", TW_TYPE_DIR3F, lightSetCallback, lightGetCallback, &lightPosPackage, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
 
 			// ====== Light ======
 			TwAddVarRW(tweakbar, "Ambient Light", TW_TYPE_COLOR4F, &parameter.ambientLight, "group=Light");
@@ -380,6 +416,7 @@ namespace cgbv
 			TwType pp_type = TwDefineEnumFromString("pp_type", post_processing_types.c_str());
 			TwAddVarCB(tweakbar, "Post Processing", pp_type, pp_SetCallback, pp_GetCallback, &post_processing_pass, "");
 			TwAddVarRW(tweakbar, "Dynamik Light Adjustment", TW_TYPE_BOOL8, &parameter.enabledLightAdjustment, " true=Enabled false=Disabled ");
+			TwAddVarRW(tweakbar, "Show Light Dot", TW_TYPE_BOOL8, &parameter.showLightDot, " true=Enabled false=Disabled ");
 
 			std::string observer_types = "Viewer, Light";
 			TwType o_type = TwDefineEnumFromString("o_type", observer_types.c_str());
@@ -508,13 +545,12 @@ namespace cgbv
 		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation));
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
 
-		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 
-		glm::mat4 shadow_view_model = shadow_view * model;
+		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 
 		if (parameter.enabledLightAdjustment)
 		{
-			adjustLight(shadow_view_model);
+			adjustLight(shadow_view * model);
 		}
 		else
 		{
@@ -523,7 +559,7 @@ namespace cgbv
 		}
 
 		shader->use();
-		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * shadow_view_model));
+		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * shadow_view * model));
 
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.placementVS);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.depthmapFS);
@@ -613,12 +649,17 @@ namespace cgbv
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
-		glLineWidth(5.f);
-		glBindVertexArray(boundingBox.vao);
-		glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
+		//glLineWidth(5.f);
+		//glBindVertexArray(boundingBox.vao);
+		//glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
 
-		//screenshot.set();
-		if (screenshot[0])
+		glLineWidth(5.f);
+		auto red = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "red");
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &red);
+		glBindVertexArray(lightDot.vao);
+		glDrawArrays(GL_LINES, 0, lightDot.vertsToDraw);
+
+		if (false) //screenshot[0])
 		{
 			//std::cout << "Storing Shadowmap to Disk...";
 			std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
@@ -689,26 +730,41 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		//lightsource_camera.moveTo(parameter.lightPos);
+		
 
-
-		returnValues = autopilot.getValues();
-		 //Light
-		parameter.lightPos = glm::vec4(returnValues.getLightPos(), 1.f);
-		lightsource_camera.moveTo(parameter.lightPos);
-		// Camera 
-		observer_camera.moveTo(returnValues.getCameraPos());
-		parameter.modelRotation = returnValues.getModelRotation();
-		// Model
-		if (returnValues.getModelID() != modelfbx.modelSelection)
+		if (true) 
 		{
-			modelfbx.modelSelection = returnValues.getModelID();
-			loadFBX(modelfbx.modelSelection);
+			autopilot.step();
+			returnValues = autopilot.getValues();
+			// Camera 
+			observer_camera.moveTo(returnValues.getCameraPos());
+			parameter.modelRotation = returnValues.getModelRotation();
+
+			//Light
+			drawLightDot(returnValues.getLightPos());
+			parameter.lightPos = glm::vec4(returnValues.getLightPos(), 1.f);
+			//lightsource_camera.moveTo(glm::inverse(observer_camera.getViewMatrix()) * parameter.lightPos);
+			lightsource_camera.moveTo(parameter.lightPos);
+			lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
+			
+
+			// Model
+			if (returnValues.getModelID() != modelfbx.modelSelection)
+			{
+				modelfbx.modelSelection = returnValues.getModelID();
+				loadFBX(modelfbx.modelSelection);
+			}
+			
+			// Screenshot 
+			parameter.screenShotNames = returnValues.getImageNames();
+			screenshot.set();
+			
 		}
-		// Screenshot 
-		parameter.screenShotNames = returnValues.getImageNames();
-		screenshot.set();
-		autopilot.step();		
+		else
+		{
+			lightsource_camera.moveTo(parameter.lightPos);
+			drawLightDot(returnValues.getLightPos());
+		}
 	}
 
 	void CGRenderer::loadFBX(int currentMod)
@@ -727,7 +783,7 @@ namespace cgbv
 			// Buffer Vetex Data
 			std::vector<float> vertexData = mesh.VertexData();
 			glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * mesh.VertexCount() * sizeof(GLfloat), vertexData.data());
-			object.boundingVertices = CGRenderer::findBoundingVertices(vertexData);
+			boundingBox.boundingVertices = CGRenderer::findBoundingVertices(vertexData);
 			//parameter.observerprojection_near = modelfbx.boundingBoxVals.z_min;
 			//parameter.observerprojection_far = modelfbx.boundingBoxVals.z_max;
 			// Buffer Normal Data
@@ -744,7 +800,6 @@ namespace cgbv
 			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 0, (const void*)(3 * mesh.VertexCount() * sizeof(GLfloat)));
 
 			object.vertsToDraw = mesh.VertexCount();
-			// drawBoundingBox();
 		}
 	}
 
@@ -800,20 +855,20 @@ namespace cgbv
 		glm::vec3 n(0.f, 1.f, 0.f);
 
 		// floor 
-		vertices.push_back(object.boundingVertices[0]); vertices.push_back(object.boundingVertices[1]);
-		vertices.push_back(object.boundingVertices[2]); vertices.push_back(object.boundingVertices[3]);
-		vertices.push_back(object.boundingVertices[0]); vertices.push_back(object.boundingVertices[2]);
-		vertices.push_back(object.boundingVertices[1]); vertices.push_back(object.boundingVertices[3]);
+		vertices.push_back(boundingBox.boundingVertices[0]); vertices.push_back(boundingBox.boundingVertices[1]);
+		vertices.push_back(boundingBox.boundingVertices[2]); vertices.push_back(boundingBox.boundingVertices[3]);
+		vertices.push_back(boundingBox.boundingVertices[0]); vertices.push_back(boundingBox.boundingVertices[2]);
+		vertices.push_back(boundingBox.boundingVertices[1]); vertices.push_back(boundingBox.boundingVertices[3]);
 		// roof
-		vertices.push_back(object.boundingVertices[4]); vertices.push_back(object.boundingVertices[5]);
-		vertices.push_back(object.boundingVertices[6]); vertices.push_back(object.boundingVertices[7]);
-		vertices.push_back(object.boundingVertices[4]); vertices.push_back(object.boundingVertices[6]);
-		vertices.push_back(object.boundingVertices[5]); vertices.push_back(object.boundingVertices[7]);
+		vertices.push_back(boundingBox.boundingVertices[4]); vertices.push_back(boundingBox.boundingVertices[5]);
+		vertices.push_back(boundingBox.boundingVertices[6]); vertices.push_back(boundingBox.boundingVertices[7]);
+		vertices.push_back(boundingBox.boundingVertices[4]); vertices.push_back(boundingBox.boundingVertices[6]);
+		vertices.push_back(boundingBox.boundingVertices[5]); vertices.push_back(boundingBox.boundingVertices[7]);
 		// edges
-		vertices.push_back(object.boundingVertices[0]); vertices.push_back(object.boundingVertices[4]);
-		vertices.push_back(object.boundingVertices[1]); vertices.push_back(object.boundingVertices[5]);
-		vertices.push_back(object.boundingVertices[2]); vertices.push_back(object.boundingVertices[6]);
-		vertices.push_back(object.boundingVertices[3]); vertices.push_back(object.boundingVertices[7]);
+		vertices.push_back(boundingBox.boundingVertices[0]); vertices.push_back(boundingBox.boundingVertices[4]);
+		vertices.push_back(boundingBox.boundingVertices[1]); vertices.push_back(boundingBox.boundingVertices[5]);
+		vertices.push_back(boundingBox.boundingVertices[2]); vertices.push_back(boundingBox.boundingVertices[6]);
+		vertices.push_back(boundingBox.boundingVertices[3]); vertices.push_back(boundingBox.boundingVertices[7]);
 
 		for (auto v : vertices)
 		{
@@ -837,6 +892,40 @@ namespace cgbv
 		data.clear();
 		vertices.clear();
 	}
+	void CGRenderer::drawLightDot(glm::vec3 lightPos)
+	{
+		std::vector<glm::vec3> vertices;
+		std::vector<float> data;
+		// Bounding Box
+
+
+		glm::vec3 n(0.f, 1.f, 0.f);
+
+		// floor 
+		vertices.push_back(glm::vec3(.0f, .0f, .0f)); 
+		vertices.push_back(lightPos);
+
+		for (auto v : vertices)
+		{
+			data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+			data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
+			lightDot.vertsToDraw++;
+		}
+
+		glGenVertexArrays(1, &lightDot.vao);
+		glBindVertexArray(lightDot.vao);
+
+		glGenBuffers(1, &lightDot.vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, lightDot.vbo);
+		glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(locs.vertex);
+		glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+		glEnableVertexAttribArray(locs.normal);
+		glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
+
+		data.clear();
+	}
 	void CGRenderer::adjustLight(glm::mat4 shadow_view_model)
 	{
 		glm::vec4 tmp;
@@ -844,7 +933,7 @@ namespace cgbv
 		float x_max = 0.f;
 		float y_min = 0.f;
 		float y_max = 0.f;
-		for (glm::vec3 v : object.boundingVertices)
+		for (glm::vec3 v : boundingBox.boundingVertices)
 		{
 			tmp = shadow_view_model * glm::vec4(v, 1.f) ;
 			tmp = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.f, 1.f) * tmp;

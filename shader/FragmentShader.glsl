@@ -126,7 +126,8 @@ layout (index = 0) subroutine (FragmentProgram) void lambert()
 
 layout (index = 1) subroutine (FragmentProgram) void depthmap()
 {
-    out_color = vec4(gl_FragCoord.z);
+    out_color = vec4(gl_FragCoord.z / gl_FragCoord.w); 
+    //out_color = vec4(gl_FragCoord.z); // idc 
 }
 
 
@@ -177,11 +178,11 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 	vec4 specular = vec4(0.f, 0.f, 0.f, 1.f);
 	if (d > 0.f) {
 		vec3 r = reflect(-n.lightDir, n.normal);
-		specular = pow(max(dot(normalize (r), n.normal), 0), material.shininess) * light.specular * material.spekular;
+		specular = pow(max(dot(normalize (r), n.normal), 0.f), material.shininess) * light.specular * material.spekular;
 	}
 	
     // --------- Shadows ---------
-
+    float intensity = dot(Input.lightDir, Input.normal);
     vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
     float min_shadow_darkness = 1.f, max_shadow_darkness = .35f;
 
@@ -192,7 +193,7 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     out_color = (shadowsample * (specular + diffus) + ambient);
     out_color.a = 1.f;
-
+    //out_color = vec4(n.lightDir*0.5 + 0.5, 1.0f);
     out_normal = n.normal * .5f + .5f;
 
     if (shadowsample <= .5f)
@@ -226,6 +227,12 @@ layout (index = 4) subroutine (FragmentProgram) void canvas_display()
  //       sampleSum += texelFetch(tex.canvas, vpCoords, i);
  //   }
 	//out_color = sampleSum / 8.0f;
+}
+
+layout(index = 5) subroutine(FragmentProgram) void red()
+{
+
+    out_color = vec4(1, 0, 0, 1);
 }
 
 // =============================================================================================================

@@ -62,6 +62,8 @@ namespace cgbv
 		unsigned int shininessMaterial;
 
 		unsigned int brightnessFactor;
+
+		unsigned int red;
 	};
 
 	struct BufferCombo
@@ -74,8 +76,8 @@ namespace cgbv
 	struct UIParameter
 	{
 		glm::quat globalRotation;
-		float distanceLight = 80.f;// 200.f;
-		float distanceCamera = 10.f; // 150.f;
+		float distanceLight = 10.f;// 200.f;
+		float distanceCamera = 15.f; // 150.f;
 		float observerprojection_near = .1f;
 		float observerprojection_far = 20.f;
 		float lightprojection_x_min = -15.f;
@@ -84,9 +86,7 @@ namespace cgbv
 		float lightprojection_y_max = 15.f;
 		float lightprojection_z_min = .1f;
 		float lightprojection_z_max = 100.f;
-		float modelScalation = .35f;
-
-
+		float modelScalation = 0.35f;
 
 		glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
 
@@ -113,6 +113,7 @@ namespace cgbv
 		std::vector<std::string> screenShotNames;
 
 		bool enabledLightAdjustment = true;
+		bool showLightDot = true;
 	};
 
 	struct Framebuffers
@@ -166,7 +167,7 @@ namespace cgbv
 
 		ShaderLocations locs;
 
-		BufferCombo basesurface, object, canvas, boundingBox;
+		BufferCombo basesurface, object, canvas, boundingBox, lightDot;
 
 		glm::mat4 observer_projection, lightsource_projection, model, bias;
 
@@ -180,6 +181,7 @@ namespace cgbv
 		cgbv::Autopilot::ReturnValues returnValues;
 
 		TweakbarPackage modelSelectionPackage;
+		TweakbarPackage lightPosPackage;
 
 		std::unique_ptr<cgbv::textures::Texture> shadowmap;
 		unsigned int shadowmap_sampler;
@@ -205,6 +207,7 @@ namespace cgbv
 		void create_image_framebuffer();
 		std::vector<glm::vec3> findBoundingVertices(std::vector<float> vertices);
 		void drawBoundingBox();
+		void drawLightDot(glm::vec3 lightPos);
 		void adjustLight(glm::mat4 shadow_view);
 
 	public:

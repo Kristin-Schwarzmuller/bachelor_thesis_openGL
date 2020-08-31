@@ -77,7 +77,11 @@ namespace cgbv
 		elevationCameraPtr = elevationCamera.begin();
 		azimuthLightPtr = azimuthLight.begin();
 		azimuthCameraPtr = azimuthCamera.at(currentModel).begin();
+
+		lightPos = calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight);
+		camPos = calPos(0.f, *elevationCameraPtr, distanceCamera);
 			
+		// storage and csv
 		createFolders();
 		csvFile.open((dateFolder + "\\" + csvName), std::ofstream::out | std::ofstream::trunc);
 
@@ -92,25 +96,29 @@ namespace cgbv
 		csvFile << n;
 		csvFile.flush();
 		defImageNames();
+		writeDataCSV();
 		return true;
 	}
 
 	Autopilot::ReturnValues Autopilot::getValues()
 	{
-		return Autopilot::ReturnValues::ReturnValues(
-			calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight),
-			calPos(0.f, *elevationCameraPtr, distanceCamera),
-			-(*azimuthCameraPtr),
-			currentModel,
-			currentImagePaths);
+			return Autopilot::ReturnValues::ReturnValues(
+				lightPos,
+				camPos,
+				-(*azimuthCameraPtr),
+				currentModel,
+				currentImagePaths);
 	}
 
 	void Autopilot::step()
 	{
-		writeDataCSV();
 		if (tick())
 		{
+			lightPos = calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight);
+			camPos = calPos(0.f, *elevationCameraPtr, distanceCamera);
+
 			defImageNames();
+			writeDataCSV();
 		}
 	}
 
@@ -239,10 +247,18 @@ namespace cgbv
 
 		csvFile << *azimuthLightPtr << u;
 		csvFile << *elevationLightPtr << u;
-		//csvFile << sx << u;
-		//csvFile << sy << u;
+
+		csvFile << lightPos.x << u;
+		csvFile << lightPos.y << u;
+		csvFile << lightPos.z << u;
+
 		csvFile << *azimuthCameraPtr << u;
-		csvFile << *elevationCameraPtr << n;
+		csvFile << *elevationCameraPtr << u;
+
+		csvFile << camPos.x << u;
+		csvFile << camPos.y << u;
+		csvFile << camPos.z << n;
+
 		csvFile.flush();
 		return true;
 	}
@@ -250,15 +266,11 @@ namespace cgbv
 	glm::vec3 Autopilot::calPos(float azimuthPtr, float elevationPtr, float distance)
 	{
 		// https://www.mathworks.com/help/matlab/ref/sph2cart.html
-		x = distance * cosf(glm::radians(elevationPtr)) * cosf(glm::radians(azimuthPtr));
-		z = distance * cosf(glm::radians(elevationPtr)) * sinf(glm::radians(azimuthPtr));
+		x = distance * cosf(glm::radians(elevationPtr)) * sinf(glm::radians(azimuthPtr));
 		y = distance * sinf(glm::radians(elevationPtr));
-
-		if (y < 0)
-			std::cout << "stop" + std::to_string(x) + " - " + std::to_string(y) + " - " + std::to_string(z) << std::endl;
+		z = distance * cosf(glm::radians(elevationPtr)) * cosf(glm::radians(azimuthPtr));
 
 		return glm::vec3(x, y, z);
-		//return glm::vec3(x, y, z);
 	}
 
 	bool Autopilot::createFolders()
