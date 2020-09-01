@@ -35,7 +35,7 @@ namespace cgbv
 	{
 		unsigned int vertex, normal;
 
-		unsigned int modelViewProjection, normalmatrix, modelview, biasedModelViewProjection;
+		unsigned int modelViewProjection, normalmatrix, modelview, model, biasedModelViewProjection;
 
 		unsigned int placementVS, lightingVS, lambertFS, depthmapFS, canvasPlacementVS, canvasDisplayFS;
 
@@ -207,7 +207,7 @@ namespace cgbv
 		void create_image_framebuffer();
 		std::vector<glm::vec3> findBoundingVertices(std::vector<float> vertices);
 		void drawBoundingBox();
-		void drawLightDot(glm::vec3 lightPos);
+		void drawLightDot(glm::vec4 lightPos);
 		void adjustLight(glm::mat4 shadow_view);
 
 	public:

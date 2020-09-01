@@ -8,6 +8,7 @@ struct Matrices
 {
 	mat4 mvp;
 	mat4 mv;
+    mat4 mod;
 	mat3 normal;
     mat4 bmvp;
 };

@@ -252,6 +252,7 @@ namespace cgbv
 			locs.normal = shader->getAttribLocation("normal");
 			//locs.uv = shader->getAttribLocation("uvs");
 			locs.modelViewProjection = shader->getUniformLocation("matrices.mvp");
+			locs.model = shader->getUniformLocation("matrices.mod");
 			locs.normalmatrix = shader->getUniformLocation("matrices.normal");
 			locs.modelview = shader->getUniformLocation("matrices.mv");
 			locs.biasedModelViewProjection = shader->getUniformLocation("matrices.bmvp");
@@ -369,7 +370,7 @@ namespace cgbv
 
 			loadFBX(modelfbx.modelSelection);
 			// drawBoundingBox();
-			drawLightDot(returnValues.getLightPos());
+			drawLightDot(parameter.lightPos);
 		}
 
 
@@ -559,6 +560,7 @@ namespace cgbv
 		}
 
 		shader->use();
+		glUniformMatrix4fv(locs.model, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * shadow_view * model));
 
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.placementVS);
@@ -601,6 +603,8 @@ namespace cgbv
 			break;
 		}
 
+
+
 		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation));
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model; 
 
@@ -633,8 +637,8 @@ namespace cgbv
 		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 		glUniformMatrix4fv(locs.biasedModelViewProjection, 1, GL_FALSE, glm::value_ptr(bias * lightsource_projection * shadow_view * model));
 
-		glUniform3fv(locs.lightPos, 1, glm::value_ptr(parameter.lightPos));
-
+		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(parameter.lightPos));
+		glUniform3fv(locs.lightPos, 1, glm::value_ptr(view * model * parameter.lightPos));
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.lightingVS);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.lightPhong);
 
@@ -741,12 +745,10 @@ namespace cgbv
 			parameter.modelRotation = returnValues.getModelRotation();
 
 			//Light
-			drawLightDot(returnValues.getLightPos());
 			parameter.lightPos = glm::vec4(returnValues.getLightPos(), 1.f);
-			//lightsource_camera.moveTo(glm::inverse(observer_camera.getViewMatrix()) * parameter.lightPos);
+			drawLightDot(parameter.lightPos);
 			lightsource_camera.moveTo(parameter.lightPos);
 			lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
-			
 
 			// Model
 			if (returnValues.getModelID() != modelfbx.modelSelection)
@@ -763,7 +765,7 @@ namespace cgbv
 		else
 		{
 			lightsource_camera.moveTo(parameter.lightPos);
-			drawLightDot(returnValues.getLightPos());
+			drawLightDot(parameter.lightPos);
 		}
 	}
 
@@ -892,18 +894,15 @@ namespace cgbv
 		data.clear();
 		vertices.clear();
 	}
-	void CGRenderer::drawLightDot(glm::vec3 lightPos)
+	void CGRenderer::drawLightDot(glm::vec4 lightPos)
 	{
 		std::vector<glm::vec3> vertices;
 		std::vector<float> data;
-		// Bounding Box
-
 
 		glm::vec3 n(0.f, 1.f, 0.f);
 
-		// floor 
 		vertices.push_back(glm::vec3(.0f, .0f, .0f)); 
-		vertices.push_back(lightPos);
+		vertices.push_back(glm::vec3(lightPos.x, lightPos.y, lightPos.z));
 
 		for (auto v : vertices)
 		{

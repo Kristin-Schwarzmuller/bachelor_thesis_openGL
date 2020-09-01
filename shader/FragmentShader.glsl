@@ -8,6 +8,7 @@ struct Matrices
 {
 	mat4 mvp;
 	mat4 mv;
+    mat4 mod;
 	mat3 normal;
     mat4 bmvp;
 };
@@ -171,7 +172,7 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
     vec4 ambient = light.ambient * material.ambient; 
 
     // Diffuse light
-	float d = dot(n.normal, n.lightDir);
+	float d = max(0.0f, dot(n.normal, n.lightDir));
 	vec4 diffus = d * light.diffus * material.diffus;
 
     // Specular
