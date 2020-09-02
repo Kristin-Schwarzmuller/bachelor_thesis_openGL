@@ -31,6 +31,7 @@ struct VertexOutput
 
 	vec3 lightDir;
 	vec3 viewDir;
+    vec3 FragPos;
 
     vec4 shadow_coordinates;
 
@@ -89,9 +90,10 @@ subroutine (VertexProgram) void verts_and_normals()
 
     vec4 h = matrices.mv * vertex;
     vec3 mvPos = h.xyz / h.w;
-
+    vec3 tmp = vec3(matrices.mod * vertex);
     // Here define if light is directional or point 
-    Output.lightDir = normalize(light.lightPos - mvPos ); 
+    Output.lightDir = normalize(light.lightPos - mvPos); 
+    Output.FragPos = tmp; 
     //Output.lightDir = light.lightPos;
     Output.viewDir = -mvPos;
 

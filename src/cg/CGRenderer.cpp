@@ -74,6 +74,23 @@ namespace cgbv
 	//	auto lightsource_camera = static_cast<Camera*>(package->object2);
 	//	*(glm::vec4*)value = *lightDir;
 	//}
+
+	//	void TW_CALL camSetCallback(const void* value, void* clientData)
+	//{
+	//	auto package = static_cast<TweakbarPackage*>(clientData);
+	//	auto camDir = static_cast<glm::vec4*>(package->object1);
+	//	auto observer_camera = static_cast<Camera*>(package->object2);
+	//	camDir = ((glm::vec4*)value);
+	//	observer_camera->moveTo(*camDir);
+	//}
+
+	//void TW_CALL camGetCallback(void* value, void* clientData)
+	//{
+	//	auto package = static_cast<TweakbarPackage*>(clientData);
+	//	auto camDir = static_cast<glm::vec4*>(package->object1);
+	//	auto observer_camera = static_cast<Camera*>(package->object2);
+	//	*(glm::vec4*)value = *camDir;
+	//}
 	// ==========================================================
 
 	CGRenderer::CGRenderer(GLFWwindow* window) : Renderer(window)
@@ -370,7 +387,7 @@ namespace cgbv
 
 			loadFBX(modelfbx.modelSelection);
 			// drawBoundingBox();
-			drawLightDot(parameter.lightPos);
+			//drawLightDot(parameter.lightPos);
 		}
 
 
@@ -384,7 +401,11 @@ namespace cgbv
 			TwBar* tweakbar = TwNewBar("TweakBar");
 			TwDefine(" TweakBar size='300 600'");
 
-			TwAddVarRW(tweakbar, "Global Rotation", TW_TYPE_QUAT4F, &parameter.globalRotation, "showval=false opened=true");
+			//TwAddVarRW(tweakbar, "Global Rotation", TW_TYPE_QUAT4F, &parameter.globalRotation, "showval=false opened=true");
+			camPosPackage.object1 = &parameter.camPos;
+			camPosPackage.object2 = &observer_camera;
+			//TwAddVarCB(tweakbar, "Camera Position", TW_TYPE_DIR3F, camSetCallback, camGetCallback, &camPosPackage, "group=Cam axisx=-x axisy=-y axisz=-z opened=true");
+			TwAddVarRW(tweakbar, "Camera Position", TW_TYPE_DIR3F, &parameter.camPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
 			TwAddVarRW(tweakbar, "Light direction", TW_TYPE_DIR3F, &parameter.lightPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
 			//lightPosPackage.object1 = &parameter.lightPos;
@@ -638,7 +659,7 @@ namespace cgbv
 		glUniformMatrix4fv(locs.biasedModelViewProjection, 1, GL_FALSE, glm::value_ptr(bias * lightsource_projection * shadow_view * model));
 
 		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(parameter.lightPos));
-		glUniform3fv(locs.lightPos, 1, glm::value_ptr(view * model * parameter.lightPos));
+		glUniform3fv(locs.lightPos, 1, glm::value_ptr(view * parameter.lightPos));
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.lightingVS);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.lightPhong);
 
@@ -663,7 +684,7 @@ namespace cgbv
 		glBindVertexArray(lightDot.vao);
 		glDrawArrays(GL_LINES, 0, lightDot.vertsToDraw);
 
-		if (false) //screenshot[0])
+		if (screenshot[0])
 		{
 			//std::cout << "Storing Shadowmap to Disk...";
 			std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
@@ -736,17 +757,17 @@ namespace cgbv
 	{
 		
 
-		if (true) 
+		while (autopilot.step())
 		{
-			autopilot.step();
 			returnValues = autopilot.getValues();
 			// Camera 
-			observer_camera.moveTo(returnValues.getCameraPos());
+			parameter.camPos = glm::vec4(returnValues.getCameraPos(), 1.0f);
+			observer_camera.moveTo(parameter.camPos);
 			parameter.modelRotation = returnValues.getModelRotation();
 
 			//Light
 			parameter.lightPos = glm::vec4(returnValues.getLightPos(), 1.f);
-			drawLightDot(parameter.lightPos);
+			//drawLightDot(parameter.lightPos);
 			lightsource_camera.moveTo(parameter.lightPos);
 			lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
 
@@ -762,9 +783,10 @@ namespace cgbv
 			screenshot.set();
 			
 		}
-		else
+		// else 
 		{
 			lightsource_camera.moveTo(parameter.lightPos);
+			observer_camera.moveTo(parameter.camPos);
 			drawLightDot(parameter.lightPos);
 		}
 	}

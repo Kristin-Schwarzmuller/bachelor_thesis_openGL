@@ -76,8 +76,8 @@ namespace cgbv
 	struct UIParameter
 	{
 		glm::quat globalRotation;
-		float distanceLight = 10.f;// 200.f;
-		float distanceCamera = 15.f; // 150.f;
+		float distanceLight = 80.f;// 200.f;
+		float distanceCamera = 10.f; // 150.f;
 		float observerprojection_near = .1f;
 		float observerprojection_far = 20.f;
 		float lightprojection_x_min = -15.f;
@@ -89,6 +89,7 @@ namespace cgbv
 		float modelScalation = 0.35f;
 
 		glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
+		glm::vec4 camPos = glm::vec4(0.f, 0.f, distanceCamera, 1.f);
 
 		// Light
 		glm::vec4 ambientLight = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
@@ -181,7 +182,8 @@ namespace cgbv
 		cgbv::Autopilot::ReturnValues returnValues;
 
 		TweakbarPackage modelSelectionPackage;
-		TweakbarPackage lightPosPackage;
+		//TweakbarPackage lightPosPackage;
+		TweakbarPackage camPosPackage;
 
 		std::unique_ptr<cgbv::textures::Texture> shadowmap;
 		unsigned int shadowmap_sampler;

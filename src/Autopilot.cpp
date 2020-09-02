@@ -110,7 +110,7 @@ namespace cgbv
 				currentImagePaths);
 	}
 
-	void Autopilot::step()
+	bool Autopilot::step()
 	{
 		if (tick())
 		{
@@ -119,7 +119,10 @@ namespace cgbv
 
 			defImageNames();
 			writeDataCSV();
+			return true;
 		}
+		std::cout << "Yeah! All images have been created! " std::endl;
+		return false; 
 	}
 
 	bool Autopilot::setupAzimuthCamera()

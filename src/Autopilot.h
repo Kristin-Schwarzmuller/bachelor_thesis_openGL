@@ -111,7 +111,7 @@ namespace cgbv
 		bool init(const std::vector<float> modelMaxTurn, const std::vector<std::string> modelNames,
 			float lightDistance, float cameraDistance);
 		ReturnValues getValues();
-		void step();
+		bool step();
 	};
 }
 
