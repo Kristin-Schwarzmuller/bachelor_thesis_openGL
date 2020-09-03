@@ -725,7 +725,7 @@ namespace cgbv
 			screenshot.reset();
 		}
 
-		TwDraw();<w+#
+		TwDraw();
 
 	}
 

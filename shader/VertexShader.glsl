@@ -90,10 +90,9 @@ subroutine (VertexProgram) void verts_and_normals()
 
     vec4 h = matrices.mv * vertex;
     vec3 mvPos = h.xyz / h.w;
-    vec3 tmp = vec3(matrices.mod * vertex);
     // Here define if light is directional or point 
     Output.lightDir = normalize(light.lightPos - mvPos); 
-    Output.FragPos = tmp; 
+    Output.FragPos = gl_Position / gl_Position.w; 
     //Output.lightDir = light.lightPos;
     Output.viewDir = -mvPos;
 

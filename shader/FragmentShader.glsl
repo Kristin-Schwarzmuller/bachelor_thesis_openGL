@@ -89,6 +89,7 @@ subroutine uniform FragmentProgram fragmentprogram;
 layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec3 out_normal;
 layout(location = 2) out vec4 out_sc;
+layout(location = 3) out vec4 out_depth;
 // =============================================================================================================
 
 
@@ -196,6 +197,7 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
     out_color.a = 1.f;
     //out_color = vec4(vec3(dot(n.normal, n.lightDir))*0.5 + 0.5, 1.0f);
     out_normal = n.normal * .5f + .5f;
+    out_depth = vec4(Input.FragPos.zzz, 1.0f);
 
     if (shadowsample <= .5f)
         out_sc = vec4(1.f);
