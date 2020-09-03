@@ -92,7 +92,7 @@ subroutine (VertexProgram) void verts_and_normals()
     vec3 mvPos = h.xyz / h.w;
     // Here define if light is directional or point 
     Output.lightDir = normalize(light.lightPos - mvPos); 
-    Output.FragPos = gl_Position / gl_Position.w; 
+    Output.FragPos = gl_Position.xyz / gl_Position.w; 
     //Output.lightDir = light.lightPos;
     Output.viewDir = -mvPos;
 
