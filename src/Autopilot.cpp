@@ -68,9 +68,9 @@ namespace cgbv
 
 		// Write the values into the vectors to iterate over it later 
 		setupAzimuthCamera();
-		elevationLight = setupVector(0, 90, stepSizeElevationLight, true);
-		elevationCamera = setupVector(0, 90, stepSizeElevationCamera, true);
-		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight, false);
+		elevationLight = setupVector(0, 90, stepSizeElevationLight, true, false);
+		elevationCamera = setupVector(0, 90, stepSizeElevationCamera, true, true); // here no 90 degrees because otherwise the iamge flipes upside down 
+		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight, false, false);
 
 		// Initialize the iterators  
 		elevationLightPtr = elevationLight.begin();
@@ -121,7 +121,7 @@ namespace cgbv
 			writeDataCSV();
 			return true;
 		}
-		std::cout << "Yeah! All images have been created! " std::endl;
+		std::cout << " ====== Yeah! All images have been created! =====" << std::endl;
 		return false; 
 	}
 
@@ -141,7 +141,7 @@ namespace cgbv
 		return true;
 	}
 
-	std::vector<float> Autopilot::setupVector(float from, float to, float step_size, bool firstNotZero)
+	std::vector<float> Autopilot::setupVector(float from, float to, float step_size, bool firstNotZero, bool lastnotninety)
 	{
 		std::vector<float> vec;
 		for (float i = from; i <= to; i += step_size) {
@@ -150,6 +150,10 @@ namespace cgbv
 		if (firstNotZero)
 		{
 			vec.at(0) = 1;
+		}
+		if (lastnotninety)
+		{
+			vec.at(vec.size() - 1) = 89.9;
 		}
 		return vec;
 	}
@@ -227,7 +231,7 @@ namespace cgbv
 		currentImageNames.clear();
 		// Camera Azimuth-Elevation - Light Azimuth-Elevation
 		imageName = modelNames.at(currentModel) + std::string(nameBuffer) + "-" + std::to_string(static_cast<int>(*azimuthCameraPtr)) + "-" + std::to_string(static_cast<int>(*elevationCameraPtr)) + "-" + std::to_string(static_cast<int>(*azimuthLightPtr)) + "-" + std::to_string(static_cast<int>(*elevationLightPtr)) + ".png";
-		currentImageNames.insert(currentImageNames.begin(), modelNames.at(currentModel) + "\\" + "shadowmap\\" + imageName);
+		currentImageNames.insert(currentImageNames.begin(), modelNames.at(currentModel) + "\\" + "depth\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgb\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normal\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" + imageName);
@@ -304,7 +308,7 @@ namespace cgbv
 		for (std::string modelName : modelNames)
 		{
 			std::filesystem::create_directory((dateFolder + "\\" + modelName).c_str());
-			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\shadowmap").c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\rgb").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\normal").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\shadow_candidate").c_str());

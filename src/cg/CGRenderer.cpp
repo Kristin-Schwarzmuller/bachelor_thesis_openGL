@@ -489,6 +489,8 @@ namespace cgbv
 		{
 			rgb_output.reset();
 			normal_output.reset();
+			sc_output.reset();
+			depth_output.reset();
 			glDeleteFramebuffers(1, &framebuffers.image_buffer);
 			glDeleteSamplers(1, &rgb_sampler);
 			glDeleteRenderbuffers(1, &rgb_depth_rbo);
@@ -502,6 +504,7 @@ namespace cgbv
 			rgb_output = std::make_unique<textures::Texture>();
 			normal_output = std::make_unique<textures::Texture>();
 			sc_output = std::make_unique<textures::Texture>();
+			depth_output = std::make_unique<textures::Texture>();
 
 			glBindTexture(GL_TEXTURE_2D, rgb_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -511,6 +514,10 @@ namespace cgbv
 
 			glBindTexture(GL_TEXTURE_2D, sc_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
+
+			glBindTexture(GL_TEXTURE_2D, depth_output->getTextureID());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
+			//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, window_width, window_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
 			glGenSamplers(1, &rgb_sampler);
 			glSamplerParameteri(rgb_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -526,9 +533,10 @@ namespace cgbv
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rgb_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, sc_output->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, depth_output->getTextureID(), 0);
 
-			GLenum draw_buffers[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-			glDrawBuffers(3, draw_buffers);
+			GLenum draw_buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+			glDrawBuffers(4, draw_buffers);
 
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			{
@@ -686,45 +694,39 @@ namespace cgbv
 
 		if (screenshot[0])
 		{
-			//std::cout << "Storing Shadowmap to Disk...";
-			std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
+			/*std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
 			glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, shadowmap_pixel.get());
-
-			//cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
 			cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotNames[0], shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
-			//std::cout << "done" << std::endl;
+			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);*/
 
-
-			//std::cout << "Storing RGB Image to Disk...";
 			std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
 			glGetTextureImage(rgb_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
-
-			//cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[1], rgb_pixel.get(), window_width, window_height, 0);
-			//std::cout << "done" << std::endl;
+			//cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
 
 
-			//std::cout << "Storing Normal Image to Disk...";
 			std::unique_ptr<GLubyte[]> normal_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
 			glGetTextureImage(normal_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, normal_pixel.get());
-
-			//cgbv::textures::Texture2DStorage::Store("../normal.png", normal_pixel.get(), window_width, window_height, 0);
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[2], normal_pixel.get(), window_width, window_height, 0);
-			//std::cout << "done" << std::endl;
+			//cgbv::textures::Texture2DStorage::Store("../normal.png", normal_pixel.get(), window_width, window_height, 0);
 
 
-			//std::cout << "Storing Shadow Candidate Image to Disk...";
 			std::unique_ptr<GLubyte[]> sc_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
 			glGetTextureImage(sc_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, sc_pixel.get());
-
-			//cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[3], sc_pixel.get(), window_width, window_height, 0);
-			//std::cout << "done" << std::endl;
+			//cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
+
+			std::unique_ptr<GLubyte[]> depth_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(depth_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel.get());
+			//glGetTextureImage(depth_output->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, window_width * window_height, depth_pixel.get());
+			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[0], depth_pixel.get(), window_width, window_height, 0);
+
 
 			screenshot.reset();
 		}
 
-		TwDraw();
+		TwDraw();<w+#
+
 	}
 
 	void CGRenderer::canvas_pass()
@@ -755,40 +757,26 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		
-
-		while (autopilot.step())
+		if (autopilot.step())
 		{
 			returnValues = autopilot.getValues();
-			// Camera 
+
 			parameter.camPos = glm::vec4(returnValues.getCameraPos(), 1.0f);
-			observer_camera.moveTo(parameter.camPos);
 			parameter.modelRotation = returnValues.getModelRotation();
-
-			//Light
 			parameter.lightPos = glm::vec4(returnValues.getLightPos(), 1.f);
-			//drawLightDot(parameter.lightPos);
-			lightsource_camera.moveTo(parameter.lightPos);
-			lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
+			parameter.screenShotNames = returnValues.getImageNames();
+			screenshot.set();
 
-			// Model
 			if (returnValues.getModelID() != modelfbx.modelSelection)
 			{
 				modelfbx.modelSelection = returnValues.getModelID();
 				loadFBX(modelfbx.modelSelection);
-			}
-			
-			// Screenshot 
-			parameter.screenShotNames = returnValues.getImageNames();
-			screenshot.set();
-			
+			}	
 		}
-		// else 
-		{
-			lightsource_camera.moveTo(parameter.lightPos);
-			observer_camera.moveTo(parameter.camPos);
-			drawLightDot(parameter.lightPos);
-		}
+		observer_camera.moveTo(parameter.camPos); 
+		lightsource_camera.moveTo(parameter.lightPos);
+		lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
+		//drawLightDot(parameter.lightPos);
 	}
 
 	void CGRenderer::loadFBX(int currentMod)
