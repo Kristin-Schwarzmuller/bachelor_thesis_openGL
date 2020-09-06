@@ -202,8 +202,7 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
     //out_color = vec4(vec3(dot(n.normal, n.lightDir))*0.5 + 0.5, 1.0f);
     out_normal = n.normal * .5f + .5f;
     out_depth = vec4(Input.FragPos.zzz, 1.0f);
-    out_depth_normalized = vec4(Input.FragPosNormalized.zzz, 1.0f);
-    //out_depthNormalized = vec4(Input.FragPosNormalized.zzz, 1.0f);
+    out_depth_normalized = normalize(vec4(Input.FragPosNormalized.zzz, 1.0f));
 
     if (shadowsample <= .5f)
         out_sc = vec4(1.f);

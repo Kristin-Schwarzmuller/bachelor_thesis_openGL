@@ -65,7 +65,6 @@ namespace cgbv
 
 		unsigned int red;
 
-		unsigned int lightprojection_z_min, lightprojection_z_max;
 	};
 
 	struct BufferCombo
