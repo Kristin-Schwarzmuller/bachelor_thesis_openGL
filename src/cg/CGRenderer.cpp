@@ -293,6 +293,8 @@ namespace cgbv
 			locs.spekularMaterial = shader->getUniformLocation("material.spekular");
 			locs.shininessMaterial = shader->getUniformLocation("material.shininess");
 			locs.brightnessFactor = shader->getUniformLocation("light.brightnessFactor");
+			locs.lightprojection_z_min = shader->getUniformLocation("light.lightprojection_z_min");
+			locs.lightprojection_z_max = shader->getUniformLocation("light.lightprojection_z_max");
 
 		}
 
@@ -491,6 +493,7 @@ namespace cgbv
 			normal_output.reset();
 			sc_output.reset();
 			depth_output.reset();
+			depth_normalized_output.reset();
 			glDeleteFramebuffers(1, &framebuffers.image_buffer);
 			glDeleteSamplers(1, &rgb_sampler);
 			glDeleteRenderbuffers(1, &rgb_depth_rbo);
@@ -505,6 +508,7 @@ namespace cgbv
 			normal_output = std::make_unique<textures::Texture>();
 			sc_output = std::make_unique<textures::Texture>();
 			depth_output = std::make_unique<textures::Texture>();
+			depth_normalized_output = std::make_unique<textures::Texture>();
 
 			glBindTexture(GL_TEXTURE_2D, rgb_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -517,7 +521,9 @@ namespace cgbv
 
 			glBindTexture(GL_TEXTURE_2D, depth_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
-			//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, window_width, window_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+			glBindTexture(GL_TEXTURE_2D, depth_normalized_output->getTextureID());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
 			glGenSamplers(1, &rgb_sampler);
 			glSamplerParameteri(rgb_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -534,9 +540,10 @@ namespace cgbv
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, sc_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, depth_output->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, depth_normalized_output->getTextureID(), 0);
 
-			GLenum draw_buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-			glDrawBuffers(4, draw_buffers);
+			GLenum draw_buffers[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+			glDrawBuffers(5, draw_buffers);
 
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			{
@@ -647,6 +654,8 @@ namespace cgbv
 		glUniform4fv(locs.spekularMaterial, 1, glm::value_ptr(parameter.spekularMaterial));
 		glUniform1f(locs.shininessMaterial, parameter.shininessMaterial);
 		glUniform1f(locs.brightnessFactor, parameter.brightnessFactor);
+		glUniform1f(locs.lightprojection_z_min, parameter.lightprojection_z_min);
+		glUniform1f(locs.lightprojection_z_max, parameter.lightprojection_z_max);
 
 		normal = glm::transpose(glm::inverse(view * model));
 
@@ -720,6 +729,11 @@ namespace cgbv
 			glGetTextureImage(depth_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel.get());
 			//glGetTextureImage(depth_output->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, window_width * window_height, depth_pixel.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[0], depth_pixel.get(), window_width, window_height, 0);
+			
+			std::unique_ptr<GLubyte[]> depth_normalized_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(depth_normalized_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_normalized_pixel.get());
+			//glGetTextureImage(depth_output->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, window_width * window_height, depth_pixel.get());
+			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[4], depth_normalized_pixel.get(), window_width, window_height, 0);
 
 
 			screenshot.reset();

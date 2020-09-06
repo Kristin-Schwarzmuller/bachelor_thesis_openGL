@@ -235,13 +235,14 @@ namespace cgbv
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgb\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normal\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_normalized\\" + imageName);
 		
-		// todo here exeption bei current Model = 7 weil es das nicht mehr gibt 
 		currentImagePaths.clear(); 
 		currentImagePaths.insert(currentImagePaths.begin(), dateFolder + "\\" + currentImageNames[0]);
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[1]);
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[2]);
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[3]);
+		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[4]);
 	}					
 
 	bool Autopilot::writeDataCSV()
@@ -251,6 +252,7 @@ namespace cgbv
 		csvFile << currentImageNames[1] << u;
 		csvFile << currentImageNames[2] << u;
 		csvFile << currentImageNames[3] << u;
+		csvFile << currentImageNames[4] << u;
 
 		csvFile << *azimuthLightPtr << u;
 		csvFile << *elevationLightPtr << u;
@@ -312,6 +314,7 @@ namespace cgbv
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\rgb").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\normal").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\shadow_candidate").c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_normalized").c_str());
 
 		}
 

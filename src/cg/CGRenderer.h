@@ -64,6 +64,8 @@ namespace cgbv
 		unsigned int brightnessFactor;
 
 		unsigned int red;
+
+		unsigned int lightprojection_z_min, lightprojection_z_max;
 	};
 
 	struct BufferCombo
@@ -192,6 +194,7 @@ namespace cgbv
 		std::unique_ptr<cgbv::textures::Texture> rgb_output;
 		std::unique_ptr<cgbv::textures::Texture> normal_output;
 		std::unique_ptr<cgbv::textures::Texture> depth_output;
+		std::unique_ptr<cgbv::textures::Texture> depth_normalized_output;
 		std::unique_ptr<cgbv::textures::Texture> sc_output;
 		unsigned int rgb_sampler;
 		unsigned int rgb_depth_rbo;
