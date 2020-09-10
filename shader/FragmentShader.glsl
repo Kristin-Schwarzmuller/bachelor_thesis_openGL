@@ -21,8 +21,6 @@ struct Light
 	vec4 diffus;
 	vec4 specular;
     float brightnessFactor;
-    float lightprojection_z_min;
-    float lightprojection_z_max;
 };
 
 struct Material 
@@ -42,8 +40,7 @@ struct FragmentInput
 
 	vec3 lightDir;
 	vec3 viewDir;
-    vec3 FragPos;
-    vec3 FragPosNormalized;
+    vec4 FragPos;
 
     vec4 shadow_coordinates;
 
@@ -93,7 +90,6 @@ layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec3 out_normal;
 layout(location = 2) out vec4 out_sc;
 layout(location = 3) out vec4 out_depth;
-layout(location = 4) out vec4 out_depth_normalized;
 // =============================================================================================================
 
 
@@ -133,8 +129,7 @@ layout (index = 0) subroutine (FragmentProgram) void lambert()
 
 layout (index = 1) subroutine (FragmentProgram) void depthmap()
 {
-    out_color = vec4(gl_FragCoord.z / gl_FragCoord.w); 
-    //out_color = vec4(gl_FragCoord.z); // idc 
+    out_color = vec4(gl_FragCoord.z); 
 }
 
 
@@ -201,10 +196,13 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
     out_color.a = 1.f;
     //out_color = vec4(vec3(dot(n.normal, n.lightDir))*0.5 + 0.5, 1.0f);
     out_normal = n.normal * .5f + .5f;
-    out_depth = vec4(Input.FragPos.zzz, 1.0f);
-    out_depth_normalized = normalize(vec4(Input.FragPosNormalized.zzz, 1.0f));
+    out_depth = vec4(gl_FragCoord.z);
+    float intensity = 80.f;
+    float z_ndc = intensity * gl_FragCoord.z - (intensity - 1.f);
+    out_depth = vec4(z_ndc);
+    //out_color = out_depth;
 
-    if (shadowsample <= .5f)
+    if (shadowsample <= .8f)
         out_sc = vec4(1.f);
     else
         out_sc = vec4(0.f);
@@ -240,7 +238,21 @@ layout (index = 4) subroutine (FragmentProgram) void canvas_display()
 layout(index = 5) subroutine(FragmentProgram) void red()
 {
 
-    out_color = vec4(1, 0, 0, 1);
+    out_color = vec4(1, 0, 0, .0f);
 }
 
+
+layout(index = 6) subroutine(FragmentProgram) void black()
+{
+
+    out_color = vec4(0.f, 0.f, 0.f, 0.f);
+    float intensity = 80.f;
+    float z_ndc = intensity * gl_FragCoord.z - (intensity - 1.f);
+
+    if (z_ndc > 0.95f)
+        z_ndc = 1.f;
+    out_depth = vec4(z_ndc);
+    //out_color = out_depth;
+
+}
 // =============================================================================================================

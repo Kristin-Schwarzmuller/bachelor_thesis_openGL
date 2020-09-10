@@ -21,8 +21,6 @@ struct Light
 	vec4 diffus;
 	vec4 specular;
     float brightnessFactor;
-    float lightprojection_z_min;
-    float lightprojection_z_max;
 };
 
 
@@ -33,8 +31,7 @@ struct VertexOutput
 
 	vec3 lightDir;
 	vec3 viewDir;
-    vec3 FragPos;
-    vec3 FragPosNormalized;
+    vec4 FragPos;
 
     vec4 shadow_coordinates;
 
@@ -95,8 +92,7 @@ subroutine (VertexProgram) void verts_and_normals()
     vec3 mvPos = h.xyz / h.w;
     // Here define if light is directional or point 
     Output.lightDir = normalize(light.lightPos - mvPos); 
-    Output.FragPos = gl_Position.xyz / gl_Position.w; 
-    Output.FragPosNormalized = gl_Position.xyz / gl_Position.w;
+    Output.FragPos = vec4(gl_Position.xyz / gl_Position.w, 1.0f); 
     //Output.FragPosNormalized = normalize((light.lightprojection_z_max - light.lightprojection_z_min) * (((gl_Position.xyz / gl_Position.w) - light.lightprojection_z_min) / (light.lightprojection_z_max - light.lightprojection_z_min)) + light.lightprojection_z_min);
     //Output.lightDir = light.lightPos;
     Output.viewDir = -mvPos;
@@ -107,6 +103,7 @@ subroutine (VertexProgram) void verts_and_normals()
 subroutine (VertexProgram) void simple_placement()
 {
     gl_Position = matrices.mvp * vertex;
+    gl_Position = vec4(gl_Position.xyz / gl_Position.w, 1.f);
 }
 
 subroutine (VertexProgram) void canvas_placement() 

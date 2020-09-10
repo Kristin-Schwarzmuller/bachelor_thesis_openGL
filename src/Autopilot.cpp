@@ -314,7 +314,7 @@ namespace cgbv
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\rgb").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\normal").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\shadow_candidate").c_str());
-			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_normalized").c_str());
+			//std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_normalized").c_str());
 
 		}
 

@@ -128,6 +128,10 @@ namespace cgbv
 		glDeleteVertexArrays(1, &lightDot.vao);
 		glDeleteBuffers(1, &lightDot.vbo);
 
+
+		glDeleteVertexArrays(1, &background.vao);
+		glDeleteBuffers(1, &background.vbo);
+
 		glDeleteFramebuffers(1, &framebuffers.shadowmap_buffer);
 		glDeleteSamplers(1, &shadowmap_sampler);
 
@@ -224,6 +228,7 @@ namespace cgbv
 		glEnable(GL_ALPHA_TEST);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
+		glDisable(GL_CULL_FACE);
 
 		//OpenGLDebugger debugger;
 
@@ -283,7 +288,8 @@ namespace cgbv
 			locs.canvasPlacementVS = shader->getSubroutineIndex(GL_VERTEX_SHADER, "canvas_placement");
 			locs.canvasDisplayFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "canvas_display");
 			locs.lightPhong = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "phongWithLambert");
-			locs.red = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "red");
+			locs.redFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "red");
+			locs.blackFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "black");
 			
 			locs.ambientLight = shader->getUniformLocation("light.ambient");
 			locs.ambientMaterial = shader->getUniformLocation("material.ambient");
@@ -293,8 +299,6 @@ namespace cgbv
 			locs.spekularMaterial = shader->getUniformLocation("material.spekular");
 			locs.shininessMaterial = shader->getUniformLocation("material.shininess");
 			locs.brightnessFactor = shader->getUniformLocation("light.brightnessFactor");
-			locs.lightprojection_z_min = shader->getUniformLocation("light.lightprojection_z_min");
-			locs.lightprojection_z_max = shader->getUniformLocation("light.lightprojection_z_max");
 
 		}
 
@@ -318,18 +322,6 @@ namespace cgbv
 
 			std::vector<float> data;
 
-			// First fill the date just with the vertices to find to bounding box for the floor 
-			//for (auto v : vertices)
-			//{
-			//	data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
-			//}
-
-			//basesurface.boundingVertices = findBoundingVertices(data);
-			//data.clear();
-
-
-			// later fill the date with the vertices and the normales to draw them 
-
 			for (auto v : vertices)
 			{
 				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
@@ -352,6 +344,56 @@ namespace cgbv
 
 			data.clear();
 			vertices.clear();
+
+			// Background
+			float  q = 49.f;
+			glm::vec3 a0(2*q, -1.f, q);
+			glm::vec3 b0(2 * q, -1.f, -q);
+			glm::vec3 c0(-2 * q, -1.f, -q);
+			glm::vec3 d0(-2 * q, -1.f, q);
+
+			glm::vec3 a1(2*q, q, q);
+			glm::vec3 b1(2*q, q, -q);
+			glm::vec3 c1(-2*q,q, -q);
+			glm::vec3 d1(-2*q,q, q);
+
+			 n = glm::vec3(0.f, 0.f, 1.f);
+
+			//vertices.push_back(a0); vertices.push_back(a1); vertices.push_back(b0);
+			//vertices.push_back(b0); vertices.push_back(b1); vertices.push_back(a1);
+
+			vertices.push_back(b0); vertices.push_back(b1); vertices.push_back(c0);
+			vertices.push_back(c0); vertices.push_back(c1); vertices.push_back(b1);
+
+			//vertices.push_back(c0); vertices.push_back(c1); vertices.push_back(d0);
+			//vertices.push_back(d0); vertices.push_back(d1); vertices.push_back(c1);
+
+			//vertices.push_back(d0); vertices.push_back(d1); vertices.push_back(a0);
+			//vertices.push_back(a0); vertices.push_back(a1); vertices.push_back(d1);
+
+			for (auto v : vertices)
+			{
+				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+				data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
+				background.vertsToDraw++;
+			}
+
+			glGenVertexArrays(1, &background.vao);
+			glBindVertexArray(background.vao);
+
+			glGenBuffers(1, &background.vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, background.vbo);
+			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+
+			glEnableVertexAttribArray(locs.vertex);
+			glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+			glEnableVertexAttribArray(locs.normal);
+			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
+
+
+			data.clear();
+			vertices.clear();
+
 
 			// Canvas 
 			a = glm::vec3(-1.f, -1.f, 0.f);
@@ -493,7 +535,6 @@ namespace cgbv
 			normal_output.reset();
 			sc_output.reset();
 			depth_output.reset();
-			depth_normalized_output.reset();
 			glDeleteFramebuffers(1, &framebuffers.image_buffer);
 			glDeleteSamplers(1, &rgb_sampler);
 			glDeleteRenderbuffers(1, &rgb_depth_rbo);
@@ -508,7 +549,6 @@ namespace cgbv
 			normal_output = std::make_unique<textures::Texture>();
 			sc_output = std::make_unique<textures::Texture>();
 			depth_output = std::make_unique<textures::Texture>();
-			depth_normalized_output = std::make_unique<textures::Texture>();
 
 			glBindTexture(GL_TEXTURE_2D, rgb_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -520,9 +560,6 @@ namespace cgbv
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
 			glBindTexture(GL_TEXTURE_2D, depth_output->getTextureID());
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
-
-			glBindTexture(GL_TEXTURE_2D, depth_normalized_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
 			glGenSamplers(1, &rgb_sampler);
@@ -540,7 +577,6 @@ namespace cgbv
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, sc_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, depth_output->getTextureID(), 0);
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, depth_normalized_output->getTextureID(), 0);
 
 			GLenum draw_buffers[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
 			glDrawBuffers(5, draw_buffers);
@@ -654,8 +690,6 @@ namespace cgbv
 		glUniform4fv(locs.spekularMaterial, 1, glm::value_ptr(parameter.spekularMaterial));
 		glUniform1f(locs.shininessMaterial, parameter.shininessMaterial);
 		glUniform1f(locs.brightnessFactor, parameter.brightnessFactor);
-		glUniform1f(locs.lightprojection_z_min, parameter.lightprojection_z_min);
-		glUniform1f(locs.lightprojection_z_max, parameter.lightprojection_z_max);
 
 		normal = glm::transpose(glm::inverse(view * model));
 
@@ -691,15 +725,18 @@ namespace cgbv
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
-		//glLineWidth(5.f);
+		auto blackFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "black");
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &blackFS);
+		glBindVertexArray(background.vao);
+		glDrawArrays(GL_TRIANGLES, 0, background.vertsToDraw);
+
 		//glBindVertexArray(boundingBox.vao);
 		//glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
 
-		glLineWidth(5.f);
-		auto red = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "red");
-		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &red);
-		glBindVertexArray(lightDot.vao);
-		glDrawArrays(GL_LINES, 0, lightDot.vertsToDraw);
+		//auto redFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "red");
+		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &redFS);
+		//glBindVertexArray(lightDot.vao);
+		//glDrawArrays(GL_LINES, 0, lightDot.vertsToDraw);
 
 		if (screenshot[0])
 		{
@@ -727,14 +764,7 @@ namespace cgbv
 
 			std::unique_ptr<GLubyte[]> depth_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
 			glGetTextureImage(depth_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel.get());
-			//glGetTextureImage(depth_output->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, window_width * window_height, depth_pixel.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[0], depth_pixel.get(), window_width, window_height, 0);
-			
-			std::unique_ptr<GLubyte[]> depth_normalized_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(depth_normalized_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_normalized_pixel.get());
-			//glGetTextureImage(depth_output->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, window_width * window_height, depth_pixel.get());
-			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[4], depth_normalized_pixel.get(), window_width, window_height, 0);
-
 
 			screenshot.reset();
 		}

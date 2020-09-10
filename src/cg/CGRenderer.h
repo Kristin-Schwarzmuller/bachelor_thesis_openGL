@@ -63,8 +63,7 @@ namespace cgbv
 
 		unsigned int brightnessFactor;
 
-		unsigned int red;
-
+		unsigned int redFS, blackFS;
 	};
 
 	struct BufferCombo
@@ -80,7 +79,7 @@ namespace cgbv
 		float distanceLight = 80.f;// 200.f;
 		float distanceCamera = 10.f; // 150.f;
 		float observerprojection_near = .1f;
-		float observerprojection_far = 20.f;
+		float observerprojection_far = 50.f;
 		float lightprojection_x_min = -15.f;
 		float lightprojection_x_max = 15.f;
 		float lightprojection_y_min = -15.f;
@@ -169,7 +168,7 @@ namespace cgbv
 
 		ShaderLocations locs;
 
-		BufferCombo basesurface, object, canvas, boundingBox, lightDot;
+		BufferCombo basesurface, object, canvas, boundingBox, lightDot, background;
 
 		glm::mat4 observer_projection, lightsource_projection, model, bias;
 
@@ -193,7 +192,6 @@ namespace cgbv
 		std::unique_ptr<cgbv::textures::Texture> rgb_output;
 		std::unique_ptr<cgbv::textures::Texture> normal_output;
 		std::unique_ptr<cgbv::textures::Texture> depth_output;
-		std::unique_ptr<cgbv::textures::Texture> depth_normalized_output;
 		std::unique_ptr<cgbv::textures::Texture> sc_output;
 		unsigned int rgb_sampler;
 		unsigned int rgb_depth_rbo;
