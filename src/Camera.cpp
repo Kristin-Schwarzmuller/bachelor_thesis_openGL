@@ -72,6 +72,7 @@ void cgbv::Camera::adjustUp()
 		glm::mat3 rotation = glm::rotate(glm::mat4(1.f), upOrientation, axis);
 
 		up = rotation * up;
+		upOrientation = 0.f;
 	}
 }
 
@@ -176,7 +177,6 @@ glm::vec3 cgbv::Camera::getRight()
 {
 	return glm::cross(getForward(), up);
 }
-
 
 glm::vec3 cgbv::Camera::getPosition()
 {

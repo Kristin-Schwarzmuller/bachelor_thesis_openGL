@@ -90,6 +90,9 @@ layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec3 out_normal;
 layout(location = 2) out vec4 out_sc;
 layout(location = 3) out vec4 out_depth;
+layout(location = 4) out vec4 out_lin_depth;
+layout(location = 5) out vec4 out_lin_depth_intense;
+layout(location = 6) out vec4 out_depth_intense;
 // =============================================================================================================
 
 
@@ -196,10 +199,20 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
     out_color.a = 1.f;
     //out_color = vec4(vec3(dot(n.normal, n.lightDir))*0.5 + 0.5, 1.0f);
     out_normal = n.normal * .5f + .5f;
+    // Depth
     out_depth = vec4(gl_FragCoord.z);
-    float intensity = 80.f;
-    float z_ndc = intensity * gl_FragCoord.z - (intensity - 1.f);
-    out_depth = vec4(z_ndc);
+
+    float z_ndc = gl_FragCoord.z * 2.0 - 1.0;
+    float near = 0.1f;
+    float far = 100.f;
+    float linearDepth = (2.0 * near * far) / (far + near - z_ndc * (far - near));
+    out_lin_depth = vec4(linearDepth);
+
+    float intensity = 50.f;
+    z_ndc = intensity * gl_FragCoord.z - (intensity - 1.f);
+    linearDepth = (2.0 * near * far) / (far + near - z_ndc * (far - near));
+    out_depth_intense = vec4(z_ndc);
+    out_lin_depth_intense = vec4(linearDepth);
     //out_color = out_depth;
 
     if (shadowsample <= .8f)
@@ -246,12 +259,20 @@ layout(index = 6) subroutine(FragmentProgram) void black()
 {
 
     out_color = vec4(0.f, 0.f, 0.f, 0.f);
-    float intensity = 80.f;
-    float z_ndc = intensity * gl_FragCoord.z - (intensity - 1.f);
+    // Depth
+    out_depth = vec4(gl_FragCoord.z);
 
-    if (z_ndc > 0.95f)
-        z_ndc = 1.f;
-    out_depth = vec4(z_ndc);
+    float z_ndc = gl_FragCoord.z * 2.0 - 1.0;
+    float near = 0.1f;
+    float far = 100.f;
+    float linearDepth = (2.0 * near * far) / (far + near - z_ndc * (far - near));
+    out_lin_depth = vec4(linearDepth);
+
+    float intensity = 50.f;
+    z_ndc = intensity * gl_FragCoord.z - (intensity - 1.f);
+    linearDepth = (2.0 * near * far) / (far + near - z_ndc * (far - near));
+    out_depth_intense = vec4(z_ndc);
+    out_lin_depth_intense = vec4(linearDepth);
     //out_color = out_depth;
 
 }

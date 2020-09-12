@@ -192,6 +192,9 @@ namespace cgbv
 		std::unique_ptr<cgbv::textures::Texture> rgb_output;
 		std::unique_ptr<cgbv::textures::Texture> normal_output;
 		std::unique_ptr<cgbv::textures::Texture> depth_output;
+		std::unique_ptr<cgbv::textures::Texture> depth_lin_output;
+		std::unique_ptr<cgbv::textures::Texture> depth_lin_ints_output;
+		std::unique_ptr<cgbv::textures::Texture> depth_ints_output;
 		std::unique_ptr<cgbv::textures::Texture> sc_output;
 		unsigned int rgb_sampler;
 		unsigned int rgb_depth_rbo;

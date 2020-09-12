@@ -68,9 +68,9 @@ namespace cgbv
 
 		// Write the values into the vectors to iterate over it later 
 		setupAzimuthCamera();
-		elevationLight = setupVector(0, 90, stepSizeElevationLight, true, false);
-		elevationCamera = setupVector(0, 90, stepSizeElevationCamera, true, true); // here no 90 degrees because otherwise the iamge flipes upside down 
-		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight, false, false);
+		elevationLight = setupVector(0, 90, stepSizeElevationLight, true);
+		elevationCamera = setupVector(0, 90, stepSizeElevationCamera, true);
+		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight, false);
 
 		// Initialize the iterators  
 		elevationLightPtr = elevationLight.begin();
@@ -127,8 +127,6 @@ namespace cgbv
 
 	bool Autopilot::setupAzimuthCamera()
 	{
-		//todo: nur ein vector pro maxturn value 
-		//define the different turning ranges for the different models 
 		std::vector<float> tmp;
 		for (auto maxturn : modelMaxTurn)
 		{
@@ -141,7 +139,7 @@ namespace cgbv
 		return true;
 	}
 
-	std::vector<float> Autopilot::setupVector(float from, float to, float step_size, bool firstNotZero, bool lastnotninety)
+	std::vector<float> Autopilot::setupVector(float from, float to, float step_size, bool firstNotZero)
 	{
 		std::vector<float> vec;
 		for (float i = from; i <= to; i += step_size) {
@@ -151,16 +149,16 @@ namespace cgbv
 		{
 			vec.at(0) = 1;
 		}
-		if (lastnotninety)
-		{
-			vec.at(vec.size() - 1) = 89.9;
-		}
 		return vec;
 	}
 
 
 	bool Autopilot::tick()
 	{
+		if (finished)
+		{
+			return false;
+		}
 		// first try to move the light 
 		if (tickLight())
 		{
@@ -183,6 +181,7 @@ namespace cgbv
 			return true;
 		}
 		// everything is done
+		finished = true;
 		csvFile.close();
 		return false;
 	}
@@ -235,7 +234,9 @@ namespace cgbv
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgb\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normal\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" + imageName);
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_normalized\\" + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin\\" + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin_intense\\" + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_intense\\" + imageName);
 		
 		currentImagePaths.clear(); 
 		currentImagePaths.insert(currentImagePaths.begin(), dateFolder + "\\" + currentImageNames[0]);
@@ -243,6 +244,8 @@ namespace cgbv
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[2]);
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[3]);
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[4]);
+		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[5]);
+		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[6]);
 	}					
 
 	bool Autopilot::writeDataCSV()
@@ -253,6 +256,8 @@ namespace cgbv
 		csvFile << currentImageNames[2] << u;
 		csvFile << currentImageNames[3] << u;
 		csvFile << currentImageNames[4] << u;
+		csvFile << currentImageNames[5] << u;
+		csvFile << currentImageNames[6] << u;
 
 		csvFile << *azimuthLightPtr << u;
 		csvFile << *elevationLightPtr << u;
@@ -314,8 +319,9 @@ namespace cgbv
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\rgb").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\normal").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\shadow_candidate").c_str());
-			//std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_normalized").c_str());
-
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_lin").c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_lin_intense").c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_intense").c_str());
 		}
 
 		return true;

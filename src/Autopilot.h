@@ -58,6 +58,8 @@ namespace cgbv
 		glm::vec3 lightPos;
 		glm::vec3 camPos;
 
+		bool finished = false;
+
 		// Used to write the CSV 
 	   // create an ofstream for the file output (see the link on streams for
 	   // more info
@@ -66,12 +68,12 @@ namespace cgbv
 		std::string csvName = "labels_ks.csv";
 		std::string u = ";";
 		std::string n = "\n";
-		const std::vector<std::string> colname{ "Filename Depth", "Filename RGB", "Filename Normals", "Filename Shadow Candidate", "Filename Depth Normalized", "Azimuth", "Elevation", "Light_x", "Light_y", "Light_z", "C_A", "C_E", "Cam_x", "Cam_y", "Cam_z" };
+		const std::vector<std::string> colname{ "Filename Depth", "Filename RGB", "Filename Normals", "Filename Shadow Candidate", "Filename Depth Linear", "Filename Depth Linear Intense", "Filename Depth Intense", "Azimuth", "Elevation", "Light_x", "Light_y", "Light_z", "C_A", "C_E", "Cam_x", "Cam_y", "Cam_z" };
 		std::ofstream csvFile;
 		// ========================================================================================================================
 		// set up the vectors to iterate over them 
 		bool setupAzimuthCamera();
-		std::vector<float> setupVector(float from, float to, float step_size, bool first, bool lastnotninety);
+		std::vector<float> setupVector(float from, float to, float step_size, bool first);
 
 		// Tick to the next position
 		bool tick();

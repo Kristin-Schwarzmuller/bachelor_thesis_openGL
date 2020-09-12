@@ -535,6 +535,9 @@ namespace cgbv
 			normal_output.reset();
 			sc_output.reset();
 			depth_output.reset();
+			depth_lin_output.reset();
+			depth_lin_ints_output.reset();
+			depth_ints_output.reset();
 			glDeleteFramebuffers(1, &framebuffers.image_buffer);
 			glDeleteSamplers(1, &rgb_sampler);
 			glDeleteRenderbuffers(1, &rgb_depth_rbo);
@@ -549,6 +552,9 @@ namespace cgbv
 			normal_output = std::make_unique<textures::Texture>();
 			sc_output = std::make_unique<textures::Texture>();
 			depth_output = std::make_unique<textures::Texture>();
+			depth_lin_output = std::make_unique<textures::Texture>();
+			depth_lin_ints_output = std::make_unique<textures::Texture>();
+			depth_ints_output = std::make_unique<textures::Texture>();
 
 			glBindTexture(GL_TEXTURE_2D, rgb_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -560,6 +566,15 @@ namespace cgbv
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
 			glBindTexture(GL_TEXTURE_2D, depth_output->getTextureID());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
+
+			glBindTexture(GL_TEXTURE_2D, depth_lin_output->getTextureID());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
+
+			glBindTexture(GL_TEXTURE_2D, depth_lin_ints_output->getTextureID());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
+
+			glBindTexture(GL_TEXTURE_2D, depth_ints_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
 			glGenSamplers(1, &rgb_sampler);
@@ -577,9 +592,12 @@ namespace cgbv
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, sc_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, depth_output->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, depth_lin_output->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, depth_lin_ints_output->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT6, depth_ints_output->getTextureID(), 0);
 
-			GLenum draw_buffers[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
-			glDrawBuffers(5, draw_buffers);
+			GLenum draw_buffers[7] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6 };
+			glDrawBuffers(7, draw_buffers);
 
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			{
@@ -766,6 +784,19 @@ namespace cgbv
 			glGetTextureImage(depth_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[0], depth_pixel.get(), window_width, window_height, 0);
 
+			std::unique_ptr<GLubyte[]> depth_pixel_lin = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(depth_lin_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_lin.get());
+			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[4], depth_pixel_lin.get(), window_width, window_height, 0);
+
+			std::unique_ptr<GLubyte[]> depth_pixel_lin_ints = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(depth_lin_ints_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_lin_ints.get());
+			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[5], depth_pixel_lin_ints.get(), window_width, window_height, 0);
+
+			std::unique_ptr<GLubyte[]> depth_pixel_ints = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(depth_ints_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_ints.get());
+			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[6], depth_pixel_ints.get(), window_width, window_height, 0);
+
+
 			screenshot.reset();
 		}
 
@@ -818,6 +849,11 @@ namespace cgbv
 			}	
 		}
 		observer_camera.moveTo(parameter.camPos); 
+		observer_camera.setTarget(glm::vec3(.0f, .0f, .0f));
+		if (parameter.camPos.y == parameter.distanceCamera) // prevent the cam to flip upside down when standing in the zenith 
+		{
+			observer_camera.setUpOrientation(glm::radians(180.f));
+		}
 		lightsource_camera.moveTo(parameter.lightPos);
 		lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
 		//drawLightDot(parameter.lightPos);
