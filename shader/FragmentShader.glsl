@@ -93,6 +93,7 @@ layout(location = 3) out vec4 out_depth;
 layout(location = 4) out vec4 out_lin_depth;
 layout(location = 5) out vec4 out_lin_depth_intense;
 layout(location = 6) out vec4 out_depth_intense;
+layout(location = 7) out vec4 out_rgbd;
 // =============================================================================================================
 
 
@@ -213,7 +214,9 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
     linearDepth = (2.0 * near * far) / (far + near - z_ndc * (far - near));
     out_depth_intense = vec4(z_ndc);
     out_lin_depth_intense = vec4(linearDepth);
-    //out_color = out_depth;
+    //out_color = out_depth_intense;
+    out_rgbd = out_color;
+    out_rgbd.w = out_depth_intense.x;
 
     if (shadowsample <= .8f)
         out_sc = vec4(1.f);

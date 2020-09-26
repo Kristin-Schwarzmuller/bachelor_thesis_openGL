@@ -96,6 +96,7 @@ namespace cgbv
 		{
 		public:
 			static void Store(std::string path, GLubyte *data, int width, int height, int imgDepth);
+			static void StoreRGBA(std::string path, GLubyte *data, int width, int height, int imgDepth);
 			static void StoreGreyscale(std::string path, GLubyte *data, int width, int height, int imgDepth);
 		};
 		//	===================================================================================================================================================================================		#####

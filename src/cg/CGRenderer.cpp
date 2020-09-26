@@ -128,7 +128,6 @@ namespace cgbv
 		glDeleteVertexArrays(1, &lightDot.vao);
 		glDeleteBuffers(1, &lightDot.vbo);
 
-
 		glDeleteVertexArrays(1, &background.vao);
 		glDeleteBuffers(1, &background.vbo);
 
@@ -347,29 +346,17 @@ namespace cgbv
 
 			// Background
 			float  q = 49.f;
-			glm::vec3 a0(2*q, -1.f, q);
 			glm::vec3 b0(2 * q, -1.f, -q);
 			glm::vec3 c0(-2 * q, -1.f, -q);
-			glm::vec3 d0(-2 * q, -1.f, q);
 
-			glm::vec3 a1(2*q, q, q);
 			glm::vec3 b1(2*q, q, -q);
 			glm::vec3 c1(-2*q,q, -q);
-			glm::vec3 d1(-2*q,q, q);
 
 			 n = glm::vec3(0.f, 0.f, 1.f);
-
-			//vertices.push_back(a0); vertices.push_back(a1); vertices.push_back(b0);
-			//vertices.push_back(b0); vertices.push_back(b1); vertices.push_back(a1);
 
 			vertices.push_back(b0); vertices.push_back(b1); vertices.push_back(c0);
 			vertices.push_back(c0); vertices.push_back(c1); vertices.push_back(b1);
 
-			//vertices.push_back(c0); vertices.push_back(c1); vertices.push_back(d0);
-			//vertices.push_back(d0); vertices.push_back(d1); vertices.push_back(c1);
-
-			//vertices.push_back(d0); vertices.push_back(d1); vertices.push_back(a0);
-			//vertices.push_back(a0); vertices.push_back(a1); vertices.push_back(d1);
 
 			for (auto v : vertices)
 			{
@@ -538,6 +525,7 @@ namespace cgbv
 			depth_lin_output.reset();
 			depth_lin_ints_output.reset();
 			depth_ints_output.reset();
+			rgbd_output.reset();
 			glDeleteFramebuffers(1, &framebuffers.image_buffer);
 			glDeleteSamplers(1, &rgb_sampler);
 			glDeleteRenderbuffers(1, &rgb_depth_rbo);
@@ -555,6 +543,7 @@ namespace cgbv
 			depth_lin_output = std::make_unique<textures::Texture>();
 			depth_lin_ints_output = std::make_unique<textures::Texture>();
 			depth_ints_output = std::make_unique<textures::Texture>();
+			rgbd_output = std::make_unique<textures::Texture>();
 
 			glBindTexture(GL_TEXTURE_2D, rgb_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -577,6 +566,9 @@ namespace cgbv
 			glBindTexture(GL_TEXTURE_2D, depth_ints_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
+			glBindTexture(GL_TEXTURE_2D, rgbd_output->getTextureID());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, window_width, window_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
 			glGenSamplers(1, &rgb_sampler);
 			glSamplerParameteri(rgb_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glSamplerParameteri(rgb_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -595,9 +587,10 @@ namespace cgbv
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, depth_lin_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, depth_lin_ints_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT6, depth_ints_output->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT7, rgbd_output->getTextureID(), 0);
 
-			GLenum draw_buffers[7] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6 };
-			glDrawBuffers(7, draw_buffers);
+			GLenum draw_buffers[8] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7 };
+			glDrawBuffers(8, draw_buffers);
 
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			{
@@ -682,18 +675,19 @@ namespace cgbv
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glm::mat4 view;
+		glm::mat4 projection;
 
 		switch (viewpoint)
 		{
 		case ObserverSelection::Viewer:
-			view = observer_camera.getViewMatrix();
+			view = observer_camera.getViewMatrix();			
+			projection = observer_projection;
 			break;
 		case ObserverSelection::Light:
 			view = lightsource_camera.getViewMatrix();
+			projection = lightsource_projection;
 			break;
 		}
-
-
 
 		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation));
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model; 
@@ -711,16 +705,7 @@ namespace cgbv
 
 		normal = glm::transpose(glm::inverse(view * model));
 
-		switch (viewpoint)
-		{
-		case ObserverSelection::Viewer:
-			glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(observer_projection * view * model));
-			break;
-		case ObserverSelection::Light:
-			glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(lightsource_projection * view * model));
-			break;
-		}
-
+		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(projection * view * model));
 		glUniformMatrix4fv(locs.modelview, 1, GL_FALSE, glm::value_ptr(view * model));
 		glUniformMatrix3fv(locs.normalmatrix, 1, GL_FALSE, glm::value_ptr(normal));
 
@@ -743,10 +728,18 @@ namespace cgbv
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
+
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation));
+		normal = glm::transpose(glm::inverse(view * model));
+		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(projection * view * model));
+		glUniformMatrix4fv(locs.modelview, 1, GL_FALSE, glm::value_ptr(view * model));
+		glUniformMatrix3fv(locs.normalmatrix, 1, GL_FALSE, glm::value_ptr(normal));
+
 		auto blackFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "black");
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &blackFS);
 		glBindVertexArray(background.vao);
 		glDrawArrays(GL_TRIANGLES, 0, background.vertsToDraw);
+
 
 		//glBindVertexArray(boundingBox.vao);
 		//glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
@@ -796,6 +789,9 @@ namespace cgbv
 			glGetTextureImage(depth_ints_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_ints.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[6], depth_pixel_ints.get(), window_width, window_height, 0);
 
+			std::unique_ptr<GLubyte[]> rgbd_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 4);
+			glGetTextureImage(rgbd_output->getTextureID(), 0, GL_RGBA, GL_UNSIGNED_BYTE, window_width * window_height * 4, rgbd_pixel.get());
+			cgbv::textures::Texture2DStorage::StoreRGBA(parameter.screenShotNames[7], rgbd_pixel.get(), window_width, window_height, 0);
 
 			screenshot.reset();
 		}
@@ -858,7 +854,7 @@ namespace cgbv
 		lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
 		//drawLightDot(parameter.lightPos);
 	}
-
+	
 	void CGRenderer::loadFBX(int currentMod)
 	{
 		cgbv::fbxmodel::FBXModel fbx(modelfbx.modelPaths[currentMod]);

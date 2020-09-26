@@ -145,6 +145,15 @@ namespace cgbv
 
 			FreeImage_Unload(image);
 		}
+		void Texture2DStorage::StoreRGBA(std::string path, GLubyte *data, int width, int height, int imgDepth)
+		{
+			auto datatype = FreeImage_GetFIFFromFilename(path.c_str());
+			FIBITMAP *image = FreeImage_ConvertFromRawBits(data, width, height, 4 * width, 32, 0x0000FF, 0xFF0000, 0x00FF00, false);
+			if (!FreeImage_Save(datatype, image, path.c_str()))
+				std::cout << "Writing Image " << path << " failed" << std::endl;
+
+			FreeImage_Unload(image);
+		}
 
         void Texture2DStorage::StoreGreyscale(std::string path, GLubyte* data, int width, int height, int imgDepth)
         {

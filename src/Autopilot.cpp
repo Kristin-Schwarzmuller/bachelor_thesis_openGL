@@ -233,10 +233,11 @@ namespace cgbv
 		currentImageNames.insert(currentImageNames.begin(), modelNames.at(currentModel) + "\\" + "depth\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgb\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normal\\" + imageName);
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" + imageName);
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin\\" + imageName);
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin_intense\\" + imageName);
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_intense\\" + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" +  imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin\\"  + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin_intense\\" +  imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_intense\\" +  imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgbd\\" + imageName);
 		
 		currentImagePaths.clear(); 
 		currentImagePaths.insert(currentImagePaths.begin(), dateFolder + "\\" + currentImageNames[0]);
@@ -246,6 +247,7 @@ namespace cgbv
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[4]);
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[5]);
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[6]);
+		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[7]);
 	}					
 
 	bool Autopilot::writeDataCSV()
@@ -258,6 +260,7 @@ namespace cgbv
 		csvFile << currentImageNames[4] << u;
 		csvFile << currentImageNames[5] << u;
 		csvFile << currentImageNames[6] << u;
+		csvFile << currentImageNames[7] << u;
 
 		csvFile << *azimuthLightPtr << u;
 		csvFile << *elevationLightPtr << u;
@@ -322,6 +325,7 @@ namespace cgbv
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_lin").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_lin_intense").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_intense").c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\rgbd").c_str());
 		}
 
 		return true;
