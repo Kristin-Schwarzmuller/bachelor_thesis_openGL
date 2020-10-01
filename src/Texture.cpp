@@ -148,7 +148,8 @@ namespace cgbv
 		void Texture2DStorage::StoreRGBA(std::string path, GLubyte *data, int width, int height, int imgDepth)
 		{
 			auto datatype = FreeImage_GetFIFFromFilename(path.c_str());
-			FIBITMAP *image = FreeImage_ConvertFromRawBits(data, width, height, 4 * width, 32, 0x0000FF, 0xFF0000, 0x00FF00, false);
+			//FIBITMAP *image = FreeImage_ConvertFromRawBits(data, width, height, 4 * width, 32, 0x0000FF, 0xFF0000, 0x00FF00, false);
+			FIBITMAP *image = FreeImage_ConvertFromRawBits(data, width, height, 4 * width, 32, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, false);
 			if (!FreeImage_Save(datatype, image, path.c_str()))
 				std::cout << "Writing Image " << path << " failed" << std::endl;
 

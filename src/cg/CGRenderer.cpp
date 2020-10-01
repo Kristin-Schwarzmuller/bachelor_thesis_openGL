@@ -222,9 +222,12 @@ namespace cgbv
 			return false;
 
 		// GL States
-		glClearColor(0.f, 0.f, 0.f, 1.f);
+		glClearColor(0.f, 0.f, 0.f, 0.f);
 
-		glEnable(GL_ALPHA_TEST);
+		//glAlphaFunc();
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glEnable(GL_ALPHA_TEST);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
 		glDisable(GL_CULL_FACE);
@@ -345,9 +348,10 @@ namespace cgbv
 			vertices.clear();
 
 			// Background
-			float  q = 49.f;
+			float  q = 49.999f;
 			glm::vec3 b0(2 * q, -1.f, -q);
-			glm::vec3 c0(-2 * q, -1.f, -q);
+			glm::vec3 c0(-2 * q, -1.f, -q);	
+
 
 			glm::vec3 b1(2*q, q, -q);
 			glm::vec3 c1(-2*q,q, -q);
@@ -712,8 +716,8 @@ namespace cgbv
 		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
 		glUniformMatrix4fv(locs.biasedModelViewProjection, 1, GL_FALSE, glm::value_ptr(bias * lightsource_projection * shadow_view * model));
 
-		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(parameter.lightPos));
-		glUniform3fv(locs.lightPos, 1, glm::value_ptr(view * parameter.lightPos));
+		glUniform3fv(locs.lightPos, 1, glm::value_ptr(parameter.lightPos));
+		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(view * parameter.lightPos));
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.lightingVS);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.lightPhong);
 
@@ -757,40 +761,40 @@ namespace cgbv
 			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);*/
 
 			std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(rgb_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
+			glGetTextureImage(rgb_output->getTextureID(), 0, GL_BGR, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[1], rgb_pixel.get(), window_width, window_height, 0);
 			//cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
 
 
 			std::unique_ptr<GLubyte[]> normal_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(normal_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, normal_pixel.get());
+			glGetTextureImage(normal_output->getTextureID(), 0, GL_BGR, GL_UNSIGNED_BYTE, window_width * window_height * 3, normal_pixel.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[2], normal_pixel.get(), window_width, window_height, 0);
 			//cgbv::textures::Texture2DStorage::Store("../normal.png", normal_pixel.get(), window_width, window_height, 0);
 
 
 			std::unique_ptr<GLubyte[]> sc_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(sc_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, sc_pixel.get());
+			glGetTextureImage(sc_output->getTextureID(), 0, GL_BGR, GL_UNSIGNED_BYTE, window_width * window_height * 3, sc_pixel.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[3], sc_pixel.get(), window_width, window_height, 0);
 			//cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
 
 			std::unique_ptr<GLubyte[]> depth_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(depth_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel.get());
+			glGetTextureImage(depth_output->getTextureID(), 0, GL_BGR, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[0], depth_pixel.get(), window_width, window_height, 0);
 
 			std::unique_ptr<GLubyte[]> depth_pixel_lin = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(depth_lin_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_lin.get());
+			glGetTextureImage(depth_lin_output->getTextureID(), 0, GL_BGR, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_lin.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[4], depth_pixel_lin.get(), window_width, window_height, 0);
 
 			std::unique_ptr<GLubyte[]> depth_pixel_lin_ints = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(depth_lin_ints_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_lin_ints.get());
+			glGetTextureImage(depth_lin_ints_output->getTextureID(), 0, GL_BGR, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_lin_ints.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[5], depth_pixel_lin_ints.get(), window_width, window_height, 0);
 
 			std::unique_ptr<GLubyte[]> depth_pixel_ints = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(depth_ints_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_ints.get());
+			glGetTextureImage(depth_ints_output->getTextureID(), 0, GL_BGR, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_ints.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[6], depth_pixel_ints.get(), window_width, window_height, 0);
 
 			std::unique_ptr<GLubyte[]> rgbd_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 4);
-			glGetTextureImage(rgbd_output->getTextureID(), 0, GL_RGBA, GL_UNSIGNED_BYTE, window_width * window_height * 4, rgbd_pixel.get());
+			glGetTextureImage(rgbd_output->getTextureID(), 0, GL_BGRA, GL_UNSIGNED_BYTE, window_width * window_height * 4, rgbd_pixel.get());
 			cgbv::textures::Texture2DStorage::StoreRGBA(parameter.screenShotNames[7], rgbd_pixel.get(), window_width, window_height, 0);
 
 			screenshot.reset();

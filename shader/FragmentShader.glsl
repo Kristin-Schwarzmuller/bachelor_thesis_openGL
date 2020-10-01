@@ -98,9 +98,13 @@ layout(location = 7) out vec4 out_rgbd;
 
 
 
-
 // Methods
 // =============================================================================================================
+vec4 getDepth()
+{
+    return vec4(gl_FragCoord.z);
+}
+
 void main()
 {
 	fragmentprogram();
@@ -196,12 +200,16 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     // --------- Result --------- 
 
-    out_color = (shadowsample * (specular + diffus) + ambient);
+    out_color =(shadowsample * (specular + diffus) + ambient);
     out_color.a = 1.f;
     //out_color = vec4(vec3(dot(n.normal, n.lightDir))*0.5 + 0.5, 1.0f);
     out_normal = n.normal * .5f + .5f;
     // Depth
-    out_depth = vec4(gl_FragCoord.z);
+    out_depth = getDepth();
+    if (out_depth.x > 1)
+        out_depth = vec4(1, 0, 0, 0);
+    else
+        out_depth = vec4(0, 1, 0, 0);
 
     float z_ndc = gl_FragCoord.z * 2.0 - 1.0;
     float near = 0.1f;
@@ -261,13 +269,14 @@ layout(index = 5) subroutine(FragmentProgram) void red()
 layout(index = 6) subroutine(FragmentProgram) void black()
 {
 
-    out_color = vec4(0.f, 0.f, 0.f, 0.f);
+    out_color = vec4(0.f, 0.f, 0.f, 1.f);
     // Depth
-    out_depth = vec4(gl_FragCoord.z);
+    
+    out_depth = getDepth();
 
     float z_ndc = gl_FragCoord.z * 2.0 - 1.0;
     float near = 0.1f;
-    float far = 100.f;
+    float far = 50.f;
     float linearDepth = (2.0 * near * far) / (far + near - z_ndc * (far - near));
     out_lin_depth = vec4(linearDepth);
 
@@ -277,6 +286,8 @@ layout(index = 6) subroutine(FragmentProgram) void black()
     out_depth_intense = vec4(z_ndc);
     out_lin_depth_intense = vec4(linearDepth);
     //out_color = out_depth;
+    out_rgbd = out_color;
+    out_rgbd.w = out_depth_intense.x;
 
 }
 // =============================================================================================================

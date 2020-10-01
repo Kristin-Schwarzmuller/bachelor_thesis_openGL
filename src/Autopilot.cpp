@@ -121,7 +121,6 @@ namespace cgbv
 			writeDataCSV();
 			return true;
 		}
-		std::cout << " ====== Yeah! All images have been created! =====" << std::endl;
 		return false; 
 	}
 
@@ -181,6 +180,7 @@ namespace cgbv
 			return true;
 		}
 		// everything is done
+		std::cout << " ====== Yeah! All images have been created! =====" << std::endl;
 		finished = true;
 		csvFile.close();
 		return false;
