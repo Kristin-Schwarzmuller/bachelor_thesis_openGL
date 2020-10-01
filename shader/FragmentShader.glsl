@@ -21,6 +21,9 @@ struct Light
 	vec4 diffus;
 	vec4 specular;
     float brightnessFactor;
+
+    float near_cp;
+    float far_cp;
 };
 
 struct Material 
@@ -91,8 +94,8 @@ layout(location = 1) out vec3 out_normal;
 layout(location = 2) out vec4 out_sc;
 layout(location = 3) out vec4 out_depth;
 layout(location = 4) out vec4 out_lin_depth;
-layout(location = 5) out vec4 out_lin_depth_intense;
-layout(location = 6) out vec4 out_depth_intense;
+layout(location = 5) out vec4 out_lin_depth_contrast;
+layout(location = 6) out vec4 out_depth_contrast;
 layout(location = 7) out vec4 out_rgbd;
 // =============================================================================================================
 
@@ -100,10 +103,29 @@ layout(location = 7) out vec4 out_rgbd;
 
 // Methods
 // =============================================================================================================
+float getZ_NDC(float contrast)
+{
+    return contrast * gl_FragCoord.z - (contrast - 1.f);
+}
+
 vec4 getDepth()
 {
     return vec4(gl_FragCoord.z);
 }
+
+vec4 getDepthContrast(float contrast)
+{
+    return vec4(getZ_NDC(contrast));
+}
+
+vec4 getLinDepth(float contrast)
+{
+    float z_ndc = getZ_NDC(contrast);
+    float linearDepth = (2.0 * light.near_cp * light.far_cp) / (light.far_cp + light.near_cp - z_ndc * (light.far_cp - light.near_cp));
+    return vec4(linearDepth);
+}
+
+
 
 void main()
 {
@@ -116,23 +138,23 @@ void main()
 
 // Subroutine Implementation
 // =============================================================================================================
-layout (index = 0) subroutine (FragmentProgram) void lambert()
-{
-    Normalized n;
-    n.viewDir = normalize(Input.viewDir);
-    n.lightDir = normalize(Input.lightDir);
-    n.normal = normalize(Input.normal);
-
-    float intensity = dot(n.lightDir, n.normal);
-
-
-    vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
-    float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), .35f, 1.f);
-
-
-    out_color = shadowsample * intensity * vec4(.7f);
-    out_color.w = 1.f;
-}
+//layout (index = 0) subroutine (FragmentProgram) void lambert()
+//{
+//    Normalized n;
+//    n.viewDir = normalize(Input.viewDir);
+//    n.lightDir = normalize(Input.lightDir);
+//    n.normal = normalize(Input.normal);
+//
+//    float intensity = dot(n.lightDir, n.normal);
+//
+//
+//    vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
+//    float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), .35f, 1.f);
+//
+//
+//    out_color = shadowsample * intensity * vec4(.7f);
+//    out_color.w = 1.f;
+//}
 
 
 layout (index = 1) subroutine (FragmentProgram) void depthmap()
@@ -140,31 +162,31 @@ layout (index = 1) subroutine (FragmentProgram) void depthmap()
     out_color = vec4(gl_FragCoord.z); 
 }
 
-
-layout (index = 2) subroutine (FragmentProgram) void phong()
-{
-  
-    Normalized n;
-    n.viewDir = normalize(Input.viewDir);
-    n.lightDir = normalize(Input.lightDir);
-    n.normal = normalize(Input.normal);
-
-    // Ambient light
-    vec4 ambient = light.ambient * material.ambient; 
-
-    // Diffuse light
-	float d = dot(n.normal, n.lightDir);
-	vec4 diffus = d * light.diffus * material.diffus;
-
-    // Specular
-	vec4 specular = vec4(0.f, 0.f, 0.f, 1.f);
-	if (d > 0.f) {
-		vec3 r = reflect(-n.lightDir, n.normal);
-		specular = pow(max(dot(normalize (r), n.normal), 0), material.shininess) * light.specular * material.spekular;
-	}
-	
-	out_color = ambient  + specular + diffus;
-}
+//
+//layout (index = 2) subroutine (FragmentProgram) void phong()
+//{
+//  
+//    Normalized n;
+//    n.viewDir = normalize(Input.viewDir);
+//    n.lightDir = normalize(Input.lightDir);
+//    n.normal = normalize(Input.normal);
+//
+//    // Ambient light
+//    vec4 ambient = light.ambient * material.ambient; 
+//
+//    // Diffuse light
+//	float d = dot(n.normal, n.lightDir);
+//	vec4 diffus = d * light.diffus * material.diffus;
+//
+//    // Specular
+//	vec4 specular = vec4(0.f, 0.f, 0.f, 1.f);
+//	if (d > 0.f) {
+//		vec3 r = reflect(-n.lightDir, n.normal);
+//		specular = pow(max(dot(normalize (r), n.normal), 0), material.shininess) * light.specular * material.spekular;
+//	}
+//	
+//	out_color = ambient  + specular + diffus;
+//}
 
 
 layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
@@ -202,30 +224,21 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     out_color =(shadowsample * (specular + diffus) + ambient);
     out_color.a = 1.f;
-    //out_color = vec4(vec3(dot(n.normal, n.lightDir))*0.5 + 0.5, 1.0f);
+
     out_normal = n.normal * .5f + .5f;
     // Depth
     out_depth = getDepth();
-    if (out_depth.x > 1)
-        out_depth = vec4(1, 0, 0, 0);
-    else
-        out_depth = vec4(0, 1, 0, 0);
 
-    float z_ndc = gl_FragCoord.z * 2.0 - 1.0;
-    float near = 0.1f;
-    float far = 100.f;
-    float linearDepth = (2.0 * near * far) / (far + near - z_ndc * (far - near));
-    out_lin_depth = vec4(linearDepth);
+    out_lin_depth = getLinDepth(2.0);
 
-    float intensity = 50.f;
-    z_ndc = intensity * gl_FragCoord.z - (intensity - 1.f);
-    linearDepth = (2.0 * near * far) / (far + near - z_ndc * (far - near));
-    out_depth_intense = vec4(z_ndc);
-    out_lin_depth_intense = vec4(linearDepth);
-    //out_color = out_depth_intense;
+    out_depth_contrast = getDepthContrast(light.far_cp);
+    out_lin_depth_contrast = getLinDepth(light.far_cp);
+
+    // RGBD
     out_rgbd = out_color;
-    out_rgbd.w = out_depth_intense.x;
+    out_rgbd.w = out_depth_contrast.x;
 
+    // Shadow Candidate
     if (shadowsample <= .8f)
         out_sc = vec4(1.f);
     else
@@ -271,23 +284,16 @@ layout(index = 6) subroutine(FragmentProgram) void black()
 
     out_color = vec4(0.f, 0.f, 0.f, 1.f);
     // Depth
-    
     out_depth = getDepth();
 
-    float z_ndc = gl_FragCoord.z * 2.0 - 1.0;
-    float near = 0.1f;
-    float far = 50.f;
-    float linearDepth = (2.0 * near * far) / (far + near - z_ndc * (far - near));
-    out_lin_depth = vec4(linearDepth);
+    out_lin_depth = getLinDepth(2.0);
 
-    float intensity = 50.f;
-    z_ndc = intensity * gl_FragCoord.z - (intensity - 1.f);
-    linearDepth = (2.0 * near * far) / (far + near - z_ndc * (far - near));
-    out_depth_intense = vec4(z_ndc);
-    out_lin_depth_intense = vec4(linearDepth);
-    //out_color = out_depth;
+    out_depth_contrast = getDepthContrast(light.far_cp);
+    out_lin_depth_contrast = getLinDepth(light.far_cp); 
+
+    // RGBD
     out_rgbd = out_color;
-    out_rgbd.w = out_depth_intense.x;
+    out_rgbd.w = out_depth_contrast.x;
 
 }
 // =============================================================================================================

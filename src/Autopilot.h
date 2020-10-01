@@ -23,10 +23,14 @@ namespace cgbv
 		std::vector<std::string> currentImagePaths;
 		std::string imageName;
 
-		float stepSizeElevationLight = 5;
-		float stepSizeElevationCamera = 30;
-		float stepSizeAzimuthLight = 5;
-		float stepSizeAzimuthCamera = 45;
+		float stepSizeElevationLight = 5.f;
+		float startElevationLight = 1.f;
+
+		float stepSizeElevationCamera = 30.f;
+		float startElevationCamera = 5.f;
+
+		float stepSizeAzimuthLight = 5.f;
+		float stepSizeAzimuthCamera = 45.f;
 		// Light Elevation
 		std::vector<float> elevationLight;
 		std::vector<float>::const_iterator elevationLightPtr;
@@ -66,14 +70,14 @@ namespace cgbv
 		std::string newFolderLocation = "..\\..\\ImageData\\";
 		std::string dateFolder;
 		std::string csvName = "labels_ks.csv";
-		std::string u = ";";
+		std::string u = ",";
 		std::string n = "\n";
 		const std::vector<std::string> colname{ "Filename Depth", "Filename RGB", "Filename Normals", "Filename Shadow Candidate", "Filename Depth Linear", "Filename Depth Linear Intense", "Filename Depth Intense", "Filename RGBD", "Azimuth", "Elevation", "Light_x", "Light_y", "Light_z", "C_A", "C_E", "Cam_x", "Cam_y", "Cam_z" };
 		std::ofstream csvFile;
 		// ========================================================================================================================
 		// set up the vectors to iterate over them 
 		bool setupAzimuthCamera();
-		std::vector<float> setupVector(float from, float to, float step_size, bool first);
+		std::vector<float> setupVector(float from, float to, float step_size, float start);
 
 		// Tick to the next position
 		bool tick();

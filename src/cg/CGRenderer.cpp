@@ -301,6 +301,8 @@ namespace cgbv
 			locs.spekularMaterial = shader->getUniformLocation("material.spekular");
 			locs.shininessMaterial = shader->getUniformLocation("material.shininess");
 			locs.brightnessFactor = shader->getUniformLocation("light.brightnessFactor");
+			locs.near_cp = shader->getUniformLocation("light.near_cp");
+			locs.far_cp = shader->getUniformLocation("light.far_cp");
 
 		}
 
@@ -706,6 +708,8 @@ namespace cgbv
 		glUniform4fv(locs.spekularMaterial, 1, glm::value_ptr(parameter.spekularMaterial));
 		glUniform1f(locs.shininessMaterial, parameter.shininessMaterial);
 		glUniform1f(locs.brightnessFactor, parameter.brightnessFactor);
+		glUniform1f(locs.near_cp, parameter.observerprojection_near);
+		glUniform1f(locs.far_cp, parameter.observerprojection_far);
 
 		normal = glm::transpose(glm::inverse(view * model));
 

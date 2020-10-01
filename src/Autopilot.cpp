@@ -68,9 +68,9 @@ namespace cgbv
 
 		// Write the values into the vectors to iterate over it later 
 		setupAzimuthCamera();
-		elevationLight = setupVector(0, 90, stepSizeElevationLight, true);
-		elevationCamera = setupVector(0, 90, stepSizeElevationCamera, true);
-		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight, false);
+		elevationLight = setupVector(0, 90, stepSizeElevationLight, startElevationLight);
+		elevationCamera = setupVector(0, 90, stepSizeElevationCamera, startElevationCamera);
+		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight, 0.f);
 
 		// Initialize the iterators  
 		elevationLightPtr = elevationLight.begin();
@@ -138,16 +138,13 @@ namespace cgbv
 		return true;
 	}
 
-	std::vector<float> Autopilot::setupVector(float from, float to, float step_size, bool firstNotZero)
+	std::vector<float> Autopilot::setupVector(float from, float to, float step_size, float start)
 	{
 		std::vector<float> vec;
 		for (float i = from; i <= to; i += step_size) {
 			vec.push_back(i);
 		}
-		if (firstNotZero)
-		{
-			vec.at(0) = 1;
-		}
+		vec.at(0) = start;
 		return vec;
 	}
 
@@ -232,7 +229,7 @@ namespace cgbv
 		imageName = modelNames.at(currentModel) + std::string(nameBuffer) + "-" + std::to_string(static_cast<int>(*azimuthCameraPtr)) + "-" + std::to_string(static_cast<int>(*elevationCameraPtr)) + "-" + std::to_string(static_cast<int>(*azimuthLightPtr)) + "-" + std::to_string(static_cast<int>(*elevationLightPtr)) + ".png";
 		currentImageNames.insert(currentImageNames.begin(), modelNames.at(currentModel) + "\\" + "depth\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgb\\" + imageName);
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normal\\" + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normals\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" +  imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin\\"  + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin_intense\\" +  imageName);
@@ -320,7 +317,7 @@ namespace cgbv
 			std::filesystem::create_directory((dateFolder + "\\" + modelName).c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\rgb").c_str());
-			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\normal").c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\normals").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\shadow_candidate").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_lin").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_lin_intense").c_str());

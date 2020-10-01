@@ -63,6 +63,8 @@ namespace cgbv
 
 		unsigned int brightnessFactor;
 
+		unsigned int near_cp, far_cp;
+
 		unsigned int redFS, blackFS;
 	};
 
@@ -104,9 +106,9 @@ namespace cgbv
 
 		// Shadow 
 		//factor: Specifies a scale factor that is used to create a variable depth offset for each polygon.The initial value is 0.
-		GLfloat offsetFactor = 1.4f;
+		GLfloat offsetFactor = 1.2f;
 		// units: Is multiplied by an implementation - specific value to create a constant depth offset.The initial value is 0.
-		GLfloat offsetUnits = 1.f;
+		GLfloat offsetUnits = 3.2f;
 
 		float f;
 		// Model parameters 
