@@ -72,7 +72,7 @@ namespace cgbv
 		std::string csvName = "labels_ks.csv";
 		std::string u = ",";
 		std::string n = "\n";
-		const std::vector<std::string> colname{ "Filename Depth", "Filename RGB", "Filename Normals", "Filename Shadow Candidate", "Filename Depth Linear", "Filename Depth Linear Intense", "Filename Depth Intense", "Filename RGBD", "Azimuth", "Elevation", "Light_x", "Light_y", "Light_z", "C_A", "C_E", "Cam_x", "Cam_y", "Cam_z" };
+		const std::vector<std::string> colname{ "Filename Depth", "Filename RGB", "Filename Normal", "Filename Shadow Candidate", "Filename Depth Linear", "Filename Depth Linear Intense", "Filename Depth Intense", "Filename RGBD", "Azimuth", "Elevation", "C_A", "C_E"};
 		std::ofstream csvFile;
 		// ========================================================================================================================
 		// set up the vectors to iterate over them 

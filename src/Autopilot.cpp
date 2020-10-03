@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <iostream>
 #include <filesystem>
+#include <cmath>
 
 
 
@@ -229,7 +230,7 @@ namespace cgbv
 		imageName = modelNames.at(currentModel) + std::string(nameBuffer) + "-" + std::to_string(static_cast<int>(*azimuthCameraPtr)) + "-" + std::to_string(static_cast<int>(*elevationCameraPtr)) + "-" + std::to_string(static_cast<int>(*azimuthLightPtr)) + "-" + std::to_string(static_cast<int>(*elevationLightPtr)) + ".png";
 		currentImageNames.insert(currentImageNames.begin(), modelNames.at(currentModel) + "\\" + "depth\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgb\\" + imageName);
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normals\\" + imageName);
+		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normal\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" +  imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin\\"  + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin_intense\\" +  imageName);
@@ -262,16 +263,8 @@ namespace cgbv
 		csvFile << *azimuthLightPtr << u;
 		csvFile << *elevationLightPtr << u;
 
-		csvFile << lightPos.x << u;
-		csvFile << lightPos.y << u;
-		csvFile << lightPos.z << u;
-
 		csvFile << *azimuthCameraPtr << u;
 		csvFile << *elevationCameraPtr << u;
-
-		csvFile << camPos.x << u;
-		csvFile << camPos.y << u;
-		csvFile << camPos.z << n;
 
 		csvFile.flush();
 		return true;
@@ -280,9 +273,9 @@ namespace cgbv
 	glm::vec3 Autopilot::calPos(float azimuthPtr, float elevationPtr, float distance)
 	{
 		// https://www.mathworks.com/help/matlab/ref/sph2cart.html
-		x = distance * cosf(glm::radians(elevationPtr)) * sinf(glm::radians(azimuthPtr));
-		y = distance * sinf(glm::radians(elevationPtr));
-		z = distance * cosf(glm::radians(elevationPtr)) * cosf(glm::radians(azimuthPtr));
+		x = distance * std::cosf(glm::radians(elevationPtr)) * std::sinf(glm::radians(azimuthPtr));
+		y = distance * std::sinf(glm::radians(elevationPtr));
+		z = distance * std::cosf(glm::radians(elevationPtr)) * std::cosf(glm::radians(azimuthPtr));
 
 		return glm::vec3(x, y, z);
 	}
@@ -317,7 +310,7 @@ namespace cgbv
 			std::filesystem::create_directory((dateFolder + "\\" + modelName).c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\rgb").c_str());
-			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\normals").c_str());
+			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\normal").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\shadow_candidate").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_lin").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_lin_intense").c_str());
