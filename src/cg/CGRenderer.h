@@ -106,9 +106,9 @@ namespace cgbv
 
 		// Shadow 
 		//factor: Specifies a scale factor that is used to create a variable depth offset for each polygon.The initial value is 0.
-		GLfloat offsetFactor = 1.2f;
+		GLfloat offsetFactor = 1.4f;
 		// units: Is multiplied by an implementation - specific value to create a constant depth offset.The initial value is 0.
-		GLfloat offsetUnits = 3.2f;
+		GLfloat offsetUnits = 1.0f;
 
 		float f;
 		// Model parameters 
