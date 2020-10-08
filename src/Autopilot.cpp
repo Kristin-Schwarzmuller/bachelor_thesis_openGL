@@ -115,6 +115,9 @@ namespace cgbv
 	{
 		if (tick())
 		{
+			if (*azimuthLightPtr == 180.f) {
+				1 * 1;
+			}
 			lightPos = calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight);
 			camPos = calPos(0.f, *elevationCameraPtr, distanceCamera);
 
@@ -250,7 +253,6 @@ namespace cgbv
 
 	bool Autopilot::writeDataCSV()
 	{
-		//Filename Azimuth	Elevation S_x S_y C_A C_E
 		csvFile << currentImageNames[0] << u;
 		csvFile << currentImageNames[1] << u;
 		csvFile << currentImageNames[2] << u;
@@ -264,7 +266,7 @@ namespace cgbv
 		csvFile << *elevationLightPtr << u;
 
 		csvFile << *azimuthCameraPtr << u;
-		csvFile << *elevationCameraPtr << u;
+		csvFile << *elevationCameraPtr << n;
 
 		csvFile.flush();
 		return true;

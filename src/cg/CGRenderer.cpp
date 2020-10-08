@@ -897,15 +897,15 @@ namespace cgbv
 
 			object.vertsToDraw = mesh.VertexCount();
 		}
-		//if (currentMod == 2) // box
-		//{
-		//	parameter.offsetFactor = 1.2f;
-		//	parameter.offsetUnits = 3.2f;
-		//}
-		//else {
-		//	parameter.offsetFactor = 1.4f;
-		//	parameter.offsetUnits = 1.0f;
-		//}
+		if (currentMod == 2) // box
+		{
+			parameter.offsetFactor = 1.2f;
+			parameter.offsetUnits = 3.2f;
+		}
+		else {
+			parameter.offsetFactor = 1.4f;
+			parameter.offsetUnits = 1.0f;
+		}
 		
 	}
 
