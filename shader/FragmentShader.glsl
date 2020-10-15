@@ -203,7 +203,7 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
     vec4 ambient = light.ambient * material.ambient; 
 
     // Diffuse light
-	float d = max(0.0f, dot(n.normal, n.lightDir));
+	float d = max(dot(n.normal, n.lightDir), 0.0f);
 	vec4 diffus = d * light.diffus * material.diffus;
 
     // Specular
@@ -215,7 +215,7 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 	
     // --------- Shadows ---------
     vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
-    float min_shadow_darkness = 1.f, max_shadow_darkness = .35f;
+    float min_shadow_darkness = 1.f, max_shadow_darkness = .0f; //.35f;
 
     float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), max_shadow_darkness, min_shadow_darkness);
 
@@ -224,6 +224,9 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     out_color =(shadowsample * (specular + diffus) + ambient);
     out_color.a = 1.f;
+
+    //if (gl_FragCoord.z >0.9999 )
+    //    out_color = vec4(1, 0, 0, 1);
 
     out_normal = n.normal * .5f + .5f;
     // Depth
@@ -283,6 +286,8 @@ layout(index = 6) subroutine(FragmentProgram) void black()
 {
 
     out_color = vec4(0.f, 0.f, 0.f, 1.f);
+
+    //out_color = Input.FragPos;
     // Depth
     out_depth = getDepth();
 

@@ -81,14 +81,15 @@ namespace cgbv
 		float distanceLight =  200.f;
 		float distanceCamera =  150.f;
 		float observerprojection_near = .1f;
-		float observerprojection_far = 200.f;
+		float observerprojection_far = 201.f;
 		float lightprojection_x_min = -15.f;
 		float lightprojection_x_max = 15.f;
 		float lightprojection_y_min = -15.f;
 		float lightprojection_y_max = 15.f;
-		float lightprojection_z_min = .1f;
-		float lightprojection_z_max = 200.f;
+		float lightprojection_z_min = .1f; // near clipping plane of light
+		float lightprojection_z_max = 201.f;// far clipping plane of light
 		float modelScalation = 7.5f;
+		float basesurface_size = 50.f;
 
 		glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
 		glm::vec4 camPos = glm::vec4(0.f, 0.f, distanceCamera, 1.f);
@@ -100,7 +101,7 @@ namespace cgbv
 		glm::vec4 ambientMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
 		glm::vec4 diffusMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
 		glm::vec4 spekularMaterial = glm::vec4(1.f, 1.f, 1.f, 1.f);
-		float shininessMaterial = 20.f;
+		float shininessMaterial = 80.f;
 
 		float brightnessFactor = 1.0f;
 

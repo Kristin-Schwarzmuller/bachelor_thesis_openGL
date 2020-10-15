@@ -314,10 +314,11 @@ namespace cgbv
 			// Base
 			std::vector<glm::vec3> vertices;
 
-			glm::vec3 a(-50.f, 0.f, -50.f);
-			glm::vec3 b(50.f, 0.f, -50.f);
-			glm::vec3 c(50.f, 0.f, 50.f);
-			glm::vec3 d(-50.f, 0.f, 50.f);
+			glm::vec3 a(-parameter.basesurface_size, 0.f, -parameter.basesurface_size);
+			glm::vec3 b(parameter.basesurface_size, 0.f, -parameter.basesurface_size);
+			glm::vec3 c(parameter.basesurface_size, 0.f, parameter.basesurface_size);
+			glm::vec3 d(-parameter.basesurface_size, 0.f, parameter.basesurface_size);
+
 
 			glm::vec3 n(0.f, 1.f, 0.f);
 
@@ -350,13 +351,21 @@ namespace cgbv
 			vertices.clear();
 
 			// Background
-			float  q = 49.999f;
-			glm::vec3 b0(2 * q, -1.f, -q);
-			glm::vec3 c0(-2 * q, -1.f, -q);	
+			float q = .0f;// parameter.basesurface_size - 0.01f;
+			float p = parameter.basesurface_size;
+			glm::vec3 b0(p, -1.f, -q);
+			glm::vec3 c0(-p, -1.f, -q);	
 
 
-			glm::vec3 b1(2*q, q, -q);
-			glm::vec3 c1(-2*q,q, -q);
+			glm::vec3 b1(p, p, -q);
+			glm::vec3 c1(-p, p, -q);
+			
+			//glm::vec3 b0(2 * q, -1.f, -q);
+			//glm::vec3 c0(-2 * q, -1.f, -q);	
+
+
+			//glm::vec3 b1(2*q, q, -q);
+			//glm::vec3 c1(-2*q,q, -q);
 
 			 n = glm::vec3(0.f, 0.f, 1.f);
 
@@ -443,6 +452,7 @@ namespace cgbv
 			camPosPackage.object2 = &observer_camera;
 			//TwAddVarCB(tweakbar, "Camera Position", TW_TYPE_DIR3F, camSetCallback, camGetCallback, &camPosPackage, "group=Cam axisx=-x axisy=-y axisz=-z opened=true");
 			TwAddVarRW(tweakbar, "Camera Position", TW_TYPE_DIR3F, &parameter.camPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
+			TwAddVarRW(tweakbar, "Observer far CP", TW_TYPE_FLOAT, &parameter.observerprojection_far, " group = 'Light' min = 0.0f max = 800.0f step = 10.f");
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
 			TwAddVarRW(tweakbar, "Light direction", TW_TYPE_DIR3F, &parameter.lightPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
 			//lightPosPackage.object1 = &parameter.lightPos;
@@ -675,6 +685,7 @@ namespace cgbv
 			break;
 		}
 		//observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), parameter.observerprojection_near - 1.0f, parameter.observerprojection_far + 1.0f);
+		observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), parameter.observerprojection_near, parameter.observerprojection_far);
 
 		glViewport(0, 0, window_width, window_height);
 
@@ -736,8 +747,9 @@ namespace cgbv
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
-
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation));
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -(parameter.basesurface_size - 0.0001)));
+		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation, parameter.modelScalation, 1.f)) * model;
+		
 		normal = glm::transpose(glm::inverse(view * model));
 		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(projection * view * model));
 		glUniformMatrix4fv(locs.modelview, 1, GL_FALSE, glm::value_ptr(view * model));
