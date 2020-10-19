@@ -30,7 +30,7 @@ struct Material
 {
 	vec4 ambient;
 	vec4 diffus;
-	vec4 spekular;
+	vec4 specular;
 	vec4 emissiv;
 	float shininess;
 };
@@ -39,8 +39,6 @@ struct Material
 struct FragmentInput
 {
     vec3 normal;
-    vec3 surfaceNormal;
-
 	vec3 lightDir;
 	vec3 viewDir;
     vec4 FragPos;
@@ -93,10 +91,7 @@ layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec3 out_normal;
 layout(location = 2) out vec4 out_sc;
 layout(location = 3) out vec4 out_depth;
-layout(location = 4) out vec4 out_lin_depth;
-layout(location = 5) out vec4 out_lin_depth_contrast;
-layout(location = 6) out vec4 out_depth_contrast;
-layout(location = 7) out vec4 out_rgbd;
+layout(location = 4) out vec4 out_rgbd;
 // =============================================================================================================
 
 
@@ -110,7 +105,7 @@ float getZ_NDC(float contrast)
 
 vec4 getDepth()
 {
-    return vec4(gl_FragCoord.z);
+    return vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0f);
 }
 
 vec4 getDepthContrast(float contrast)
@@ -193,9 +188,9 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 {
   
     Normalized n;
-    n.viewDir = normalize(Input.viewDir);
-    n.lightDir = normalize(Input.lightDir);
-    n.normal = normalize(Input.normal);
+    n.viewDir = normalize(Input.viewDir); // view space
+    n.lightDir = normalize(Input.lightDir); //world space
+    n.normal = normalize(Input.normal); // view space
 
     // --------- Phong ---------
 
@@ -208,13 +203,14 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     // Specular
 	vec4 specular = vec4(0.f, 0.f, 0.f, 1.f);
-	if (d > 0.f) {
+	if (d > -0.001f)
+    {
 		vec3 r = reflect(-n.lightDir, n.normal);
-		specular = pow(max(dot(normalize (r), n.viewDir), 0.f), material.shininess) * light.specular * material.spekular;
+		specular = pow(max(dot(normalize(r), n.viewDir), 0.f), material.shininess) * light.specular * material.specular;
 	}
 	
     // --------- Shadows ---------
-    vec3 shadow_coordinates = Input.shadow_coordinates.xyz;
+    vec3 shadow_coordinates = Input.shadow_coordinates.xyz / Input.shadow_coordinates.w;
     float min_shadow_darkness = 1.f, max_shadow_darkness = .0f; //.35f;
 
     float shadowsample = clamp(texture(tex.shadowmap, shadow_coordinates), max_shadow_darkness, min_shadow_darkness);
@@ -222,9 +218,9 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     // --------- Result --------- 
 
-    out_color =(shadowsample * (specular + diffus) + ambient);
-    out_color.a = 1.f;
-
+    //out_color =(shadowsample * (specular + diffus) + ambient);
+    //out_color.a = 1.f;
+    out_color = gl_Position;
     //if (gl_FragCoord.z >0.9999 )
     //    out_color = vec4(1, 0, 0, 1);
 
@@ -232,14 +228,14 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
     // Depth
     out_depth = getDepth();
 
-    out_lin_depth = getLinDepth(2.0);
+    //out_lin_depth = getLinDepth(2.0);
 
-    out_depth_contrast = getDepthContrast(light.far_cp);
-    out_lin_depth_contrast = getLinDepth(light.far_cp);
+    //out_depth_contrast = getDepthContrast(light.far_cp);
+    //out_lin_depth_contrast = getLinDepth(light.far_cp);
 
     // RGBD
     out_rgbd = out_color;
-    out_rgbd.w = out_depth_contrast.x;
+    out_rgbd.w = out_depth.x;
 
     // Shadow Candidate
     if (shadowsample <= .8f)
@@ -279,26 +275,5 @@ layout(index = 5) subroutine(FragmentProgram) void red()
 {
 
     out_color = vec4(1, 0, 0, .0f);
-}
-
-
-layout(index = 6) subroutine(FragmentProgram) void black()
-{
-
-    out_color = vec4(0.f, 0.f, 0.f, 1.f);
-
-    //out_color = Input.FragPos;
-    // Depth
-    out_depth = getDepth();
-
-    out_lin_depth = getLinDepth(2.0);
-
-    out_depth_contrast = getDepthContrast(light.far_cp);
-    out_lin_depth_contrast = getLinDepth(light.far_cp); 
-
-    // RGBD
-    out_rgbd = out_color;
-    out_rgbd.w = out_depth_contrast.x;
-
 }
 // =============================================================================================================

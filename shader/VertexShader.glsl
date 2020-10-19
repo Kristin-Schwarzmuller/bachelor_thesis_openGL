@@ -30,8 +30,6 @@ struct Light
 struct VertexOutput
 {
     vec3 normal;
-    vec3 surfaceNormal;
-
 	vec3 lightDir;
 	vec3 viewDir;
     vec4 FragPos;
@@ -81,26 +79,24 @@ void main()
 
 
 
-
+    
 // Subroutine Implementation
 // =============================================================================================================
 subroutine (VertexProgram) void verts_and_normals()
 {
-    gl_Position = matrices.mvp * vertex;
+    gl_Position = matrices.mvp * vertex; //clip space
 
-    Output.normal = matrices.normal * normal;
-    Output.surfaceNormal = normal;
+    Output.normal = matrices.normal * normal; // view space 
 
-    vec4 h = matrices.mv * vertex;
-    vec3 mvPos = h.xyz / h.w;
-    // Here define if light is directional or point 
-    Output.lightDir = normalize(light.lightPos - mvPos); //  == point light
-    //Output.lightDir = normalize(light.lightPos); // == directional light
-    Output.FragPos = vec4(gl_Position.xyz / gl_Position.w, 1.0f);   
+    vec4 h = matrices.mv * vertex; // view space
+    vec3 mvPos = h.xyz / h.w; // view space
+    Output.viewDir = -mvPos; // view space
 
-    Output.viewDir = -mvPos;
+    //Output.lightDir = normalize(light.lightPos - mvPos); //  == point light
+    Output.lightDir = light.lightPos; // == directional light // word space  
 
-    Output.shadow_coordinates = matrices.bmvp * vertex;
+
+    Output.shadow_coordinates = matrices.bmvp * vertex; //clip space
 }
 
 subroutine (VertexProgram) void simple_placement()

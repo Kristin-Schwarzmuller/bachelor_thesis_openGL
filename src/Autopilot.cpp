@@ -69,8 +69,8 @@ namespace cgbv
 
 		// Write the values into the vectors to iterate over it later 
 		setupAzimuthCamera();
-		elevationLight = setupVector(0, 90, stepSizeElevationLight, startElevationLight);
-		elevationCamera = setupVector(0, 90, stepSizeElevationCamera, startElevationCamera);
+		elevationLight = setupVector(startElevationLight, 90, stepSizeElevationLight, startElevationLight);
+		elevationCamera = setupVector(startElevationCamera, 90, stepSizeElevationCamera, startElevationCamera);
 		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight, 0.f);
 
 		// Initialize the iterators  
@@ -79,8 +79,8 @@ namespace cgbv
 		azimuthLightPtr = azimuthLight.begin();
 		azimuthCameraPtr = azimuthCamera.at(currentModel).begin();
 
-		lightPos = calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight);
-		camPos = calPos(0.f, *elevationCameraPtr, distanceCamera);
+		lightPos = sph2cart(*azimuthLightPtr, *elevationLightPtr, distanceLight);
+		camPos = sph2cart(0.f, *elevationCameraPtr, distanceCamera);
 			
 		// storage and csv
 		createFolders();
@@ -113,13 +113,15 @@ namespace cgbv
 
 	bool Autopilot::step()
 	{
+		if (first)
+		{
+			first = false;
+			return true;
+		}
 		if (tick())
 		{
-			if (*azimuthLightPtr == 180.f) {
-				1 * 1;
-			}
-			lightPos = calPos(*azimuthLightPtr, *elevationLightPtr, distanceLight);
-			camPos = calPos(0.f, *elevationCameraPtr, distanceCamera);
+			lightPos = sph2cart(*azimuthLightPtr, *elevationLightPtr, distanceLight);
+			camPos = sph2cart(0.f, *elevationCameraPtr, distanceCamera);
 
 			defImageNames();
 			writeDataCSV();
@@ -235,9 +237,6 @@ namespace cgbv
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgb\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "normal\\" + imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "shadow_candidate\\" +  imageName);
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin\\"  + imageName);
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_lin_intense\\" +  imageName);
-		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "depth_intense\\" +  imageName);
 		currentImageNames.push_back(modelNames.at(currentModel) + "\\" + "rgbd\\" + imageName);
 		
 		currentImagePaths.clear(); 
@@ -246,9 +245,6 @@ namespace cgbv
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[2]);
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[3]);
 		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[4]);
-		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[5]);
-		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[6]);
-		currentImagePaths.push_back(dateFolder + "\\" + currentImageNames[7]);
 	}					
 
 	bool Autopilot::writeDataCSV()
@@ -258,21 +254,22 @@ namespace cgbv
 		csvFile << currentImageNames[2] << u;
 		csvFile << currentImageNames[3] << u;
 		csvFile << currentImageNames[4] << u;
-		csvFile << currentImageNames[5] << u;
-		csvFile << currentImageNames[6] << u;
-		csvFile << currentImageNames[7] << u;
 
 		csvFile << *azimuthLightPtr << u;
 		csvFile << *elevationLightPtr << u;
 
 		csvFile << *azimuthCameraPtr << u;
-		csvFile << *elevationCameraPtr << n;
+		csvFile << *elevationCameraPtr << u;
+
+		csvFile << lightPos.x << u;
+		csvFile << lightPos.y << u;
+		csvFile << lightPos.z << n;
 
 		csvFile.flush();
 		return true;
 	}
 
-	glm::vec3 Autopilot::calPos(float azimuthPtr, float elevationPtr, float distance)
+	glm::vec3 Autopilot::sph2cart(float azimuthPtr, float elevationPtr, float distance)
 	{
 		// https://www.mathworks.com/help/matlab/ref/sph2cart.html
 		x = distance * std::cosf(glm::radians(elevationPtr)) * std::sinf(glm::radians(azimuthPtr));
@@ -314,9 +311,6 @@ namespace cgbv
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\rgb").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\normal").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\shadow_candidate").c_str());
-			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_lin").c_str());
-			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_lin_intense").c_str());
-			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\depth_intense").c_str());
 			std::filesystem::create_directory((dateFolder + "\\" + modelName + "\\rgbd").c_str());
 		}
 

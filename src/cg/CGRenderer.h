@@ -63,9 +63,7 @@ namespace cgbv
 
 		unsigned int brightnessFactor;
 
-		unsigned int near_cp, far_cp;
-
-		unsigned int redFS, blackFS;
+		unsigned int redFS;
 	};
 
 	struct BufferCombo
@@ -79,21 +77,30 @@ namespace cgbv
 	{
 		glm::quat globalRotation;
 		float distanceLight =  200.f;
-		float distanceCamera =  150.f;
-		float observerprojection_near = .1f;
-		float observerprojection_far = 201.f;
+		float distanceCamera = 150;// 100.f;
+		bool autopilot_mode = true;
+
 		float lightprojection_x_min = -15.f;
 		float lightprojection_x_max = 15.f;
 		float lightprojection_y_min = -15.f;
 		float lightprojection_y_max = 15.f;
-		float lightprojection_z_min = .1f; // near clipping plane of light
-		float lightprojection_z_max = 201.f;// far clipping plane of light
-		float modelScalation = 7.5f;
-		float basesurface_size = 50.f;
+		float lightprojection_z_min = 1.f; // near clipping plane of light
+		float lightprojection_z_max = 170.f;// 220;// far clipping plane of light
+		float modelScalation = 1.0f;
+		float basesurface_size = 60.f;
+		float observerprojection_near = 70.f; //90.f;
+		float observerprojection_far = 300; // 170.f; // 220.f;// basesurface_size* modelScalation;// 251.f;
 
-		glm::vec4 lightPos = glm::vec4(0.f, 0.f, distanceLight, 1.f);
-		glm::vec4 camPos = glm::vec4(0.f, 0.f, distanceCamera, 1.f);
-
+		glm::vec4 lightPos = glm::vec4(0.f, 10.f, distanceLight, 1.f);
+		//glm::vec4 lightPos = glm::vec4(0.f, 1.07f, -12.22f, 1.f);
+		glm::vec4 camPos = glm::vec4(0.f, -6.f, distanceCamera, 1.f);
+		//glm::vec4 camPos = glm::vec4(0.f, distanceCamera, 0, 1.f); // 5 Grad Elevation = arctan(13.13/cameraDistance)
+		float e = 30.f;
+		float a = 0.f;
+		/*glm::vec4 camPos = glm::vec4(	distanceCamera * std::cosf(glm::radians(e)) * std::sinf(glm::radians(a)),
+										distanceCamera * std::sinf(glm::radians(e)), 
+										distanceCamera * std::cosf(glm::radians(e))* std::cosf(glm::radians(a)),
+										0.f);*/
 		// Light
 		glm::vec4 ambientLight = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
 		glm::vec4 diffusLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
@@ -195,9 +202,6 @@ namespace cgbv
 		std::unique_ptr<cgbv::textures::Texture> rgb_output;
 		std::unique_ptr<cgbv::textures::Texture> normal_output;
 		std::unique_ptr<cgbv::textures::Texture> depth_output;
-		std::unique_ptr<cgbv::textures::Texture> depth_lin_output;
-		std::unique_ptr<cgbv::textures::Texture> depth_lin_ints_output;
-		std::unique_ptr<cgbv::textures::Texture> depth_ints_output;
 		std::unique_ptr<cgbv::textures::Texture> sc_output;
 		std::unique_ptr<cgbv::textures::Texture> rgbd_output;
 		unsigned int rgb_sampler;
@@ -205,7 +209,8 @@ namespace cgbv
 
 		cgbv::Camera observer_camera, lightsource_camera;
 
-		std::bitset<1> screenshot;
+		bool screenshot = false;
+		std::vector<float> data4lightdot;
 
 		ObserverSelection viewpoint = ObserverSelection::Viewer;
 		PostProcessing post_processing_pass = PostProcessing::Post_Processing;

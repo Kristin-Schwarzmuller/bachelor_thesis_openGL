@@ -24,7 +24,7 @@ namespace cgbv
 		std::string imageName;
 
 		float stepSizeElevationLight = 5.f;
-		float startElevationLight = 1.f;
+		float startElevationLight = 5.f;
 
 		float stepSizeElevationCamera = 30.f;
 		float startElevationCamera = 5.f;
@@ -62,6 +62,7 @@ namespace cgbv
 		glm::vec3 lightPos;
 		glm::vec3 camPos;
 
+		bool first = true;
 		bool finished = false;
 
 		// Used to write the CSV 
@@ -72,7 +73,7 @@ namespace cgbv
 		std::string csvName = "labels_ks.csv";
 		std::string u = ",";
 		std::string n = "\n";
-		const std::vector<std::string> colname{ "Filename Depth", "Filename RGB", "Filename Normal", "Filename Shadow Candidate", "Filename Depth Linear", "Filename Depth Linear Intense", "Filename Depth Intense", "Filename RGBD", "Azimuth", "Elevation", "C_A", "C_E"};
+		const std::vector<std::string> colname{ "Filename Depth", "Filename RGB", "Filename Normal", "Filename Shadow Candidate", "Filename RGBD", "Azimuth", "Elevation", "C_A", "C_E", "L_x", "L_y", "L_z"};
 		std::ofstream csvFile;
 		// ========================================================================================================================
 		// set up the vectors to iterate over them 
@@ -87,7 +88,7 @@ namespace cgbv
 
 		void defImageNames();
 		bool writeDataCSV();
-		glm::vec3 calPos(float azimuthPtr, float elevationPtr, float distance);
+		glm::vec3 sph2cart(float azimuthPtr, float elevationPtr, float distance);
 		bool createFolders();
 
 	public:

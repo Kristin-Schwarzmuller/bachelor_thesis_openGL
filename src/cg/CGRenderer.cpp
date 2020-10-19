@@ -107,7 +107,7 @@ namespace cgbv
 
 	void CGRenderer::capture()
 	{
-		screenshot.set();
+		screenshot = true;
 	}
 
 
@@ -222,9 +222,9 @@ namespace cgbv
 			return false;
 
 		// GL States
-		glClearColor(0.f, 0.f, 0.f, 0.f);
+		glClearColor(1.f, 1.f, 1.f, 0.f);
+		glClearDepth(1.f);
 
-		//glAlphaFunc();
 		//glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		//glEnable(GL_ALPHA_TEST);
@@ -236,26 +236,17 @@ namespace cgbv
 
 		// Matrices 
 		{
-
-			observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), parameter.observerprojection_near, parameter.observerprojection_far);
-			observer_camera.setTarget(glm::vec3(0.f, 0.f, 0.f));
-
-			lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
-				parameter.lightprojection_y_min, parameter.lightprojection_y_max,
-				parameter.lightprojection_z_min, parameter.lightprojection_z_max);
-
-			returnValues = autopilot.getValues();
 			// Camera 
-			observer_camera.moveTo(returnValues.getCameraPos());
-			parameter.modelRotation = returnValues.getModelRotation();
-			//Light
-			parameter.lightPos = glm::vec4(returnValues.getLightPos(), 1.f);
+			observer_projection = glm::perspective(float(M_PI) / 5.f, float(window_width) / float(window_height), 
+					parameter.observerprojection_near, parameter.observerprojection_far);
+			observer_camera.moveTo(parameter.camPos);
+			observer_camera.setTarget(glm::vec3(.0f, .0f, .0f));
+			//Light			
+			lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
+					parameter.lightprojection_y_min, parameter.lightprojection_y_max,
+					parameter.lightprojection_z_min, parameter.lightprojection_z_max);
 			lightsource_camera.moveTo(parameter.lightPos);
 			lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
-
-			// Screenshot 
-			parameter.screenShotNames = returnValues.getImageNames();
-			screenshot.set();
 
 			bias = glm::mat4
 			(
@@ -291,18 +282,15 @@ namespace cgbv
 			locs.canvasDisplayFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "canvas_display");
 			locs.lightPhong = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "phongWithLambert");
 			locs.redFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "red");
-			locs.blackFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "black");
 			
 			locs.ambientLight = shader->getUniformLocation("light.ambient");
 			locs.ambientMaterial = shader->getUniformLocation("material.ambient");
 			locs.diffusLight = shader->getUniformLocation("light.diffus");
 			locs.diffusMaterial = shader->getUniformLocation("material.diffus");
 			locs.spekularLight = shader->getUniformLocation("light.specular");
-			locs.spekularMaterial = shader->getUniformLocation("material.spekular");
+			locs.spekularMaterial = shader->getUniformLocation("material.specular");
 			locs.shininessMaterial = shader->getUniformLocation("material.shininess");
 			locs.brightnessFactor = shader->getUniformLocation("light.brightnessFactor");
-			locs.near_cp = shader->getUniformLocation("light.near_cp");
-			locs.far_cp = shader->getUniformLocation("light.far_cp");
 
 		}
 
@@ -350,53 +338,6 @@ namespace cgbv
 			data.clear();
 			vertices.clear();
 
-			// Background
-			float q = .0f;// parameter.basesurface_size - 0.01f;
-			float p = parameter.basesurface_size;
-			glm::vec3 b0(p, -1.f, -q);
-			glm::vec3 c0(-p, -1.f, -q);	
-
-
-			glm::vec3 b1(p, p, -q);
-			glm::vec3 c1(-p, p, -q);
-			
-			//glm::vec3 b0(2 * q, -1.f, -q);
-			//glm::vec3 c0(-2 * q, -1.f, -q);	
-
-
-			//glm::vec3 b1(2*q, q, -q);
-			//glm::vec3 c1(-2*q,q, -q);
-
-			 n = glm::vec3(0.f, 0.f, 1.f);
-
-			vertices.push_back(b0); vertices.push_back(b1); vertices.push_back(c0);
-			vertices.push_back(c0); vertices.push_back(c1); vertices.push_back(b1);
-
-
-			for (auto v : vertices)
-			{
-				data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
-				data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
-				background.vertsToDraw++;
-			}
-
-			glGenVertexArrays(1, &background.vao);
-			glBindVertexArray(background.vao);
-
-			glGenBuffers(1, &background.vbo);
-			glBindBuffer(GL_ARRAY_BUFFER, background.vbo);
-			glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
-
-			glEnableVertexAttribArray(locs.vertex);
-			glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
-			glEnableVertexAttribArray(locs.normal);
-			glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
-
-
-			data.clear();
-			vertices.clear();
-
-
 			// Canvas 
 			a = glm::vec3(-1.f, -1.f, 0.f);
 			b = glm::vec3(1.f, -1.f, 0.f);
@@ -433,7 +374,7 @@ namespace cgbv
 
 			loadFBX(modelfbx.modelSelection);
 			// drawBoundingBox();
-			//drawLightDot(parameter.lightPos);
+			drawLightDot(parameter.lightPos);
 		}
 
 
@@ -452,9 +393,12 @@ namespace cgbv
 			camPosPackage.object2 = &observer_camera;
 			//TwAddVarCB(tweakbar, "Camera Position", TW_TYPE_DIR3F, camSetCallback, camGetCallback, &camPosPackage, "group=Cam axisx=-x axisy=-y axisz=-z opened=true");
 			TwAddVarRW(tweakbar, "Camera Position", TW_TYPE_DIR3F, &parameter.camPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
+			TwAddVarRW(tweakbar, "Observer near CP", TW_TYPE_FLOAT, &parameter.observerprojection_near, " group = 'Light' min = 0.0f max = 800.0f step = 1.f");
 			TwAddVarRW(tweakbar, "Observer far CP", TW_TYPE_FLOAT, &parameter.observerprojection_far, " group = 'Light' min = 0.0f max = 800.0f step = 10.f");
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
 			TwAddVarRW(tweakbar, "Light direction", TW_TYPE_DIR3F, &parameter.lightPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
+			TwAddVarRW(tweakbar, "Licht near CP", TW_TYPE_FLOAT, &parameter.lightprojection_z_min, " group = 'Light' min = 0.0f max = 800.0f step = .1f");
+			TwAddVarRW(tweakbar, "Light far CP", TW_TYPE_FLOAT, &parameter.lightprojection_z_max, " group = 'Light' min = 0.0f max = 800.0f step = 10.f");
 			//lightPosPackage.object1 = &parameter.lightPos;
 			//lightPosPackage.object2 = &lightsource_camera;
 			//TwAddVarCB(tweakbar, "Light direction", TW_TYPE_DIR3F, lightSetCallback, lightGetCallback, &lightPosPackage, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
@@ -470,8 +414,8 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "Specular  Material", TW_TYPE_COLOR4F, &parameter.spekularMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 
 			// ====== Shadow ======
-			TwAddVarRW(tweakbar, "Shadow Offset Factor", TW_TYPE_FLOAT, &parameter.offsetFactor, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
-			TwAddVarRW(tweakbar, "Shadowmap Offset Units", TW_TYPE_FLOAT, &parameter.offsetUnits, " group = 'Shadow' min = 0.0f max = 128.0f step = 0.1f");
+			TwAddVarRW(tweakbar, "Shadow Offset Factor", TW_TYPE_FLOAT, &parameter.offsetFactor, " group = 'Shadow' step = 5.f");
+			TwAddVarRW(tweakbar, "Shadowmap Offset Units", TW_TYPE_FLOAT, &parameter.offsetUnits, " group = 'Shadow' step = 100.f");
 
 			// ====== Modelauswahl ======
 			std::string meshtypes = "BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT";
@@ -486,6 +430,7 @@ namespace cgbv
 			TwAddVarCB(tweakbar, "Post Processing", pp_type, pp_SetCallback, pp_GetCallback, &post_processing_pass, "");
 			TwAddVarRW(tweakbar, "Dynamik Light Adjustment", TW_TYPE_BOOL8, &parameter.enabledLightAdjustment, " true=Enabled false=Disabled ");
 			TwAddVarRW(tweakbar, "Show Light Dot", TW_TYPE_BOOL8, &parameter.showLightDot, " true=Enabled false=Disabled ");
+			TwAddVarRW(tweakbar, "Start Autopilot", TW_TYPE_BOOL8, &parameter.autopilot_mode, " true=Activate false=Deactivate ");
 
 			std::string observer_types = "Viewer, Light";
 			TwType o_type = TwDefineEnumFromString("o_type", observer_types.c_str());
@@ -538,9 +483,6 @@ namespace cgbv
 			normal_output.reset();
 			sc_output.reset();
 			depth_output.reset();
-			depth_lin_output.reset();
-			depth_lin_ints_output.reset();
-			depth_ints_output.reset();
 			rgbd_output.reset();
 			glDeleteFramebuffers(1, &framebuffers.image_buffer);
 			glDeleteSamplers(1, &rgb_sampler);
@@ -556,9 +498,6 @@ namespace cgbv
 			normal_output = std::make_unique<textures::Texture>();
 			sc_output = std::make_unique<textures::Texture>();
 			depth_output = std::make_unique<textures::Texture>();
-			depth_lin_output = std::make_unique<textures::Texture>();
-			depth_lin_ints_output = std::make_unique<textures::Texture>();
-			depth_ints_output = std::make_unique<textures::Texture>();
 			rgbd_output = std::make_unique<textures::Texture>();
 
 			glBindTexture(GL_TEXTURE_2D, rgb_output->getTextureID());
@@ -571,15 +510,6 @@ namespace cgbv
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
 			glBindTexture(GL_TEXTURE_2D, depth_output->getTextureID());
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
-
-			glBindTexture(GL_TEXTURE_2D, depth_lin_output->getTextureID());
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
-
-			glBindTexture(GL_TEXTURE_2D, depth_lin_ints_output->getTextureID());
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
-
-			glBindTexture(GL_TEXTURE_2D, depth_ints_output->getTextureID());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, window_width, window_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
 			glBindTexture(GL_TEXTURE_2D, rgbd_output->getTextureID());
@@ -600,13 +530,10 @@ namespace cgbv
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, sc_output->getTextureID(), 0);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, depth_output->getTextureID(), 0);
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, depth_lin_output->getTextureID(), 0);
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, depth_lin_ints_output->getTextureID(), 0);
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT6, depth_ints_output->getTextureID(), 0);
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT7, rgbd_output->getTextureID(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, rgbd_output->getTextureID(), 0);
 
-			GLenum draw_buffers[8] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7 };
-			glDrawBuffers(8, draw_buffers);
+			GLenum draw_buffers[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+			glDrawBuffers(5, draw_buffers);
 
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			{
@@ -636,7 +563,6 @@ namespace cgbv
 	void CGRenderer::shadowmap_pass()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.shadowmap_buffer);
-		//observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), parameter.observerprojection_near-1.0f, parameter.observerprojection_far+1.0f);
 
 		glViewport(0, 0, shadowmap_width, shadowmap_height);
 
@@ -654,7 +580,6 @@ namespace cgbv
 		}
 		else
 		{
-			//lightsource_projection = glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, 0.1f, 100.f);
 			lightsource_projection = glm::ortho(-1.0f, 1.0f, 0.0f, 2.5f, .1f, 100.f);
 		}
 
@@ -684,8 +609,8 @@ namespace cgbv
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.image_buffer);
 			break;
 		}
-		//observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), parameter.observerprojection_near - 1.0f, parameter.observerprojection_far + 1.0f);
-		observer_projection = glm::perspective(float(M_PI) / 4.5f, float(window_width) / float(window_height), parameter.observerprojection_near, parameter.observerprojection_far);
+		
+		observer_projection = glm::perspective(float(M_PI) / 30.f, float(window_width) / float(window_height), parameter.observerprojection_near, parameter.observerprojection_far);
 
 		glViewport(0, 0, window_width, window_height);
 
@@ -719,20 +644,21 @@ namespace cgbv
 		glUniform4fv(locs.spekularMaterial, 1, glm::value_ptr(parameter.spekularMaterial));
 		glUniform1f(locs.shininessMaterial, parameter.shininessMaterial);
 		glUniform1f(locs.brightnessFactor, parameter.brightnessFactor);
-		glUniform1f(locs.near_cp, parameter.observerprojection_near);
-		glUniform1f(locs.far_cp, parameter.observerprojection_far);
-
-		normal = glm::transpose(glm::inverse(view * model));
 
 		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(projection * view * model));
 		glUniformMatrix4fv(locs.modelview, 1, GL_FALSE, glm::value_ptr(view * model));
+
+		normal = glm::mat3(glm::transpose(glm::inverse(view * model)));
 		glUniformMatrix3fv(locs.normalmatrix, 1, GL_FALSE, glm::value_ptr(normal));
 
-		glm::mat4 shadow_view = lightsource_camera.getViewMatrix();
-		glUniformMatrix4fv(locs.biasedModelViewProjection, 1, GL_FALSE, glm::value_ptr(bias * lightsource_projection * shadow_view * model));
+		glm::mat4 lightsource_view = lightsource_camera.getViewMatrix();
+		glUniformMatrix4fv(locs.biasedModelViewProjection, 1, GL_FALSE, glm::value_ptr(bias * lightsource_projection * lightsource_view * model));
 
 		glUniform3fv(locs.lightPos, 1, glm::value_ptr(parameter.lightPos));
 		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(view * parameter.lightPos));
+		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(glm::inverse(view) * parameter.lightPos));
+		//glm::mat4 normView = glm::mat4(glm::transpose(glm::inverse(view)));
+		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(normView * parameter.lightPos));
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.lightingVS);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.lightPhong);
 
@@ -747,40 +673,29 @@ namespace cgbv
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -(parameter.basesurface_size - 0.0001)));
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation, parameter.modelScalation, 1.f)) * model;
-		
-		normal = glm::transpose(glm::inverse(view * model));
-		glUniformMatrix4fv(locs.modelViewProjection, 1, GL_FALSE, glm::value_ptr(projection * view * model));
-		glUniformMatrix4fv(locs.modelview, 1, GL_FALSE, glm::value_ptr(view * model));
-		glUniformMatrix3fv(locs.normalmatrix, 1, GL_FALSE, glm::value_ptr(normal));
-
-		auto blackFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "black");
-		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &blackFS);
-		glBindVertexArray(background.vao);
-		glDrawArrays(GL_TRIANGLES, 0, background.vertsToDraw);
-
-
-		//glBindVertexArray(boundingBox.vao);
-		//glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
-
 		//auto redFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "red");
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &redFS);
 		//glBindVertexArray(lightDot.vao);
 		//glDrawArrays(GL_LINES, 0, lightDot.vertsToDraw);
 
-		if (screenshot[0])
+		//glBindVertexArray(boundingBox.vao);
+		//glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
+
+		if (screenshot)
 		{
-			/*std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
-			glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, shadowmap_pixel.get());
-			cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotNames[0], shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
-			cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);*/
+			//std::unique_ptr<GLubyte[]> shadowmap_pixel = std::make_unique<GLubyte[]>(shadowmap_width * shadowmap_height);
+			//glGetTextureImage(shadowmap->getTextureID(), 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, shadowmap_width * shadowmap_height, shadowmap_pixel.get());
+			////cgbv::textures::Texture2DStorage::StoreGreyscale(parameter.screenShotNames[0], shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
+			//cgbv::textures::Texture2DStorage::StoreGreyscale("../shadowmap.png", shadowmap_pixel.get(), shadowmap_width, shadowmap_height, 0);
+
+			std::unique_ptr<GLubyte[]> depth_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
+			glGetTextureImage(depth_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel.get());
+			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[0], depth_pixel.get(), window_width, window_height, 0);
 
 			std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
 			glGetTextureImage(rgb_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[1], rgb_pixel.get(), window_width, window_height, 0);
 			//cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
-
 
 			std::unique_ptr<GLubyte[]> normal_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
 			glGetTextureImage(normal_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, normal_pixel.get());
@@ -793,27 +708,12 @@ namespace cgbv
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[3], sc_pixel.get(), window_width, window_height, 0);
 			//cgbv::textures::Texture2DStorage::Store("../shadow_candidate.png", sc_pixel.get(), window_width, window_height, 0);
 
-			std::unique_ptr<GLubyte[]> depth_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(depth_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel.get());
-			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[0], depth_pixel.get(), window_width, window_height, 0);
-
-			std::unique_ptr<GLubyte[]> depth_pixel_lin = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(depth_lin_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_lin.get());
-			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[4], depth_pixel_lin.get(), window_width, window_height, 0);
-
-			std::unique_ptr<GLubyte[]> depth_pixel_lin_ints = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(depth_lin_ints_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_lin_ints.get());
-			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[5], depth_pixel_lin_ints.get(), window_width, window_height, 0);
-
-			std::unique_ptr<GLubyte[]> depth_pixel_ints = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(depth_ints_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, depth_pixel_ints.get());
-			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[6], depth_pixel_ints.get(), window_width, window_height, 0);
 
 			std::unique_ptr<GLubyte[]> rgbd_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 4);
 			glGetTextureImage(rgbd_output->getTextureID(), 0, GL_RGBA, GL_UNSIGNED_BYTE, window_width * window_height * 4, rgbd_pixel.get());
-			cgbv::textures::Texture2DStorage::StoreRGBA(parameter.screenShotNames[7], rgbd_pixel.get(), window_width, window_height, 0);
+			cgbv::textures::Texture2DStorage::StoreRGBA(parameter.screenShotNames[4], rgbd_pixel.get(), window_width, window_height, 0);
 
-			screenshot.reset();
+			screenshot = false;
 		}
 
 		TwDraw();
@@ -848,7 +748,8 @@ namespace cgbv
 
 	void CGRenderer::update()
 	{
-		if (autopilot.step())
+		screenshot = false;
+		if (parameter.autopilot_mode && autopilot.step())
 		{
 			returnValues = autopilot.getValues();
 
@@ -856,7 +757,7 @@ namespace cgbv
 			parameter.modelRotation = returnValues.getModelRotation();
 			parameter.lightPos = glm::vec4(returnValues.getLightPos(), 1.f);
 			parameter.screenShotNames = returnValues.getImageNames();
-			screenshot.set();
+			screenshot = parameter.autopilot_mode;
 
 			if (returnValues.getModelID() != modelfbx.modelSelection)
 			{
@@ -872,7 +773,7 @@ namespace cgbv
 		}
 		lightsource_camera.moveTo(parameter.lightPos);
 		lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
-		//drawLightDot(parameter.lightPos);
+		drawLightDot(observer_camera.getViewMatrix() * parameter.lightPos);
 	}
 	
 	void CGRenderer::loadFBX(int currentMod)
@@ -1013,7 +914,7 @@ namespace cgbv
 	void CGRenderer::drawLightDot(glm::vec4 lightPos)
 	{
 		std::vector<glm::vec3> vertices;
-		std::vector<float> data;
+		
 
 		glm::vec3 n(0.f, 1.f, 0.f);
 
@@ -1022,8 +923,8 @@ namespace cgbv
 
 		for (auto v : vertices)
 		{
-			data.insert(std::end(data), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
-			data.insert(std::end(data), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
+			data4lightdot.insert(std::end(data4lightdot), glm::value_ptr(v), glm::value_ptr(v) + sizeof(glm::vec3) / sizeof(float));
+			data4lightdot.insert(std::end(data4lightdot), glm::value_ptr(n), glm::value_ptr(n) + sizeof(glm::vec3) / sizeof(float));
 			lightDot.vertsToDraw++;
 		}
 
@@ -1032,14 +933,14 @@ namespace cgbv
 
 		glGenBuffers(1, &lightDot.vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, lightDot.vbo);
-		glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, data4lightdot.size() * sizeof(float), data4lightdot.data(), GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(locs.vertex);
 		glVertexAttribPointer(locs.vertex, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
 		glEnableVertexAttribArray(locs.normal);
 		glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
 
-		data.clear();
+		//data.clear();
 	}
 	void CGRenderer::adjustLight(glm::mat4 shadow_view_model)
 	{
@@ -1062,11 +963,11 @@ namespace cgbv
 			if (tmp.y > y_max)
 				y_max = tmp.y;
 		}
-
-		parameter.lightprojection_x_min = x_min;
-		parameter.lightprojection_x_max = x_max;
-		parameter.lightprojection_y_min = y_min;
-		parameter.lightprojection_y_max = y_max;
+		float c = 2.0f;
+		parameter.lightprojection_x_min = c * x_min;
+		parameter.lightprojection_x_max = c * x_max;
+		parameter.lightprojection_y_min = c * y_min;
+		parameter.lightprojection_y_max = c * y_max;
 
 		lightsource_projection = glm::ortho(parameter.lightprojection_x_min, parameter.lightprojection_x_max,
 			parameter.lightprojection_y_min, parameter.lightprojection_y_max,
