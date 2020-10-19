@@ -69,8 +69,8 @@ namespace cgbv
 
 		// Write the values into the vectors to iterate over it later 
 		setupAzimuthCamera();
-		elevationLight = setupVector(startElevationLight, 90, stepSizeElevationLight, startElevationLight);
-		elevationCamera = setupVector(startElevationCamera, 90, stepSizeElevationCamera, startElevationCamera);
+		elevationLight = setupVector(0, 90, stepSizeElevationLight, startElevationLight);
+		elevationCamera = setupVector(0, 90, stepSizeElevationCamera, startElevationCamera);
 		azimuthLight = setupVector(0, 355, stepSizeAzimuthLight, 0.f);
 
 		// Initialize the iterators  
@@ -151,6 +151,8 @@ namespace cgbv
 			vec.push_back(i);
 		}
 		vec.at(0) = start;
+		if (vec.at(0) == vec.at(1))
+			vec.erase(vec.begin());
 		return vec;
 	}
 
@@ -277,6 +279,14 @@ namespace cgbv
 		z = distance * std::cosf(glm::radians(elevationPtr)) * std::cosf(glm::radians(azimuthPtr));
 
 		return glm::vec3(x, y, z);
+	}
+
+	glm::vec2 Autopilot::cart2sph(glm::vec3 position)
+	{
+		float azimuth = std::atan2f(y, x);
+		float elevation = std::atan2f(z, std::sqrt(pow(position.x, 2.f) + pow(position.y, 2.f)));
+
+		return glm::vec2(azimuth, elevation);
 	}
 
 	bool Autopilot::createFolders()

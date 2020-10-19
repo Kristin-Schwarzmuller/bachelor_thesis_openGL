@@ -213,7 +213,7 @@ namespace cgbv
 
 	bool CGRenderer::setup()
 	{
-		autopilot.init(modelfbx.modelMaxTurn, modelfbx.modelNames, parameter.distanceLight, parameter.distanceCamera);
+		autopilot.init(modelfbx.modelMaxTurn, modelfbx.modelNames, parameter.light_distance, parameter.cam_distance);
 
 		glfwGetFramebufferSize(window, &window_width, &window_height);
 
@@ -373,8 +373,6 @@ namespace cgbv
 			vertices.clear();
 
 			loadFBX(modelfbx.modelSelection);
-			// drawBoundingBox();
-			drawLightDot(parameter.lightPos);
 		}
 
 
@@ -386,16 +384,25 @@ namespace cgbv
 			TwInit(TW_OPENGL_CORE, nullptr);
 			TwWindowSize(1280, 720);
 			TwBar* tweakbar = TwNewBar("TweakBar");
-			TwDefine(" TweakBar size='300 600'");
+			TwDefine(" TweakBar size='300 800'");
 
 			//TwAddVarRW(tweakbar, "Global Rotation", TW_TYPE_QUAT4F, &parameter.globalRotation, "showval=false opened=true");
-			camPosPackage.object1 = &parameter.camPos;
-			camPosPackage.object2 = &observer_camera;
+			//camPosPackage.object1 = &parameter.camPos;
+			//camPosPackage.object2 = &observer_camera;
 			//TwAddVarCB(tweakbar, "Camera Position", TW_TYPE_DIR3F, camSetCallback, camGetCallback, &camPosPackage, "group=Cam axisx=-x axisy=-y axisz=-z opened=true");
-			TwAddVarRW(tweakbar, "Camera Position", TW_TYPE_DIR3F, &parameter.camPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
-			TwAddVarRW(tweakbar, "Observer near CP", TW_TYPE_FLOAT, &parameter.observerprojection_near, " group = 'Light' min = 0.0f max = 800.0f step = 1.f");
-			TwAddVarRW(tweakbar, "Observer far CP", TW_TYPE_FLOAT, &parameter.observerprojection_far, " group = 'Light' min = 0.0f max = 800.0f step = 10.f");
+
+			// Camera
+			TwAddVarRW(tweakbar, "Cam Azimuth", TW_TYPE_FLOAT, &parameter.cam_a, " group=Cam");
+			TwAddVarRW(tweakbar, "Cam Elevation", TW_TYPE_FLOAT, &parameter.cam_e, " group=Cam");
+			TwAddVarRW(tweakbar, "Camera Position", TW_TYPE_DIR3F, &parameter.camPos, "group=Cam axisx=-x axisy=-y axisz=-z opened=true");
+			TwAddVarRW(tweakbar, "Observer near CP", TW_TYPE_FLOAT, &parameter.observerprojection_near, " group = 'Cam' min = 0.0f max = 800.0f step = 1.f");
+			TwAddVarRW(tweakbar, "Observer far CP", TW_TYPE_FLOAT, &parameter.observerprojection_far, " group = 'Cam' min = 0.0f max = 800.0f step = 10.f");
+
 			TwAddButton(tweakbar, "Take Screenshot", handleScreenshot, this, nullptr);
+
+			// Light 
+			TwAddVarRW(tweakbar, "Light Azimuth", TW_TYPE_FLOAT, &parameter.light_a, " group=Light");
+			TwAddVarRW(tweakbar, "Light Elevation", TW_TYPE_FLOAT, &parameter.light_e, " group=Light");
 			TwAddVarRW(tweakbar, "Light direction", TW_TYPE_DIR3F, &parameter.lightPos, "group=Light axisx=-x axisy=-y axisz=-z opened=true");
 			TwAddVarRW(tweakbar, "Licht near CP", TW_TYPE_FLOAT, &parameter.lightprojection_z_min, " group = 'Light' min = 0.0f max = 800.0f step = .1f");
 			TwAddVarRW(tweakbar, "Light far CP", TW_TYPE_FLOAT, &parameter.lightprojection_z_max, " group = 'Light' min = 0.0f max = 800.0f step = 10.f");
@@ -414,8 +421,8 @@ namespace cgbv
 			TwAddVarRW(tweakbar, "Specular  Material", TW_TYPE_COLOR4F, &parameter.spekularMaterial, " group=Material alpha help='Color and transparency of the cube.' ");
 
 			// ====== Shadow ======
-			TwAddVarRW(tweakbar, "Shadow Offset Factor", TW_TYPE_FLOAT, &parameter.offsetFactor, " group = 'Shadow' step = 5.f");
-			TwAddVarRW(tweakbar, "Shadowmap Offset Units", TW_TYPE_FLOAT, &parameter.offsetUnits, " group = 'Shadow' step = 100.f");
+			TwAddVarRW(tweakbar, "Shadow Offset Factor", TW_TYPE_FLOAT, &parameter.offsetFactor, " group = 'Shadow' step = 1.f");
+			TwAddVarRW(tweakbar, "Shadowmap Offset Units", TW_TYPE_FLOAT, &parameter.offsetUnits, " group = 'Shadow' step = 1.f");
 
 			// ====== Modelauswahl ======
 			std::string meshtypes = "BUDDHA, BUNNY, BOX, CONE, CYLINDER, BALL, DONUT";
@@ -654,11 +661,11 @@ namespace cgbv
 		glm::mat4 lightsource_view = lightsource_camera.getViewMatrix();
 		glUniformMatrix4fv(locs.biasedModelViewProjection, 1, GL_FALSE, glm::value_ptr(bias * lightsource_projection * lightsource_view * model));
 
-		glUniform3fv(locs.lightPos, 1, glm::value_ptr(parameter.lightPos));
+		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(parameter.lightPos));
 		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(view * parameter.lightPos));
 		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(glm::inverse(view) * parameter.lightPos));
-		//glm::mat4 normView = glm::mat4(glm::transpose(glm::inverse(view)));
-		//glUniform3fv(locs.lightPos, 1, glm::value_ptr(normView * parameter.lightPos));
+		glm::mat4 normView = glm::mat4(glm::transpose(glm::inverse(view)));
+		glUniform3fv(locs.lightPos, 1, glm::value_ptr(normView * parameter.lightPos));
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &locs.lightingVS);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &locs.lightPhong);
 
@@ -673,13 +680,16 @@ namespace cgbv
 		glBindVertexArray(object.vao);
 		glDrawArrays(GL_TRIANGLES, 0, object.vertsToDraw);
 
-		//auto redFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "red");
-		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &redFS);
-		//glBindVertexArray(lightDot.vao);
-		//glDrawArrays(GL_LINES, 0, lightDot.vertsToDraw);
+		if (parameter.showLightDot)
+		{
+			auto redFS = shader->getSubroutineIndex(GL_FRAGMENT_SHADER, "red");
+			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &redFS);
+			glBindVertexArray(lightDot.vao);
+			glDrawArrays(GL_LINES, 0, lightDot.vertsToDraw);
 
-		//glBindVertexArray(boundingBox.vao);
-		//glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
+			glBindVertexArray(boundingBox.vao);
+			glDrawArrays(GL_LINES, 0, boundingBox.vertsToDraw);
+		}
 
 		if (screenshot)
 		{
@@ -693,7 +703,7 @@ namespace cgbv
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[0], depth_pixel.get(), window_width, window_height, 0);
 
 			std::unique_ptr<GLubyte[]> rgb_pixel = std::make_unique<GLubyte[]>(window_width * window_height * 3);
-			glGetTextureImage(rgb_output->getTextureID(), 0, GL_RGB, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
+			glGetTextureImage(rgb_output->getTextureID(), 0, GL_BGR, GL_UNSIGNED_BYTE, window_width * window_height * 3, rgb_pixel.get());
 			cgbv::textures::Texture2DStorage::Store(parameter.screenShotNames[1], rgb_pixel.get(), window_width, window_height, 0);
 			//cgbv::textures::Texture2DStorage::Store("../rgb.png", rgb_pixel.get(), window_width, window_height, 0);
 
@@ -753,6 +763,7 @@ namespace cgbv
 		{
 			returnValues = autopilot.getValues();
 
+			// New values for all 
 			parameter.camPos = glm::vec4(returnValues.getCameraPos(), 1.0f);
 			parameter.modelRotation = returnValues.getModelRotation();
 			parameter.lightPos = glm::vec4(returnValues.getLightPos(), 1.f);
@@ -764,16 +775,36 @@ namespace cgbv
 				modelfbx.modelSelection = returnValues.getModelID();
 				loadFBX(modelfbx.modelSelection);
 			}	
+
+			// update azimuth and elevation variables
+			glm::vec2 tmp = autopilot.cart2sph(parameter.camPos);
+			parameter.cam_a, parameter.cam_e = tmp.x, tmp.y;
+
+			tmp = autopilot.cart2sph(parameter.lightPos);
+			parameter.light_a, parameter.light_e = tmp.x, tmp.y;
+		}
+		else
+		{
+			// Update positions via GUI
+			parameter.camPos = glm::vec4(autopilot.sph2cart(parameter.cam_a, parameter.cam_e, parameter.cam_distance), 1.f);
+			parameter.lightPos = glm::vec4(autopilot.sph2cart(parameter.light_a, parameter.light_e, parameter.light_distance), 1.f);
 		}
 		observer_camera.moveTo(parameter.camPos); 
 		observer_camera.setTarget(glm::vec3(.0f, .0f, .0f));
-		if (parameter.camPos.y == parameter.distanceCamera) // prevent the cam to flip upside down when standing in the zenith 
+		if (parameter.camPos.y == parameter.cam_distance) // prevent the cam to flip upside down when standing in the zenith 
 		{
 			observer_camera.setUpOrientation(glm::radians(180.f));
 		}
 		lightsource_camera.moveTo(parameter.lightPos);
 		lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
-		drawLightDot(observer_camera.getViewMatrix() * parameter.lightPos);
+
+
+
+		//drawLightDot(parameter.lightPos/30.f);
+		//drawLightDot(observer_camera.getViewMatrix() * parameter.lightPos);
+		//drawLightDot(glm::inverse(observer_camera.getViewMatrix()) * parameter.lightPos);
+		glm::mat4 normView = glm::mat4(glm::transpose(glm::inverse(observer_camera.getViewMatrix())));
+		glUniform3fv(locs.lightPos, 1, glm::value_ptr(normView * parameter.lightPos));
 	}
 	
 	void CGRenderer::loadFBX(int currentMod)
@@ -810,13 +841,13 @@ namespace cgbv
 
 			object.vertsToDraw = mesh.VertexCount();
 		}
-		if (currentMod == 2) // box
+		if (currentMod <= 2 && currentMod >= 5) // box, cone, cylinder
 		{
 			parameter.offsetFactor = 1.2f;
 			parameter.offsetUnits = 3.2f;
 		}
 		else {
-			parameter.offsetFactor = 1.4f;
+			parameter.offsetFactor = 3.0;
 			parameter.offsetUnits = 1.0f;
 		}
 		
@@ -913,6 +944,9 @@ namespace cgbv
 	}
 	void CGRenderer::drawLightDot(glm::vec4 lightPos)
 	{
+		if (counter4lightdot++ > 100000) // prevent over flow error
+			counter4lightdot = 0; 
+
 		std::vector<glm::vec3> vertices;
 		
 
@@ -940,7 +974,7 @@ namespace cgbv
 		glEnableVertexAttribArray(locs.normal);
 		glVertexAttribPointer(locs.normal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)size_t(3 * sizeof(float)));
 
-		//data.clear();
+		data4lightdot.clear();
 	}
 	void CGRenderer::adjustLight(glm::mat4 shadow_view_model)
 	{

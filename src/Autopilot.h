@@ -88,7 +88,6 @@ namespace cgbv
 
 		void defImageNames();
 		bool writeDataCSV();
-		glm::vec3 sph2cart(float azimuthPtr, float elevationPtr, float distance);
 		bool createFolders();
 
 	public:
@@ -119,6 +118,8 @@ namespace cgbv
 			float lightDistance, float cameraDistance);
 		ReturnValues getValues();
 		bool step();
+		glm::vec3 sph2cart(float azimuthPtr, float elevationPtr, float distance);
+		glm::vec2 cart2sph(glm::vec3 position);
 	};
 }
 

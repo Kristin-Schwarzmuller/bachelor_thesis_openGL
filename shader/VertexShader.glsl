@@ -90,7 +90,7 @@ subroutine (VertexProgram) void verts_and_normals()
 
     vec4 h = matrices.mv * vertex; // view space
     vec3 mvPos = h.xyz / h.w; // view space
-    Output.viewDir = -mvPos; // view space
+    Output.viewDir = vec3(0, 0, 1);//-mvPos; // view space
 
     //Output.lightDir = normalize(light.lightPos - mvPos); //  == point light
     Output.lightDir = light.lightPos; // == directional light // word space  

@@ -76,24 +76,24 @@ namespace cgbv
 	struct UIParameter
 	{
 		glm::quat globalRotation;
-		float distanceLight =  200.f;
-		float distanceCamera = 150;// 100.f;
+		float light_distance =  200.f;
+		float cam_distance = 120.f;
 		bool autopilot_mode = true;
 
 		float lightprojection_x_min = -15.f;
 		float lightprojection_x_max = 15.f;
 		float lightprojection_y_min = -15.f;
 		float lightprojection_y_max = 15.f;
-		float lightprojection_z_min = 1.f; // near clipping plane of light
-		float lightprojection_z_max = 170.f;// 220;// far clipping plane of light
+		float lightprojection_z_min = 190.f; // near clipping plane of light
+		float lightprojection_z_max = 220;// far clipping plane of light
 		float modelScalation = 1.0f;
 		float basesurface_size = 60.f;
-		float observerprojection_near = 70.f; //90.f;
-		float observerprojection_far = 300; // 170.f; // 220.f;// basesurface_size* modelScalation;// 251.f;
+		float observerprojection_near = 70.f;
+		float observerprojection_far = 200.f;
 
-		glm::vec4 lightPos = glm::vec4(0.f, 10.f, distanceLight, 1.f);
+		glm::vec4 lightPos = glm::vec4(0.f, 0.f, 0.f, 1.f);
 		//glm::vec4 lightPos = glm::vec4(0.f, 1.07f, -12.22f, 1.f);
-		glm::vec4 camPos = glm::vec4(0.f, -6.f, distanceCamera, 1.f);
+		glm::vec4 camPos = glm::vec4(-cam_distance, 0,0, 1.f);
 		//glm::vec4 camPos = glm::vec4(0.f, distanceCamera, 0, 1.f); // 5 Grad Elevation = arctan(13.13/cameraDistance)
 		float e = 30.f;
 		float a = 0.f;
@@ -101,8 +101,13 @@ namespace cgbv
 										distanceCamera * std::sinf(glm::radians(e)), 
 										distanceCamera * std::cosf(glm::radians(e))* std::cosf(glm::radians(a)),
 										0.f);*/
+
+		// Adzimuth and Elevation of light and camera
+		float light_a, light_e;
+		float cam_a, cam_e;
+
 		// Light
-		glm::vec4 ambientLight = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
+		glm::vec4 ambientLight =  glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
 		glm::vec4 diffusLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
 		glm::vec4 specularLight = glm::vec4(1.f, 1.f, 1.f, 1.f);
 		glm::vec4 ambientMaterial = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
@@ -124,7 +129,9 @@ namespace cgbv
 		std::vector<std::string> screenShotNames;
 
 		bool enabledLightAdjustment = true;
-		bool showLightDot = true;
+		bool showLightDot = false;
+
+
 	};
 
 	struct Framebuffers
@@ -211,6 +218,7 @@ namespace cgbv
 
 		bool screenshot = false;
 		std::vector<float> data4lightdot;
+		int counter4lightdot = 0;
 
 		ObserverSelection viewpoint = ObserverSelection::Viewer;
 		PostProcessing post_processing_pass = PostProcessing::Post_Processing;

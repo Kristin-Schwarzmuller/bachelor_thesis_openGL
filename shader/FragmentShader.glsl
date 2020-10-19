@@ -218,9 +218,10 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     // --------- Result --------- 
 
-    //out_color =(shadowsample * (specular + diffus) + ambient);
-    //out_color.a = 1.f;
-    out_color = gl_Position;
+    out_color =(shadowsample * (specular + diffus) + ambient);
+    //out_color =(shadowsample * + ambient);
+    out_color.a = 1.f;
+
     //if (gl_FragCoord.z >0.9999 )
     //    out_color = vec4(1, 0, 0, 1);
 
