@@ -3,7 +3,7 @@
 #include <windows.h>
 #include <iostream>
 #include <filesystem>
-#include <cmath>
+#include <math.h> 
 
 
 
@@ -274,12 +274,23 @@ namespace cgbv
 	glm::vec3 Autopilot::sph2cart(float azimuthPtr, float elevationPtr, float distance)
 	{
 		// https://www.mathworks.com/help/matlab/ref/sph2cart.html
-		x = distance * std::cosf(glm::radians(elevationPtr)) * std::sinf(glm::radians(azimuthPtr));
-		y = distance * std::sinf(glm::radians(elevationPtr));
-		z = distance * std::cosf(glm::radians(elevationPtr)) * std::cosf(glm::radians(azimuthPtr));
+		int z = 4;
+		coA = cutDecimal(cosf(glm::radians(azimuthPtr)), z); 
+		coE = cutDecimal(cosf(glm::radians(elevationPtr)), z);
+		siA = cutDecimal(sinf(glm::radians(azimuthPtr)), z);
+		siE = cutDecimal(sinf(glm::radians(elevationPtr)), z);
+
+		x = distance * coE * siA;
+		y = distance * siE;
+		z = distance * coE * coA;
 
 		return glm::vec3(x, y, z);
 	}
+
+	//float cutDecimal(float x, int remainingDecimals) {
+	//	int s = pow(10, remainingDecimals);
+	//	return (std::floor(x * s) / s);
+	//}
 
 	glm::vec2 Autopilot::cart2sph(glm::vec3 position)
 	{
@@ -325,6 +336,18 @@ namespace cgbv
 		}
 
 		return true;
+	}
+
+	float Autopilot::cutDecimal(float x, int remainingDecimals)
+	{
+		unsigned int s;
+		float a = x;
+
+		s = pow(10, remainingDecimals);
+		a = std::roundf(a * s);
+		a = (a / s);
+
+		return a;
 	}
 
 }

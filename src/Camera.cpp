@@ -50,10 +50,7 @@ void cgbv::Camera::adjustUp()
 	delta = glm::normalize(delta);
 
 	// Kreuzprodukt == (0, 0, 0) verhindern
-	if(delta.x == yVec.x && delta.y == yVec.y && delta.z == yVec.z)
-		up = glm::vec3(0.f, 0.f, 1.f);
-
-	else if (delta.x == -yVec.x && delta.y == -yVec.y && delta.z == -yVec.z)
+	if((delta.x == yVec.x && delta.y == yVec.y && delta.z == yVec.z) || (delta.x == -yVec.x && delta.y == -yVec.y && delta.z == -yVec.z))
 		up = -glm::vec3(0.f, 0.f, 1.f);
 
 	else
@@ -80,6 +77,7 @@ void cgbv::Camera::adjustUp()
 void cgbv::Camera::moveTo(glm::vec3 newPosition)
 {
 	position = newPosition;
+	adjustUp();
 }
 
 
@@ -88,6 +86,7 @@ void cgbv::Camera::moveTo(float x, float y, float z)
 	position.x = x;
 	position.y = y;
 	position.z = z;
+	adjustUp();
 }
 
 

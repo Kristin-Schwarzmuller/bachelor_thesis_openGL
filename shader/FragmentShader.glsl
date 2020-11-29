@@ -203,7 +203,7 @@ layout (index = 3) subroutine (FragmentProgram) void phongWithLambert()
 
     // Specular
 	vec4 specular = vec4(0.f, 0.f, 0.f, 1.f);
-	if (d > -0.001f)
+	if (d > 0)// -0.001f)
     {
 		vec3 r = reflect(-n.lightDir, n.normal);
 		specular = pow(max(dot(normalize(r), n.viewDir), 0.f), material.shininess) * light.specular * material.specular;

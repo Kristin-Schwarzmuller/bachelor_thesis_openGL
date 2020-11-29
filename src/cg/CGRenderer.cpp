@@ -789,20 +789,20 @@ namespace cgbv
 			parameter.camPos = glm::vec4(autopilot.sph2cart(parameter.cam_a, parameter.cam_e, parameter.cam_distance), 1.f);
 			parameter.lightPos = glm::vec4(autopilot.sph2cart(parameter.light_a, parameter.light_e, parameter.light_distance), 1.f);
 		}
-		observer_camera.moveTo(parameter.camPos); 
+		
+		//if (parameter.camPos.y == parameter.cam_distance) // prevent the cam to flip upside down when standing in the zenith 
+		//{
+		//	observer_camera.reset();//observer_camera.setUpOrientation(glm::radians(180.f));
+		//}
+		observer_camera.moveTo(parameter.camPos);
 		observer_camera.setTarget(glm::vec3(.0f, .0f, .0f));
-		if (parameter.camPos.y == parameter.cam_distance) // prevent the cam to flip upside down when standing in the zenith 
-		{
-			observer_camera.setUpOrientation(glm::radians(180.f));
-		}
+
 		lightsource_camera.moveTo(parameter.lightPos);
 		lightsource_camera.setTarget(glm::vec3(.0f, .0f, .0f));
 
 
 
-		//drawLightDot(parameter.lightPos/30.f);
-		//drawLightDot(observer_camera.getViewMatrix() * parameter.lightPos);
-		//drawLightDot(glm::inverse(observer_camera.getViewMatrix()) * parameter.lightPos);
+		//drawLightDot(parameter.lightPos);
 		glm::mat4 normView = glm::mat4(glm::transpose(glm::inverse(observer_camera.getViewMatrix())));
 		glUniform3fv(locs.lightPos, 1, glm::value_ptr(normView * parameter.lightPos));
 	}
@@ -844,6 +844,7 @@ namespace cgbv
 		if (currentMod <= 2 && currentMod >= 5) // box, cone, cylinder
 		{
 			parameter.offsetFactor = 1.2f;
+
 			parameter.offsetUnits = 3.2f;
 		}
 		else {

@@ -56,9 +56,7 @@ namespace cgbv
 		float distanceLight;
 
 		// the coordinates for the distance calculation 
-		float x;
-		float y;
-		float z;
+		float x, y, z, coA, coE, siA, siE;
 		glm::vec3 lightPos;
 		glm::vec3 camPos;
 
@@ -68,7 +66,7 @@ namespace cgbv
 		// Used to write the CSV 
 	   // create an ofstream for the file output (see the link on streams for
 	   // more info
-		std::string newFolderLocation = "..\\..\\ImageData\\";
+		std::string newFolderLocation = "..\\..\\dataset\\";
 		std::string dateFolder;
 		std::string csvName = "labels_ks.csv";
 		std::string u = ",";
@@ -89,6 +87,7 @@ namespace cgbv
 		void defImageNames();
 		bool writeDataCSV();
 		bool createFolders();
+		float cutDecimal(float x, int remainingDecimals);
 
 	public:
 		// evtl todo: reset
