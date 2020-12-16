@@ -575,7 +575,7 @@ namespace cgbv
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation));
+		model = glm::mat4_cast(parameter.globalRotation);
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model;
 
 
@@ -638,7 +638,7 @@ namespace cgbv
 			break;
 		}
 
-		model = glm::scale(glm::mat4_cast(parameter.globalRotation), glm::vec3(parameter.modelScalation));
+		model = glm::mat4_cast(parameter.globalRotation);
 		model = glm::rotate(glm::mat4(1.f), glm::radians(parameter.modelRotation), glm::vec3(0.f, 1.f, 0.f)) * model; 
 
 		shader->use();
@@ -979,6 +979,7 @@ namespace cgbv
 	}
 	void CGRenderer::adjustLight(glm::mat4 shadow_view_model)
 	{
+		glm::mat4 m = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.f, 1.f);
 		glm::vec4 tmp;
 		float x_min = 0.f;
 		float x_max = 0.f;
