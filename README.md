@@ -16,13 +16,13 @@ Examples, all with a camera postion with cam_azimuth = 0°, cam_elevation = 30°
 alt="RGB image of an Buddha" 
 width="200"/>
 <img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/rgb/bunny00043910-0-30-315-45.png" 
-alt="RGB image of an Buddha" 
+alt="RGB image of an Bunny" 
 width="200"/>
 <img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/rgb/ball00106118-0-30-315-45.png" 
-alt="RGB image of an Buddha" 
+alt="RGB image of an Ball" 
 width="200"/>
 <img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/rgb/cone00095750-0-30-315-45.png" 
-alt="RGB image of an Buddha" 
+alt="RGB image of an Cone" 
 width="200"/>
 
 A bigger collection of the generated images can found [here](https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/201129Collection_201129_2031_final.pdf) 
@@ -48,16 +48,16 @@ Next to comon red, green and blue (RGB) channel images (left), depth images (sec
 alt="RGB image" 
 width="180"/>
 <img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/types/D-1-bunny-0-5-290-35.png" 
-alt="RGB image" 
+alt="depth image" 
 width="180"/>
 <img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/types/RD-1-bunny-0-5-290-35.png" 
-alt="RGB image" 
+alt="RGBD image" 
 width="180"/>
 <img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/types/S-bunny00042522-0-5-290-35.png" 
-alt="RGB image" 
+alt="shadow candidate image" 
 width="180"/>
 <img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/types/N1-bunny-0-5-290-35.png" 
-alt="RGB image" 
+alt="normals image" 
 width="180"/>
 
 ## Code description 
@@ -84,7 +84,7 @@ Now, by determining the minimal and maximal x and y values, the optimal extents 
 
 
 <img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/Shadowmap_projection.jpeg" 
-alt="RGB image" 
+alt="hsadow projection algorithm image" 
 width="500"/>
 
 The cyan cube around the cone represents the bounding box that defines the maximal extension along the x, y and z-axis. The edges are orthogonal-projected onto the clipping plane of the light. Around the projected points in the plane, the bounding rectangle is defined (illustrated in red), to obtain the optimal extents of the shadow map projection. Behind the clipping plane, the directional light source is defined in yellow.
