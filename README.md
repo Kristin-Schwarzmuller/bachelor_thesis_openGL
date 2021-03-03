@@ -12,16 +12,16 @@ Seven 3D models were illuminated: the Stanford Buddha and bunny as well as a cub
 
 Examples, all with a camera postion with cam_azimuth = 0°, cam_elevation = 30°, and light postion light_azimuth = 315° and light_elevation = 45°: 
 
-<img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/rgb/buddha00002438-0-30-315-45.png" 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/rgb/buddha00002438-0-30-315-45.png" 
 alt="RGB image of an Buddha" 
 width="200"/>
-<img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/rgb/bunny00043910-0-30-315-45.png" 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/rgb/bunny00043910-0-30-315-45.png" 
 alt="RGB image of an Bunny" 
 width="200"/>
-<img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/rgb/ball00106118-0-30-315-45.png" 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/rgb/ball00106118-0-30-315-45.png" 
 alt="RGB image of an Ball" 
 width="200"/>
-<img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/rgb/cone00095750-0-30-315-45.png" 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/rgb/cone00095750-0-30-315-45.png" 
 alt="RGB image of an Cone" 
 width="200"/>
 
@@ -44,19 +44,19 @@ The distance from the origin to the camera is 120 units.
 
 Next to comon red, green and blue (RGB) channel images (left), depth images (second left), RGB-Depth images (middle), shadow canidate images (second right) and normal images (right) are generated and saved. 
 
-<img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/types/R-1-bunny-0-5-290-35.png" 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/types/R-1-bunny-0-5-290-35.png" 
 alt="RGB image" 
 width="180"/>
-<img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/types/D-1-bunny-0-5-290-35.png" 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/types/D-1-bunny-0-5-290-35.png" 
 alt="depth image" 
 width="180"/>
-<img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/types/RD-1-bunny-0-5-290-35.png" 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/types/RD-1-bunny-0-5-290-35.png" 
 alt="RGBD image" 
 width="180"/>
-<img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/types/S-bunny00042522-0-5-290-35.png" 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/types/S-bunny00042522-0-5-290-35.png" 
 alt="shadow candidate image" 
 width="180"/>
-<img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/types/N1-bunny-0-5-290-35.png" 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/types/N1-bunny-0-5-290-35.png" 
 alt="normals image" 
 width="180"/>
 
