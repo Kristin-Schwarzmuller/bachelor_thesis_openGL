@@ -83,7 +83,7 @@ The use of the resolution of the shadow map should be as effective as possible. 
 Now, by determining the minimal and maximal x and y values, the optimal extents of the two dimensional shadow map projection are obtained. By projecting an object onto a plane, the z value determines the depth that is clipped off and no more of interest.
 
 
-<img src="https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/example_images/Shadowmap_projection.jpeg" 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/Shadowmap_projection.jpeg" 
 alt="hsadow projection algorithm image" 
 width="500"/>
 
