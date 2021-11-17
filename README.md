@@ -25,7 +25,7 @@ width="200"/>
 alt="RGB image of an Cone" 
 width="200"/>
 
-A bigger collection of the generated images can found [here](https://gitlab.lrz.de/mm_promotion/theses/kristin_schwarzmueller/opengl-training-data/-/tree/master/201129Collection_201129_2031_final.pdf) 
+A bigger collection of the generated images can found [here](https://github.com/Kristin-Schwarzmuller/thesis_openGL/blob/master/201129Collection_201129_2031_final.pdf) 
 
 
 ### Light 
