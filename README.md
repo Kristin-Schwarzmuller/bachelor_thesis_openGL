@@ -32,7 +32,7 @@ A bigger collection of the generated images can found [here](https://github.com/
 Azimuth was modified in 5° steps from 0° to 355°, to distribute the light samples in a full circle around the centre object. The elevation was raised in 5° steps from 5° to 90°. The range of the elevation does not start with zero because in that case the light ray would be partly covered by
 the base surface. The light source is directional, the distance to the origin was always kept constant and amounted 200 units.
 
-<img src="https://github.com/Kristin-Schwarzmuller/thesis_openGL/blob/master/example_images/camera.gif" 
+<img src="https://github.com/Kristin-Schwarzmuller/thesis_openGL/blob/master/example_images/light.gif" 
 alt="Movement of light gif" 
 width="300"/>
 
@@ -45,7 +45,7 @@ The step size of azimuth was 45° and for elevation 30°. The range for elevatio
 45°. Due to the axial symmetry of the torus, images are captured from 0°, 45°, 90° and 135°. The sphere, the cone, and the cylinder are not rotated because from all sides the same images are generated.
 The distance from the origin to the camera is 120 units.
 
-<img src="https://github.com/Kristin-Schwarzmuller/thesis_openGL/blob/master/example_images/light.gif" 
+<img src="https://github.com/Kristin-Schwarzmuller/thesis_openGL/blob/master/example_images/camera.gif" 
 alt="Movement of camera gif" 
 width="300"/>
 
