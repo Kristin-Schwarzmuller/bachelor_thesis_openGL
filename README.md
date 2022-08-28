@@ -8,7 +8,7 @@ So in total five parameters were changed during the image generation: azimuth an
 ### Spherical coordinate system: 
 <img src="https://github.com/Kristin-Schwarzmuller/thesis_openGL/blob/master/example_images/spericalCoo.png" 
 alt="Spherical Coordinate System" 
-width="300"/>
+width="400"/>
 
 ## Scenery 
 
