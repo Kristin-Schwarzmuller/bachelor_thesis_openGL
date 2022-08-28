@@ -5,6 +5,12 @@ A model is displayed at the origin and the camera and light position change thro
 The position of the camera and the light was measured in spherical coordinates. 
 So in total five parameters were changed during the image generation: azimuth and elevation of the light and the camera and the model at the centre of the scene.
 
+### Spherical coordinate system: 
+<img src="https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/rgb/buddha00002438-0-30-315-45.png" 
+alt="Spherical Coordinate System" 
+width="300"/>
+https://github.com/Kristin-Schwarzmuller/thesis_openGL/blob/master/example_images/spericalCoo.png
+
 ## Scenery 
 
 ### Models 
