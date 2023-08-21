@@ -1,13 +1,27 @@
 # Image Generator
 
+## Table of Contents
+- [Spherical Coordinate System](#Spherical)
+- [Scenery](#Scenery)
+  - [Models](#models)
+  - [Light](#light)
+  - [Camera](#light)
+- [Image Types](#Image)
+- [Code Description](#Code)
+- [Autopilot](#Autopilot)
+
 This OpenGL program is designed to automatically generate and save images. A model is displayed at the origin, and the camera and light positions change throughout the different images, always pointing to the origin. The position of the camera and the light was measured in spherical coordinates. In total, five parameters were changed during the image generation: azimuth and elevation of the light and the camera, and the model at the center of the scene.
 
-## Spherical Coordinate System
+<div id='Spherical'/>
+  
+## Spherical Coordinate System 
 
 <img src="https://github.com/Kristin-Schwarzmuller/thesis_openGL/blob/master/example_images/spericalCoo.png" 
 alt="Spherical Coordinate System" 
 width="400"/>
 
+<div id='Scenery'/>
+  
 ## Scenery
 
 ### Models
@@ -31,6 +45,8 @@ The elevation was varied in the same way as for the light. The rotation around t
 
 ![Movement of camera gif](https://github.com/Kristin-Schwarzmuller/thesis_openGL/blob/master/example_images/camera.gif)
 
+<div id='Image'/>
+  
 ## Image Types
 
 In addition to common red, green, and blue (RGB) channel images (left), depth images (second left), RGB-Depth images (middle), shadow candidate images (second right), and normal images (right) are generated and saved.
@@ -41,6 +57,8 @@ In addition to common red, green, and blue (RGB) channel images (left), depth im
 ![Shadow candidate image](https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/types/S-bunny00042522-0-5-290-35.png)
 ![Normals image](https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/types/N1-bunny-0-5-290-35.png)
 
+<div id='Code'/>
+  
 ## Code Description
 
 ### main
@@ -67,6 +85,8 @@ To obtain the coordinates of the bounding box from the view of the light, they a
 Now, by determining the minimal and maximal x and y values, the optimal extents of the two-dimensional shadow map projection are obtained. By projecting an object onto a plane, the z value determines the depth that is clipped off and no more of interest.
 
 ![Shadow map projection algorithm image](https://github.com/MolineraNegra/thesis_openGL/blob/master/example_images/Shadowmap_projection.jpeg)
+
+<div id='Autopilot'/>
 
 ### Autopilot
 
